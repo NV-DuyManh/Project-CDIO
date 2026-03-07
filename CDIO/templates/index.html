@@ -102,12 +102,14 @@
         </div>
 
         <div class="hero-stats">
-            <div class="stat"><strong>{{ store_count }}</strong> cửa hàng</div>
-            <div class="stat-divider"></div>
-            <div class="stat"><strong>Real-time</strong> cào dữ liệu</div>
-            <div class="stat-divider"></div>
-            <div class="stat"><strong>100%</strong> giá thực tế</div>
-        </div>
+    <div class="stat"><strong>{{ store_count }}</strong> cửa hàng</div>
+    <div class="stat-divider"></div>
+    <div class="stat"><strong>Real-time</strong> cào dữ liệu</div>
+    <div class="stat-divider"></div>
+    <div class="stat"><strong>3 lớp lọc</strong> chống rác</div>
+    <div class="stat-divider"></div>
+    <div class="stat"><strong>100%</strong> giá thực tế</div>
+</div>
     </div>
 </section>
 
@@ -132,11 +134,15 @@
         </div>
         {% if products %}
         <div class="results-filters">
-            <span class="filter-label">Hiển thị:</span>
-            <button class="filter-btn active" onclick="filterSite('all', event)">Tất cả</button>
-            <button class="filter-btn" onclick="filterSite('Clickbuy', event)">Clickbuy</button>
-            <button class="filter-btn" onclick="filterSite('CellphoneS', event)">CellphoneS</button>
-        </div>
+    <span class="filter-label">Hiển thị:</span>
+    <button class="filter-btn active" onclick="filterSite('all', event)">Tất cả</button>
+    <button class="filter-btn" onclick="filterSite('Clickbuy', event)">Clickbuy</button>
+    <button class="filter-btn" onclick="filterSite('CellphoneS', event)">CellphoneS</button>
+    <button class="filter-btn" onclick="filterSite('Di Động 3A', event)">Di Động 3A</button>
+    <button class="filter-btn" onclick="filterSite('Smart Việt', event)">Smart Việt</button>
+    <button class="filter-btn" onclick="filterSite('Bạch Long Store', event)">Bạch Long</button>
+    <button class="filter-btn" onclick="filterSite('Tiến Trần Mobile', event)">Tiến Trần</button>
+</div>
         {% endif %}
     </div>
 
@@ -329,7 +335,7 @@ fetch('/cart/count')
     .then(function(r) { return r.json(); })
     .then(function(d) {
         var el = document.getElementById('cart-count');
-        if (el && d.count) el.textContent = d.count;
+        if (el) el.textContent = d.count;
     });
 {% endif %}
 
