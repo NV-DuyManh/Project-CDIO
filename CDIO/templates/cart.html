@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ Hàng — PriceHunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+    <div class="nav-links">
+        <a href="/" class="nav-link">Tìm Kiếm</a>
+        <a href="/history" class="nav-link">Lịch Sử</a>
+        <a href="/cart" class="nav-link active">🛒 Giỏ hàng</a>
+        <a href="/orders" class="nav-link">Đơn hàng</a>
+        <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
+        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+    </div>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+</nav>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">🛒 Giỏ hàng của bạn</h1>
+            <p class="page-sub">{{ cart_items|length }} sản phẩm trong giỏ</p>
+        </div>
+        <a href="/" class="nav-btn btn-ghost">← Tiếp tục mua sắm</a>
+    </div>
+
+    {% if cart_items %}
+    <div class="cart-layout">
+        <div class="cart-items-list">
+            {% for item in cart_items %}
+            <div class="cart-item-card" id="cart-item-{{ item.id }}">
+                <img src="{{ item.img }}" alt="{{ item.title }}"
+                     onerror="this.src='https://via.placeholder.com/80x80/f8f9fa/999?text=?'">
+                <div class="cart-item-info">
+                    <h3 class="cart-item-title">{{ item.title }}</h3>
+                    <span class="site-pill site-{{ item.site | replace(' ','') }}">{{ item.site }}</span>
+                    <p class="cart-item-price">{{ item.price_str }}</p>
+                </div>
+                <div class="cart-item-qty">
+                    <button onclick="updateQty({{ item.id }}, -1)">−</button>
+                    <span id="qty-{{ item.id }}">{{ item.quantity }}</span>
+                    <button onclick="updateQty({{ item.id }}, 1)">+</button>
+                </div>
+                <div class="cart-item-total" id="total-{{ item.id }}">
+                    <!-- computed by JS -->
+                    {{ item.price_str }}
+                </div>
+                <button class="cart-remove-btn" onclick="removeItem({{ item.id }})">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-summary-card">
+            <h3>Tóm tắt đơn hàng</h3>
+            <div class="summary-row"><span>Tạm tính</span><span id="subtotal">Đang tính...</span></div>
+            <div class="summary-row"><span>Phí vận chuyển</span><span>30.000đ</span></div>
+            <div class="summary-row summary-total"><span>Tổng cộng</span><span id="grand-total">Đang tính...</span></div>
+            <a href="/checkout" class="auth-submit" style="display:block;text-align:center;text-decoration:none;margin-top:1rem;">
+                Thanh toán →
+            </a>
+            <form action="/cart/clear" method="POST" style="margin-top:0.5rem">
+                <button type="submit" class="btn-clear-cart">Xóa toàn bộ giỏ hàng</button>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="empty-state" style="padding:5rem 0">
+        <div class="empty-icon">🛒</div>
+        <h3>Giỏ hàng trống</h3>
+        <p>Hãy tìm kiếm và thêm sản phẩm vào giỏ hàng</p>
+        <a href="/" class="nav-btn btn-primary" style="margin-top:1rem">Tìm kiếm ngay</a>
+    </div>
+    {% endif %}
+</div>
+
+<div id="toast" class="toast"></div>
+<footer class="footer"><p>© 2025 PriceHunt</p></footer>
+<script src="/static/js/main.js"></script>
+<script>
+const cartData = {{ cart_items | tojson | safe }};
+
+function parseRawPrice(price_str) {
+    const nums = price_str.replace(/\D/g, '');
+    return parseInt(nums) || 0;
+}
+
+function formatVND(n) {
+    return n.toLocaleString('vi-VN') + 'đ';
+}
+
+function updateQty(id, delta) {
+    fetch(`/cart/update/${id}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({delta})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.removed) {
+            document.getElementById(`cart-item-${id}`)?.remove();
+        } else {
+            const el = document.getElementById(`qty-${id}`);
+            if (el) el.textContent = data.quantity;
+        }
+        recalc();
+    });
+}
+
+function removeItem(id) {
+    fetch(`/cart/remove/${id}`, {method: 'POST'})
+    .then(r => r.json())
+    .then(() => {
+        document.getElementById(`cart-item-${id}`)?.remove();
+        recalc();
+        showToast('🗑️ Đã xóa sản phẩm');
+    });
+}
+
+function recalc() {
+    // Simple recalc from DOM
+    let total = 0;
+    document.querySelectorAll('.cart-item-card').forEach(card => {
+        const id = card.id.replace('cart-item-', '');
+        const qtyEl = document.getElementById(`qty-${id}`);
+        const priceEl = card.querySelector('.cart-item-price');
+        if (qtyEl && priceEl) {
+            const qty = parseInt(qtyEl.textContent);
+            const price = parseRawPrice(priceEl.textContent);
+            total += qty * price;
+        }
+    });
+    document.getElementById('subtotal').textContent = formatVND(total);
+    document.getElementById('grand-total').textContent = formatVND(total + 30000);
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+recalc();
+</script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceHunt — So Sánh Giá Thông Minh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+    <div class="loading-inner">
+        <div class="loading-rings">
+            <span></span><span></span><span></span>
+        </div>
+        <p class="loading-title">Robot đang săn giá tốt nhất</p>
+        <p class="loading-sub">Đang quét <strong>{{ store_count }}</strong> cửa hàng — vui lòng chờ khoảng 10–15 giây</p>
+        <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+    </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">PriceHunt</span>
+    </a>
+    <div class="nav-links">
+        <a href="/" class="nav-link active">Tìm Kiếm</a>
+        <a href="/history" class="nav-link">Lịch Sử</a>
+        {% if session.get('user_id') %}
+            <a href="/cart" class="nav-link cart-link">🛒 Giỏ hàng
+                <span class="cart-count" id="cart-count">0</span>
+            </a>
+            <a href="/orders" class="nav-link">Đơn hàng</a>
+            <a href="/profile" class="nav-link nav-profile">{{ session.get('username', 'Profile') }}</a>
+            <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+            <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+            <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
+    </div>
+    <button class="nav-toggle" onclick="toggleMenu()">☰</button>
+</nav>
+
+<!-- Hero / Search Section -->
+<section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+        <div class="hero-badge">🔍 So sánh giá từ các sàn TMĐT</div>
+        <h1 class="hero-title">Săn giá <em>tốt nhất</em><br>mọi sản phẩm</h1>
+        <p class="hero-sub">Tự động quét sản phẩm — tìm ra deal rẻ nhất ngay lập tức.</p>
+        <form class="search-form" action="/" method="GET" onsubmit="showLoading(event)">
+            <div class="search-wrap">
+                <span class="search-icon">🔎</span>
+                <input type="text" name="keyword" id="keyword-input"
+                       value="{{ keyword if keyword else '' }}"
+                       placeholder="iPhone 15, Samsung S24, MacBook..."
+                       autocomplete="off" required>
+                <button type="submit" id="search-btn">
+                    <span class="btn-label">Tìm Giá</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- AI Image Search -->
+        <div class="search-divider">
+            <span>hoặc</span>
+        </div>
+
+        <div class="image-upload-area" id="upload-area">
+            <input type="file" id="image-input" accept="image/*" style="display:none">
+            <div class="upload-drop-zone" id="drop-zone" onclick="document.getElementById('image-input').click()">
+                <div class="upload-icon-wrap" id="upload-icon-wrap">
+                    <span class="upload-icon">📷</span>
+                </div>
+                <p class="upload-title" id="upload-title">Tải ảnh sản phẩm lên</p>
+                <p class="upload-sub" id="upload-sub">Kéo thả hoặc nhấn để chọn ảnh — AI sẽ tự nhận diện tên sản phẩm</p>
+                <span class="upload-formats">JPG · PNG · WEBP</span>
+            </div>
+
+            <!-- Preview + confirm -->
+            <div class="upload-preview" id="upload-preview" style="display:none">
+                <img id="preview-img" src="" alt="Preview">
+                <div class="preview-info">
+                    <p class="preview-name" id="preview-name">Ảnh đã chọn</p>
+                    <div class="preview-actions">
+                        <button class="btn-ai-search" id="btn-ai-search" onclick="runAiSearch()">
+                            <span id="ai-btn-text">🔍 Nhận diện & Tìm giá</span>
+                        </button>
+                        <button class="btn-cancel-upload" onclick="cancelUpload()">✕ Hủy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI result message -->
+            <div class="ai-result-msg" id="ai-result-msg" style="display:none"></div>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat"><strong>{{ store_count }}</strong> cửa hàng</div>
+            <div class="stat-divider"></div>
+            <div class="stat"><strong>Real-time</strong> cào dữ liệu</div>
+            <div class="stat-divider"></div>
+            <div class="stat"><strong>100%</strong> giá thực tế</div>
+        </div>
+    </div>
+</section>
+
+<!-- Results Section -->
+{% if keyword %}
+<section class="results-section">
+    <div class="results-header">
+        <div class="results-meta">
+            {% if products %}
+                <h2 class="results-title">Kết quả cho <span class="keyword-highlight">"{{ keyword }}"</span></h2>
+                <p class="results-count">{{ products|length }} sản phẩm
+                    {% if is_fast_load %}
+                        <span class="cache-badge">⚡ Cache</span>
+                    {% else %}
+                        <span class="fresh-badge">🔄 Mới cào</span>
+                    {% endif %}
+                </p>
+            {% else %}
+                <h2 class="results-title">Không tìm thấy kết quả</h2>
+                <p class="results-count">Thử từ khóa khác nhé!</p>
+            {% endif %}
+        </div>
+        {% if products %}
+        <div class="results-filters">
+            <span class="filter-label">Hiển thị:</span>
+            <button class="filter-btn active" onclick="filterSite('all', event)">Tất cả</button>
+            <button class="filter-btn" onclick="filterSite('Clickbuy', event)">Clickbuy</button>
+            <button class="filter-btn" onclick="filterSite('CellphoneS', event)">CellphoneS</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="products-grid" id="products-grid">
+        {% for product in products %}
+        <div class="product-card {% if loop.index == 1 %}best-price{% endif %}"
+             data-site="{{ product.site }}"
+             data-index="{{ loop.index }}">
+
+            {% if loop.index == 1 %}
+            <div class="best-badge">⭐ Giá Tốt Nhất</div>
+            {% endif %}
+
+            <div class="card-site-badge site-{{ product.site | replace(' ','') }}">{{ product.site }}</div>
+
+            <div class="card-img-wrap">
+                <img src="{{ product.img }}" alt="{{ product.title }}" loading="lazy"
+                     onerror="this.src='https://via.placeholder.com/200x200/1a1a24/555?text=No+Image'">
+            </div>
+
+            <div class="card-body">
+                <h3 class="card-title">{{ product.title }}</h3>
+                <div class="card-price-wrap">
+                    <span class="card-price">{{ product.price_str }}</span>
+                </div>
+
+                <div class="card-actions">
+                    <a href="{{ product.link }}" target="_blank" class="btn-store">
+                        Tới nơi bán <span>↗</span>
+                    </a>
+                    {% if session.get('user_id') %}
+                    <button class="btn-cart" onclick="addToCart(this)">🛒</button>
+                    <button class="btn-fav" onclick="saveFavorite(this)">♡</button>
+                    {% else %}
+                    <a href="/login" class="btn-cart" title="Đăng nhập để thêm vào giỏ">🛒</a>
+                    {% endif %}
+                </div>
+
+                <!-- Data attributes to avoid JS quote-escaping issues -->
+                <span class="product-data" style="display:none"
+                      data-title="{{ product.title | replace('"', '') }}"
+                      data-price="{{ product.price_str }}"
+                      data-img="{{ product.img }}"
+                      data-link="{{ product.link }}"
+                      data-site="{{ product.site }}"></span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if products | length == 0 %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>Không tìm thấy sản phẩm</h3>
+        <p>Hãy thử từ khóa khác như "iPhone", "Samsung", "Laptop"</p>
+    </div>
+    {% endif %}
+</section>
+
+{% else %}
+<!-- Feature Cards khi chua tim kiem -->
+<section class="features-section">
+    <div class="features-grid">
+        <div class="feature-card">
+            <span class="feature-icon">⚡</span>
+            <h3>Cào Real-time</h3>
+            <p>Dữ liệu trực tiếp từ nhiều sàn thương mại điện tử, không qua trung gian.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🏆</span>
+            <h3>Highlight Giá Rẻ</h3>
+            <p>Tự động đánh dấu sản phẩm có giá thấp nhất trong kết quả.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">💾</span>
+            <h3>Lưu Lịch Sử</h3>
+            <p>Toàn bộ kết quả được lưu vào database để tra cứu lại nhanh.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🛒</span>
+            <h3>Giỏ Hàng</h3>
+            <p>Gom sản phẩm yêu thích vào giỏ, so sánh và đặt hàng dễ dàng.</p>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Toast notification -->
+<div id="toast" class="toast"></div>
+
+<footer class="footer">
+    <p>© 2025 PriceHunt — So sánh giá thông minh</p>
+</footer>
+
+<script src="/static/js/main.js"></script>
+<script>
+// Loading overlay
+function showLoading(e) {
+    var kw = document.getElementById('keyword-input').value.trim();
+    if (!kw) return;
+    document.getElementById('loading-overlay').classList.add('active');
+    document.getElementById('search-btn').disabled = true;
+
+    var messages = [
+        "Đang kết nối tới các cửa hàng...",
+        "Robot đang thu thập dữ liệu sản phẩm...",
+        "Đang so sánh giá từ nhiều nguồn...",
+        "Sắp xong rồi, chờ tí nhé! ⚡"
+    ];
+    var i = 0;
+    var subEl = document.querySelector('.loading-sub');
+    var interval = setInterval(function() {
+        i = (i + 1) % messages.length;
+        subEl.innerHTML = messages[i];
+        if (i === messages.length - 1) clearInterval(interval);
+    }, 3000);
+}
+
+// Navbar toggle
+function toggleMenu() {
+    document.querySelector('.nav-links').classList.toggle('open');
+}
+
+// Filter by site
+function filterSite(site, e) {
+    document.querySelectorAll('.product-card').forEach(function(card) {
+        card.style.display = (site === 'all' || card.dataset.site === site) ? '' : 'none';
+    });
+    document.querySelectorAll('.filter-btn').forEach(function(b) {
+        b.classList.remove('active');
+    });
+    if (e && e.target) e.target.classList.add('active');
+}
+
+// Get product data from hidden span (avoids quote-escaping bugs)
+function getProductData(btn) {
+    var span = btn.closest('.card-body').querySelector('.product-data');
+    return {
+        title:     span.dataset.title,
+        price_str: span.dataset.price,
+        img:       span.dataset.img,
+        link:      span.dataset.link,
+        site:      span.dataset.site
+    };
+}
+
+// Add to cart
+function addToCart(btn) {
+    var data = getProductData(btn);
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        showToast('✅ Đã thêm vào giỏ hàng!');
+        if (res.count !== undefined) {
+            var el = document.getElementById('cart-count');
+            if (el) el.textContent = res.count;
+        }
+    })
+    .catch(function() { showToast('❌ Lỗi kết nối'); });
+}
+
+// Save favorite
+function saveFavorite(btn) {
+    var data = getProductData(btn);
+    fetch('/favorites/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() { showToast('❤️ Đã lưu vào yêu thích!'); })
+    .catch(function() { showToast('❌ Lỗi kết nối'); });
+}
+
+// Toast
+function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// Update cart count on load
+{% if session.get('user_id') %}
+fetch('/cart/count')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        var el = document.getElementById('cart-count');
+        if (el && d.count) el.textContent = d.count;
+    });
+{% endif %}
+
+// ── AI Image Search ──────────────────────────────
+var selectedFile = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('image-input');
+    var dropZone = document.getElementById('drop-zone');
+    if (!input || !dropZone) return;
+
+    // File input change
+    input.addEventListener('change', function() {
+        if (input.files && input.files[0]) {
+            handleFileSelected(input.files[0]);
+        }
+    });
+
+    // Drag & drop
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', function() {
+        dropZone.classList.remove('drag-over');
+    });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        var file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleFileSelected(file);
+        }
+    });
+});
+
+function handleFileSelected(file) {
+    selectedFile = file;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('preview-img').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    document.getElementById('preview-name').textContent = file.name;
+    document.getElementById('drop-zone').style.display = 'none';
+    document.getElementById('upload-preview').style.display = 'flex';
+    document.getElementById('ai-result-msg').style.display = 'none';
+}
+
+function cancelUpload() {
+    selectedFile = null;
+    document.getElementById('image-input').value = '';
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('drop-zone').style.display = 'flex';
+    document.getElementById('ai-result-msg').style.display = 'none';
+    document.getElementById('ai-btn-text').textContent = '🔍 Nhận diện & Tìm giá';
+    document.getElementById('btn-ai-search').disabled = false;
+}
+
+function runAiSearch() {
+    if (!selectedFile) return;
+
+    var btn = document.getElementById('btn-ai-search');
+    var btnText = document.getElementById('ai-btn-text');
+    var msgEl = document.getElementById('ai-result-msg');
+
+    // Show loading state
+    btn.disabled = true;
+    btnText.textContent = '⏳ AI đang phân tích ảnh...';
+    msgEl.style.display = 'none';
+
+    var formData = new FormData();
+    formData.append('image', selectedFile);
+
+    fetch('/upload-image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Show detected keyword then redirect
+            msgEl.className = 'ai-result-msg ai-success';
+            msgEl.innerHTML = '✅ Nhận diện: <strong>' + data.keyword + '</strong> — Đang tìm giá...';
+            msgEl.style.display = 'block';
+            btnText.textContent = '✅ Đã nhận diện!';
+
+            // Show loading overlay then redirect
+            setTimeout(function() {
+                document.getElementById('loading-overlay').classList.add('active');
+                window.location.href = data.redirect;
+            }, 1200);
+        } else {
+            msgEl.className = 'ai-result-msg ai-error';
+            msgEl.textContent = data.error || 'Không nhận diện được. Thử ảnh khác nhé!';
+            msgEl.style.display = 'block';
+            btn.disabled = false;
+            btnText.textContent = '🔍 Nhận diện & Tìm giá';
+        }
+    })
+    .catch(function() {
+        msgEl.className = 'ai-result-msg ai-error';
+        msgEl.textContent = '❌ Lỗi kết nối. Vui lòng thử lại.';
+        msgEl.style.display = 'block';
+        btn.disabled = false;
+        btnText.textContent = '🔍 Nhận diện & Tìm giá';
+    });
+}
+
+</script>
+</body>
+</html>

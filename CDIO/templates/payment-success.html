@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Thành Công — PriceHunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .order-items-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            text-align: left;
+        }
+        .order-items-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        .order-item-row:last-child { border-bottom: none; }
+        .order-item-name {
+            flex: 1;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+        }
+        .order-item-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+        .qty-chip {
+            background: rgba(245,166,35,0.15);
+            color: #f5a623;
+            border: 1px solid rgba(245,166,35,0.3);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .item-total {
+            color: #f5a623;
+            font-weight: 600;
+            font-size: 0.85rem;
+            min-width: 90px;
+            text-align: right;
+        }
+        .total-qty-row {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid rgba(245,166,35,0.2);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: #aaa;
+        }
+        .total-qty-row strong { color: #f5a623; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+</nav>
+
+<div class="result-page">
+    <div class="result-card result-success">
+        <div class="result-icon-wrap success-anim">✓</div>
+        <h1>Thanh toán thành công!</h1>
+        <p class="result-sub">Đơn hàng của bạn đã được xác nhận</p>
+
+        <div class="order-info-card">
+            <div class="order-info-row">
+                <span>Mã đơn hàng</span>
+                <strong>#{{ order_id }}</strong>
+            </div>
+            <div class="order-info-row">
+                <span>Tổng tiền</span>
+                <strong class="price-cell">{{ total }}</strong>
+            </div>
+            <div class="order-info-row">
+                <span>Phương thức</span>
+                <strong>{{ payment_method }}</strong>
+            </div>
+        </div>
+
+        {% if order_items %}
+        <div class="order-items-box">
+            <div class="order-items-title">🛍 Sản phẩm đã mua</div>
+            {% for item in order_items %}
+            <div class="order-item-row">
+                <span class="order-item-name" title="{{ item.product_name }}">
+                    {{ item.product_name }}
+                </span>
+                <div class="order-item-right">
+                    <span class="qty-chip">×{{ item.quantity }}</span>
+                    <span class="item-total">
+                        {% if item.total_price > 0 %}
+                            {{ "{:,.0f}đ".format(item.total_price).replace(',', '.') }}
+                        {% else %}
+                            {{ item.price_str }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="total-qty-row">
+                <span>Tổng số lượng</span>
+                <strong>{{ total_qty }} sản phẩm</strong>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="delivery-estimate">
+            🚚 Dự kiến giao hàng: <strong>3–5 ngày làm việc</strong>
+        </div>
+
+        <div class="result-actions">
+            <a href="/orders" class="nav-btn btn-primary">Xem đơn hàng</a>
+            <a href="/" class="nav-btn btn-ghost">Tiếp tục mua sắm</a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer"><p>© 2025 PriceHunt</p></footer>
+<script src="/static/js/main.js"></script>
+</body>
+</html>
