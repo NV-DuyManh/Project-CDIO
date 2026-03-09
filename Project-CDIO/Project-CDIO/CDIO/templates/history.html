@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử — PriceHunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link active">Lịch Sử</a>
+            {% if session.get('user_id') %}
+            <a href="/cart" class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
+            <a href="/orders" class="nav-link">Đơn hàng</a>
+            <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
+            <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+            {% else %}
+            <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+            <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+            {% endif %}
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Lịch Sử Cào Dữ Liệu</h1>
+                <p class="page-sub">Toàn bộ sản phẩm đã được lưu vào database</p>
+            </div>
+            <a href="/" class="nav-btn btn-primary">+ Tìm kiếm mới</a>
+        </div>
+
+        <div class="history-toolbar">
+            <div class="search-filter-wrap">
+                <span>🔎</span>
+                <input type="text" id="table-search" placeholder="Lọc theo tên, từ khóa, sàn..."
+                    oninput="filterTable()">
+            </div>
+            <div class="site-filters">
+                <button class="filter-btn active" onclick="filterBySite('all', this)">Tất cả</button>
+                {% for site in products | map(attribute='site') | unique %}
+                <button class="filter-btn" onclick="filterBySite('{{ site }}', this)">{{ site }}</button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="table-card">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Từ khóa</th>
+                        <th>Sàn</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá bán</th>
+                        <th>Thao tác</th>
+                        <th>Thời gian lưu</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    {% for product in products %}
+                    <tr class="table-row" data-site="{{ product.site }}" data-keyword="{{ product.keyword }}"
+                        data-title="{{ product.title }}">
+                        <td>
+                            <a href="/?keyword={{ product.keyword }}" class="keyword-link">
+                                {{ product.keyword }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="site-pill site-{{ product.site | replace(' ','') }}">{{ product.site }}</span>
+                        </td>
+                        <td>
+                            <div class="table-img-wrap">
+                                <img src="{{ product.img }}" alt="{{ product.title }}"
+                                    onerror="this.src='https://via.placeholder.com/60x60/f8f9fa/999?text=?'">
+                            </div>
+                        </td>
+                        <td class="title-cell">{{ product.title }}</td>
+                        <td class="price-cell">{{ product.price_str }}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <a href="{{ product.link }}" target="_blank" class="table-link-btn">Xem ↗</a>
+                                <button
+                                    onclick="addToCartHistory('{{ product.title | replace('\'', '\\\'') }}', '{{ product.price_str }}', '{{ product.img }}', '{{ product.link }}', '{{ product.site }}')"
+                                    class="nav-btn btn-primary"
+                                    style="padding: 4px 10px; font-size: 13px; border: none; cursor: pointer; border-radius: 4px; height: auto;">Thêm
+                                    vào giỏ hàng
+                                </button>
+                            </div>
+                        </td>
+                        <td class="date-cell">{{ product.created_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <h3>Chưa có dữ liệu</h3>
+                                <p>Hãy tìm kiếm sản phẩm đầu tiên để dữ liệu xuất hiện ở đây</p>
+                                <a href="/" class="nav-btn btn-primary">Tìm kiếm ngay</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 PriceHunt</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        let currentSiteFilter = 'all';
+
+        function filterTable() {
+            const q = document.getElementById('table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#table-body .table-row');
+            rows.forEach(row => {
+                const text = (row.dataset.keyword + row.dataset.title + row.dataset.site).toLowerCase();
+                const siteMatch = currentSiteFilter === 'all' || row.dataset.site === currentSiteFilter;
+                row.style.display = text.includes(q) && siteMatch ? '' : 'none';
+            });
+        }
+
+        function filterBySite(site, btn) {
+            currentSiteFilter = site;
+            document.querySelectorAll('.site-filters .filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterTable();
+        }
+
+        {% if session.get('user_id') %}
+        fetch('/cart/count').then(r => r.json()).then(d => {
+            const el = document.getElementById('cart-count');
+            if (el && d.count) el.textContent = d.count;
+        });
+        {% endif %}
+
+        function addToCartHistory(title, price, img, link, site) {
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    price: price,
+                    img: img,
+                    link: link,
+                    site: site
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Da them san pham vao gio hang!");
+                        window.location.reload();
+                    } else {
+                        alert("Co loi xay ra, vui long kiem tra lai server.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
+    </script>
+</body>
+
+</html>
