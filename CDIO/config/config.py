@@ -6,7 +6,7 @@ import os
 DB_CONFIG = {
     "host":     "localhost",
     "user":     "root",
-    "password": "Duymanh20092005#",
+    "password": ".TranThinh270400",
     "database": "cdio",
     "charset":  "utf8mb4"
 }
@@ -17,18 +17,21 @@ DB_CONFIG = {
 SECRET_KEY = os.environ.get('SECRET_KEY', 'pricehunt-secret-key-change-in-production')
 
 # ════════════════════════════════════════════════════════════════════
-# STORES — thêm cửa hàng mới vào đây
+# STORES — thêm cửa hàng mới: thêm tên vào đây + tạo scraper tương ứng
 # ════════════════════════════════════════════════════════════════════
-STORES = ["Clickbuy", "CellphoneS"]
+STORES = [
+    "Clickbuy",
+    "CellphoneS",
+    "Di Động 3A",
+    "Smart Việt",
+    "Bạch Long Store",
+    "Tiến Trần Mobile",
+]
 
 FALLBACK_IMG = "https://via.placeholder.com/200x200/1a1a24/555568?text=No+Image"
 
 # ════════════════════════════════════════════════════════════════════
-# AI IMAGE SEARCH — Gemini Vision (FREE)
-# Lấy key tại: aistudio.google.com
-# Set key:
-#   PowerShell: $env:GEMINI_API_KEY="AIzaSy..."
-#   CMD:        set GEMINI_API_KEY=AIzaSy...
+# AI IMAGE SEARCH
 # ════════════════════════════════════════════════════════════════════
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 
