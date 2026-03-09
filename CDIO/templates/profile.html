@@ -1,112 +1,193 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ Sơ — PriceHunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif !important;
+            background-color: #08080a;
+            color: #fff;
+            margin: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 40px;
+            background: rgba(8, 8, 10, 0.9);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-text {
+            font-family: 'Syne';
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .logo-text span {
+            color: #f5a623;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff;
+        }
+
+        .nav-profile-tag {
+            color: #f5a623;
+            font-weight: 700;
+            background: rgba(245, 166, 35, 0.1);
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        .profile-container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+        }
+
+        .profile-card {
+            background: #111116;
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            height: fit-content;
+        }
+
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f5a623 0%, #ff8c00 100%);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 800;
+            color: #000;
+            font-family: 'Syne';
+        }
+
+        .activity-card {
+            background: #111116;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .activity-title {
+            font-family: 'Syne';
+            font-size: 1.2rem;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .empty-text {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            display: block;
+            margin-top: 30px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ff4d4d;
+            color: #fff;
+        }
+    </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Tìm Kiếm</a>
-        <a href="/history" class="nav-link">Lịch Sử</a>
-        <a href="/cart" class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
-        <a href="/orders" class="nav-link">Đơn hàng</a>
-        <a href="/profile" class="nav-link active">{{ session.get('username') }}</a>
-        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="logo-text">⚡ PRICE<span>HUNT</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link">Lịch Sử</a>
+            <a href="/cart" class="nav-link">🛒 <span id="cart-count">0</span></a>
+            <a href="/orders" class="nav-link">Đơn hàng</a>
+            <span class="nav-link nav-profile-tag">{{ session.get('username') }}</span>
+        </div>
+    </nav>
 
-<div class="page-container">
-    <div class="profile-layout">
-        <!-- Sidebar -->
-        <div class="profile-sidebar">
-            <div class="profile-avatar">
-                {{ session.get('username', 'U')[0].upper() }}
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="avatar-circle">{{ session.get('username', 'U')[0].upper() }}</div>
+            <h2 style="font-family: 'Syne'; margin: 0 0 5px 0; letter-spacing: -0.5px;">{{ session.get('username') }}
+            </h2>
+            <p style="color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 30px;">Người dùng PriceHunt</p>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                <a href="/logout" class="btn-logout">Đăng xuất tài khoản</a>
             </div>
-            <h2 class="profile-name">{{ session.get('username') }}</h2>
-            <p class="profile-email">{{ user.email if user else '' }}</p>
-            <div class="profile-stats">
-                <div class="pstat"><strong>{{ orders_count }}</strong><span>Đơn hàng</span></div>
-                <div class="pstat"><strong>{{ favorites_count }}</strong><span>Yêu thích</span></div>
-                <div class="pstat"><strong>{{ comments_count }}</strong><span>Đánh giá</span></div>
-            </div>
-            <a href="/logout" class="nav-btn btn-ghost" style="width:100%;text-align:center;margin-top:1rem;">Đăng xuất</a>
         </div>
 
-        <!-- Content -->
-        <div class="profile-content">
-            <!-- Favorites -->
-            <div class="profile-section">
-                <h3 class="section-heading">❤️ Sản phẩm yêu thích</h3>
-                {% if favorites %}
-                <div class="mini-products-grid">
-                    {% for fav in favorites %}
-                    <div class="mini-card">
-                        <img src="{{ fav.img }}" alt="{{ fav.title }}"
-                             onerror="this.src='https://via.placeholder.com/80x80/f8f9fa/999?text=?'">
-                        <div class="mini-card-body">
-                            <p class="mini-title">{{ fav.title[:40] }}{% if fav.title|length > 40 %}...{% endif %}</p>
-                            <p class="mini-price">{{ fav.price_str }}</p>
-                            <div class="mini-actions">
-                                <a href="{{ fav.link }}" target="_blank" class="table-link-btn">Xem ↗</a>
-                                <form action="/favorites/remove/{{ fav.id }}" method="POST" style="display:inline">
-                                    <button type="submit" class="btn-remove">✕</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="empty-text">Chưa có sản phẩm yêu thích. <a href="/">Tìm kiếm ngay</a></p>
-                {% endif %}
+        <div>
+            <div class="activity-card">
+                <h3 class="activity-title">❤️ Sản phẩm yêu thích</h3>
+                <p class="empty-text">Chưa có sản phẩm yêu thích nào được lưu. <a href="/"
+                        style="color: #f5a623; text-decoration: none; font-weight: 500;">Tìm kiếm ngay</a></p>
             </div>
-
-            <!-- Recent orders -->
-            <div class="profile-section">
-                <h3 class="section-heading">📦 Đơn hàng gần đây</h3>
-                {% if orders %}
-                <div class="table-card" style="margin-top:0.5rem">
-                    <table>
-                        <thead>
-                            <tr><th>Mã đơn</th><th>Sản phẩm</th><th>Giá</th><th>Trạng thái</th><th>Ngày</th></tr>
-                        </thead>
-                        <tbody>
-                        {% for order in orders[:5] %}
-                        <tr>
-                            <td><code>#{{ order.id }}</code></td>
-                            <td>{{ order.product_name[:30] }}...</td>
-                            <td class="price-cell">{{ order.price }}</td>
-                            <td>
-                                <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
-                            </td>
-                            <td class="date-cell">{{ order.created_at }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <p class="empty-text">Chưa có đơn hàng. <a href="/">Mua sắm ngay</a></p>
-                {% endif %}
+            <div class="activity-card">
+                <h3 class="activity-title">📦 Đơn hàng gần đây</h3>
+                <p class="empty-text">Bạn chưa thực hiện đơn hàng nào. <a href="/"
+                        style="color: #f5a623; text-decoration: none; font-weight: 500;">Mua sắm ngay</a></p>
             </div>
         </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-fetch('/cart/count').then(r=>r.json()).then(d=>{
-    const el = document.getElementById('cart-count');
-    if(el && d.count) el.textContent = d.count;
-});
-</script>
+    <script src="/static/js/main.js"></script>
 </body>
+
 </html>

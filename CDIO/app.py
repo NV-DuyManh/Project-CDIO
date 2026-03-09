@@ -6,16 +6,16 @@ from flask import Flask
 from config.config import SECRET_KEY
 from database.db import init_extra_tables
 
-# ── Import Blueprints ────────────────────────────────────────────────
+# -- Import Blueprints ------------------------------------------------
 from routes.search_routes import search_bp
 from routes.upload_routes  import upload_bp
 from routes.auth_routes    import auth_bp
 from routes.cart_routes    import cart_bp
 from routes.admin_routes   import admin_bp
 
-# ════════════════════════════════════════════════════════════════════
+# =====================================================================
 # APP FACTORY
-# ════════════════════════════════════════════════════════════════════
+# =====================================================================
 
 def create_app():
     app = Flask(__name__)
@@ -29,11 +29,6 @@ def create_app():
     app.register_blueprint(admin_bp)
 
     return app
-
-
-# ════════════════════════════════════════════════════════════════════
-# ENTRY POINT
-# ════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     app = create_app()

@@ -1,153 +1,268 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ Hàng — PriceHunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Syne:wght@800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root {
+            --bg-dark: #08080a;
+            --accent: #f5a623;
+            --font-main: 'Be Vietnam Pro', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main) !important;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar đồng bộ 100% */
+        .navbar {
+            height: 75px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: rgba(8, 8, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-text {
+            font-family: 'Syne' !important;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .cart-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .nav-user-btn {
+            color: var(--accent) !important;
+            font-weight: 700;
+            background: rgba(245, 166, 35, 0.12);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            text-transform: lowercase;
+        }
+
+        /* Giỏ hàng Layout */
+        .cart-container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+        }
+
+        .cart-item-card {
+            background: #111116;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        .cart-item-card:hover {
+            border-color: rgba(245, 166, 35, 0.2);
+        }
+
+        .cart-item-img {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            background: #fff;
+            padding: 5px;
+            object-fit: contain;
+        }
+
+        .cart-summary-card {
+            background: #111116;
+            border-radius: 24px;
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 100px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .btn-checkout {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 20px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-family: var(--font-main);
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(245, 166, 35, 0.2);
+        }
+    </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Tìm Kiếm</a>
-        <a href="/history" class="nav-link">Lịch Sử</a>
-        <a href="/cart" class="nav-link active">🛒 Giỏ hàng</a>
-        <a href="/orders" class="nav-link">Đơn hàng</a>
-        <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
-        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
-
-<div class="page-container">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">🛒 Giỏ hàng của bạn</h1>
-            <p class="page-sub">{{ cart_items|length }} sản phẩm trong giỏ</p>
-        </div>
-        <a href="/" class="nav-btn btn-ghost">← Tiếp tục mua sắm</a>
-    </div>
-
-    {% if cart_items %}
-    <div class="cart-layout">
-        <div class="cart-items-list">
-            {% for item in cart_items %}
-            <div class="cart-item-card" id="cart-item-{{ item.id }}">
-                <img src="{{ item.img }}" alt="{{ item.title }}"
-                     onerror="this.src='https://via.placeholder.com/80x80/f8f9fa/999?text=?'">
-                <div class="cart-item-info">
-                    <h3 class="cart-item-title">{{ item.title }}</h3>
-                    <span class="site-pill site-{{ item.site | replace(' ','') }}">{{ item.site }}</span>
-                    <p class="cart-item-price">{{ item.price_str }}</p>
-                </div>
-                <div class="cart-item-qty">
-                    <button onclick="updateQty({{ item.id }}, -1)">−</button>
-                    <span id="qty-{{ item.id }}">{{ item.quantity }}</span>
-                    <button onclick="updateQty({{ item.id }}, 1)">+</button>
-                </div>
-                <div class="cart-item-total" id="total-{{ item.id }}">
-                    <!-- computed by JS -->
-                    {{ item.price_str }}
-                </div>
-                <button class="cart-remove-btn" onclick="removeItem({{ item.id }})">✕</button>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="cart-summary-card">
-            <h3>Tóm tắt đơn hàng</h3>
-            <div class="summary-row"><span>Tạm tính</span><span id="subtotal">Đang tính...</span></div>
-            <div class="summary-row"><span>Phí vận chuyển</span><span>30.000đ</span></div>
-            <div class="summary-row summary-total"><span>Tổng cộng</span><span id="grand-total">Đang tính...</span></div>
-            <a href="/checkout" class="auth-submit" style="display:block;text-align:center;text-decoration:none;margin-top:1rem;">
-                Thanh toán →
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <div class="logo-text">PRICE<span>HUNT</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="/" class="nav-item">Tìm Kiếm</a>
+            <a href="/history" class="nav-item">Lịch Sử</a>
+            <a href="/cart" class="nav-item active">
+                <div class="cart-pill">🛒 <span id="cart-count">9</span></div>
             </a>
-            <form action="/cart/clear" method="POST" style="margin-top:0.5rem">
-                <button type="submit" class="btn-clear-cart">Xóa toàn bộ giỏ hàng</button>
-            </form>
+            <a href="/orders" class="nav-item">Đơn hàng</a>
+            <a href="/profile" class="nav-user-btn">tin</a>
+            <a href="/logout" class="nav-item" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;">Đăng xuất</a>
         </div>
+    </nav>
+
+    <div class="cart-container">
+        <h1 style="font-family: 'Syne'; font-size: 2.8rem; margin-bottom: 35px; letter-spacing: -1.5px;">Giỏ hàng của
+            bạn</h1>
+
+        {% if cart_items %}
+        <div class="cart-grid">
+            <div class="cart-items-list">
+                {% for item in cart_items %}
+                <div class="cart-item-card">
+                    <img src="{{ item.img }}" class="cart-item-img"
+                        onerror="this.src='https://via.placeholder.com/100'">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; font-weight: 600; line-height: 1.4;">{{
+                            item.title }}</h3>
+                        <p style="color: var(--accent); font-weight: 800; margin: 0; font-size: 1.2rem;">{{
+                            item.price_str }}</p>
+                    </div>
+                    <button
+                        style="background:none; border:none; color:#444; cursor:pointer; font-size: 1.2rem;">✕</button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary-card">
+                <h2 style="margin-top: 0; font-family: 'Syne'; margin-bottom: 25px;">Tóm tắt đơn hàng</h2>
+                <div class="summary-row">
+                    <span style="color: #666;">Tạm tính</span>
+                    <span id="subtotal" style="font-weight: 700;">{{ total_price if total_price else 'Đang tính...'
+                        }}</span>
+                </div>
+                <div class="summary-row"
+                    style="border-top: 1px solid #222; pt-20; margin-top: 10px; padding-top: 20px;">
+                    <span style="font-weight: 800;">Tổng cộng</span>
+                    <span style="color: var(--accent); font-weight: 800; font-size: 1.4rem;">{{ total_price }}</span>
+                </div>
+                <button onclick="handleCheckout()" class="btn-checkout">Thanh toán ngay —></button>
+            </div>
+        </div>
+        {% else %}
+        <div
+            style="text-align: center; padding: 100px 0; background: #111116; border-radius: 30px; border: 1px dashed #222;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🛒</div>
+            <h3 style="font-size: 1.5rem; color: #555;">Giỏ hàng hiện đang trống</h3>
+            <a href="/" class="nav-item"
+                style="display: inline-block; margin-top: 25px; background: var(--accent); color: #000; padding: 15px 35px; font-weight: 800;">Tìm
+                kiếm ngay</a>
+        </div>
+        {% endif %}
     </div>
 
-    {% else %}
-    <div class="empty-state" style="padding:5rem 0">
-        <div class="empty-icon">🛒</div>
-        <h3>Giỏ hàng trống</h3>
-        <p>Hãy tìm kiếm và thêm sản phẩm vào giỏ hàng</p>
-        <a href="/" class="nav-btn btn-primary" style="margin-top:1rem">Tìm kiếm ngay</a>
-    </div>
-    {% endif %}
-</div>
-
-<div id="toast" class="toast"></div>
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-const cartData = {{ cart_items | tojson | safe }};
-
-function parseRawPrice(price_str) {
-    const nums = price_str.replace(/\D/g, '');
-    return parseInt(nums) || 0;
-}
-
-function formatVND(n) {
-    return n.toLocaleString('vi-VN') + 'đ';
-}
-
-function updateQty(id, delta) {
-    fetch(`/cart/update/${id}`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({delta})
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.removed) {
-            document.getElementById(`cart-item-${id}`)?.remove();
-        } else {
-            const el = document.getElementById(`qty-${id}`);
-            if (el) el.textContent = data.quantity;
+    <script src="/static/js/main.js"></script>
+    <script>
+        const isLoggedIn = {{ 'true' if session.get('user_id') else 'false' }};
+        function handleCheckout() {
+            if (!isLoggedIn) {
+                Swal.fire({
+                    title: 'Bạn chưa đăng nhập!',
+                    text: 'Vui lòng đăng nhập để thực hiện thanh toán đơn hàng này.',
+                    icon: 'info',
+                    background: '#111116',
+                    color: '#fff',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f5a623',
+                    confirmButtonText: 'Đăng nhập ngay',
+                    cancelButtonText: 'Để sau',
+                    reverseButtons: true
+                }).then((r) => { if (r.isConfirmed) window.location.href = '/login'; });
+            } else {
+                window.location.href = '/checkout';
+            }
         }
-        recalc();
-    });
-}
-
-function removeItem(id) {
-    fetch(`/cart/remove/${id}`, {method: 'POST'})
-    .then(r => r.json())
-    .then(() => {
-        document.getElementById(`cart-item-${id}`)?.remove();
-        recalc();
-        showToast('🗑️ Đã xóa sản phẩm');
-    });
-}
-
-function recalc() {
-    // Simple recalc from DOM
-    let total = 0;
-    document.querySelectorAll('.cart-item-card').forEach(card => {
-        const id = card.id.replace('cart-item-', '');
-        const qtyEl = document.getElementById(`qty-${id}`);
-        const priceEl = card.querySelector('.cart-item-price');
-        if (qtyEl && priceEl) {
-            const qty = parseInt(qtyEl.textContent);
-            const price = parseRawPrice(priceEl.textContent);
-            total += qty * price;
-        }
-    });
-    document.getElementById('subtotal').textContent = formatVND(total);
-    document.getElementById('grand-total').textContent = formatVND(total + 30000);
-}
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-recalc();
-</script>
+    </script>
 </body>
+
 </html>

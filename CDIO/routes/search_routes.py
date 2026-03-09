@@ -35,7 +35,10 @@ def home():
 def history():
     conn   = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT * FROM search_history ORDER BY created_at DESC LIMIT 200")
+    
+    # Sửa lại: Lấy đợt cào mới nhất (Time DESC) nhưng giữ đúng thứ tự sản phẩm trong đợt đó (ID ASC)
+    cursor.execute("SELECT * FROM search_history ORDER BY created_at DESC, id ASC LIMIT 200")
+    
     data = cursor.fetchall()
     conn.close()
     return render_template("history.html", products=data)

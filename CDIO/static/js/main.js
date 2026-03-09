@@ -1,8 +1,11 @@
 // PriceHunt — Main JS
-// Handles: input animations, scroll effects, misc UX
+// Handles: cart updates, scroll animations, star ratings
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Animate elements on scroll
+    // 1. Cap nhat so luong gio hang ngay khi trang vua tai xong
+    updateCartBadge();
+
+    // 2. Animate elements on scroll (Hieu ung hien thi khi cuon chuot)
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -16,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(el);
     });
 
-    // Star rating widget
+    // 3. Star rating widget (Logic cho phan danh gia sao)
     document.querySelectorAll('.star-rating').forEach(widget => {
         const stars = widget.querySelectorAll('.star');
         const input = widget.querySelector('input[type=hidden]');
@@ -38,3 +41,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+/**
+ * Ham lay so luong gio hang tu server va hien thi len Badge
+ * Dung chung cho tat ca cac trang (Index, History, Cart, Orders)
+ */
+function updateCartBadge() {
+    const el = document.getElementById('cart-count');
+    if (el) {
+        fetch('/cart/count')
+            .then(r => {
+                if (!r.ok) throw new Error('Network response was not ok');
+                return r.json();
+            })
+            .then(d => {
+                // Neu co du lieu thi hien, khong thi hien 0
+                el.textContent = (d.count !== undefined && d.count !== null) ? d.count : 0;
+            })
+            .catch(err => {
+                console.error("Loi khi cap nhat gio hang:", err);
+                el.textContent = '0';
+            });
+    }
+}

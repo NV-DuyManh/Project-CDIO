@@ -1,127 +1,159 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh Toán — PriceHunt</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <title>Thanh Toan — PriceHunt</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&family=Syne:wght@800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        :root {
+            --bg-dark: #08080a;
+            --accent: #f5a623;
+            --font-main: 'Be Vietnam Pro', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main) !important;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+        }
+
+        .navbar {
+            height: 75px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: rgba(8, 8, 10, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-text {
+            font-family: 'Syne' !important;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .checkout-section {
+            background: #111116;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: #1a1a1f;
+            border: 1px solid #333;
+            padding: 12px;
+            border-radius: 12px;
+            color: #fff;
+            font-family: var(--font-main);
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .pay-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: 800;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+    </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/cart" class="nav-btn btn-ghost">← Giỏ hàng</a>
-    </div>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <div class="logo-text">PRICE<span>HUNT</span></div>
+        </a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="/cart" style="color: #fff; text-decoration: none; font-weight: 600;">← Quay lai</a>
+        </div>
+    </nav>
 
-<!-- Payment loading overlay -->
-<div id="payment-overlay">
-    <div class="loading-inner">
-        <div class="loading-rings"><span></span><span></span><span></span></div>
-        <p class="loading-title">Đang xử lý thanh toán</p>
-        <p class="loading-sub">Vui lòng không đóng trang này...</p>
-        <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
-    </div>
-</div>
+    <div style="max-width: 1000px; margin: 50px auto; padding: 0 20px;">
+        <h1 style="font-family: 'Syne'; margin-bottom: 40px; font-size: 2.5rem;">Thanh Toan</h1>
 
-<div class="page-container">
-    <div class="page-header">
-        <h1 class="page-title">💳 Thanh Toán</h1>
-        <p class="page-sub">Bước cuối cùng để hoàn tất đơn hàng</p>
-    </div>
-
-    <div class="checkout-layout">
-        <!-- Customer Form -->
-        <form class="checkout-form" id="checkout-form" action="/checkout" method="POST" onsubmit="processPayment(event)">
-            <div class="checkout-section">
-                <h3 class="section-heading">📋 Thông tin giao hàng</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Họ và tên *</label>
-                        <input type="text" name="fullname" placeholder="Nguyễn Văn A" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input type="tel" name="phone" placeholder="0901234567" required>
-                    </div>
-                    <div class="form-group" style="grid-column:span 2">
-                        <label>Email *</label>
-                        <input type="email" name="email" placeholder="email@example.com" required>
-                    </div>
-                    <div class="form-group" style="grid-column:span 2">
-                        <label>Địa chỉ giao hàng *</label>
-                        <textarea name="address" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required></textarea>
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 40px;">
+            <form id="checkout-form" onsubmit="processPayment(event)">
+                <div class="checkout-section">
+                    <h3 style="margin-top: 0; color: var(--accent);">Thong tin nhan hang</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group" style="grid-column: span 2;"><label>Ho va ten</label><input type="text"
+                                required></div>
+                        <div class="form-group"><label>So dien thoai</label><input type="tel" required></div>
+                        <div class="form-group"><label>Email</label><input type="email" required></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Dia chi</label><textarea rows="3"
+                                required></textarea></div>
                     </div>
                 </div>
-            </div>
+                <button type="submit" class="pay-btn">Thanh toan ngay →</button>
+            </form>
 
             <div class="checkout-section">
-                <h3 class="section-heading">💳 Phương thức thanh toán</h3>
-                <div class="payment-methods">
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="credit_card" checked>
-                        <span class="payment-icon">💳</span>
-                        <span class="payment-label">Thẻ tín dụng / Ghi nợ</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="momo">
-                        <span class="payment-icon">🟣</span>
-                        <span class="payment-label">MoMo</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="vnpay">
-                        <span class="payment-icon">🔵</span>
-                        <span class="payment-label">VNPay</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="cod">
-                        <span class="payment-icon">💵</span>
-                        <span class="payment-label">Thanh toán khi nhận hàng</span>
-                    </label>
+                <h3 style="margin-top: 0;">Don hang cua ban</h3>
+                {% for item in cart_items %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem;">
+                    <span style="color: #888;">{{ item.title[:25] }}... x{{ item.quantity }}</span>
+                    <span style="font-weight: 600;">{{ item.price_str }}</span>
+                </div>
+                {% endfor %}
+                <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem;">
+                    <span>Tong cong</span><span style="color: var(--accent);">{{ total }}</span>
                 </div>
             </div>
-
-            <button type="submit" class="auth-submit pay-btn">
-                <span>Thanh toán ngay</span>
-                <span>→</span>
-            </button>
-        </form>
-
-        <!-- Order Summary -->
-        <div class="cart-summary-card">
-            <h3>📦 Đơn hàng của bạn</h3>
-            {% for item in cart_items %}
-            <div class="checkout-item">
-                <img src="{{ item.img }}" alt="{{ item.title }}"
-                     onerror="this.src='https://via.placeholder.com/50x50/f8f9fa/999?text=?'">
-                <div class="checkout-item-info">
-                    <p class="checkout-item-title">{{ item.title[:35] }}{% if item.title|length > 35 %}...{% endif %}</p>
-                    <p class="checkout-item-qty">x{{ item.quantity }}</p>
-                </div>
-                <span class="checkout-item-price">{{ item.price_str }}</span>
-            </div>
-            {% endfor %}
-            <div class="summary-divider"></div>
-            <div class="summary-row"><span>Tạm tính</span><span>{{ subtotal }}</span></div>
-            <div class="summary-row"><span>Phí vận chuyển</span><span>30.000đ</span></div>
-            <div class="summary-row summary-total"><span>Tổng cộng</span><span>{{ total }}</span></div>
         </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-function processPayment(e) {
-    e.preventDefault();
-    document.getElementById('payment-overlay').classList.add('active');
-    // Submit after animation
-    setTimeout(() => {
-        document.getElementById('checkout-form').submit();
-    }, 4000);
-}
-</script>
+    <script>
+        function processPayment(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Dang xu ly...',
+                text: 'Vui long khong dong trang nay',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+            setTimeout(() => {
+                Swal.fire({ icon: 'success', title: 'Thanh toan thanh cong!', background: '#111116', color: '#fff', confirmButtonColor: '#f5a623' })
+                    .then(() => { window.location.href = '/'; });
+            }, 2500);
+        }
+    </script>
 </body>
+
 </html>

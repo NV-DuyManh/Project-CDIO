@@ -1,451 +1,343 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PriceHunt — So Sánh Giá Thông Minh</title>
+    <title>PriceHunt — Săn Giá Thông Minh</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Syne:wght@800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        :root {
+            --bg-dark: #08080a;
+            --accent: #f5a623;
+            --font-main: 'Be Vietnam Pro', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main) !important;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            height: 75px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            background: rgba(8, 8, 10, 0.95);
+            backdrop-filter: blur(15px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-family: 'Syne' !important;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .nav-user-btn {
+            color: var(--accent) !important;
+            font-weight: 700;
+            background: rgba(245, 166, 35, 0.12);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            text-transform: lowercase;
+        }
+
+        /* --- HERO --- */
+        .hero {
+            padding: 100px 20px 60px;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 4.2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 30px;
+        }
+
+        .hero-title span {
+            display: block;
+        }
+
+        .hero-title em {
+            font-style: normal;
+            background: linear-gradient(135deg, #f5a623 0%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- SEARCH BOX --- */
+        .search-wrap {
+            background: #111116;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 8px 8px 8px 24px;
+            display: flex;
+            align-items: center;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .search-wrap input {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            flex: 1;
+            outline: none;
+            font-family: var(--font-main);
+        }
+
+        .search-wrap button {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* --- PRODUCT CARDS --- */
+        .product-card {
+            background: #111116;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 166, 35, 0.3);
+        }
+
+        .product-img-wrap {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .product-img-wrap img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* --- LOADING OVERLAY --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 8, 10, 0.98);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+    </style>
 </head>
+
 <body>
-
-<!-- Loading Overlay -->
-<div id="loading-overlay">
-    <div class="loading-inner">
-        <div class="loading-rings">
-            <span></span><span></span><span></span>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <span style="font-size: 1.8rem;">⚡</span>
+            <div class="logo-text">PRICE<span>HUNT</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="/" class="nav-item active">Tìm Kiếm</a>
+            <a href="/history" class="nav-item">Lịch Sử</a>
+            {% if session.get('user_id') %}
+            <a href="/cart" class="nav-item">🛒 <span id="cart-count">9</span></a>
+            <a href="/orders" class="nav-item">Đơn hàng</a>
+            <a href="/profile" class="nav-user-btn">{{ session.get('username') }}</a>
+            <a href="/logout" class="nav-item" style="color:rgba(255,77,77,0.5); font-size:0.8rem">Đăng xuất</a>
+            {% else %}
+            <a href="/login" class="nav-item">Đăng nhập</a>
+            <a href="/register" class="nav-item" style="background: var(--accent); color: #000; font-weight: 700;">Đăng
+                ký</a>
+            {% endif %}
         </div>
-        <p class="loading-title">Robot đang săn giá tốt nhất</p>
-        <p class="loading-sub">Đang quét <strong>{{ store_count }}</strong> cửa hàng — vui lòng chờ khoảng 10–15 giây</p>
-        <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
-    </div>
-</div>
+    </nav>
 
-<!-- Navbar -->
-<nav class="navbar">
-    <a href="/" class="nav-logo">
-        <span class="logo-icon">⚡</span>
-        <span class="logo-text">PriceHunt</span>
-    </a>
-    <div class="nav-links">
-        <a href="/" class="nav-link active">Tìm Kiếm</a>
-        <a href="/history" class="nav-link">Lịch Sử</a>
-        {% if session.get('user_id') %}
-            <a href="/cart" class="nav-link cart-link">🛒 Giỏ hàng
-                <span class="cart-count" id="cart-count">0</span>
-            </a>
-            <a href="/orders" class="nav-link">Đơn hàng</a>
-            <a href="/profile" class="nav-link nav-profile">{{ session.get('username', 'Profile') }}</a>
-            <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-        {% else %}
-            <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
-            <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
-        {% endif %}
-    </div>
-    <button class="nav-toggle" onclick="toggleMenu()">☰</button>
-</nav>
+    <section class="hero">
+        <h1 class="hero-title">
+            <span>Săn giá <em>tốt nhất</em></span>
+            <span>mọi sản phẩm</span>
+        </h1>
 
-<!-- Hero / Search Section -->
-<section class="hero">
-    <div class="hero-bg-grid"></div>
-    <div class="hero-content">
-        <div class="hero-badge">🔍 So sánh giá từ các sàn TMĐT</div>
-        <h1 class="hero-title">Săn giá <em>tốt nhất</em><br>mọi sản phẩm</h1>
-        <p class="hero-sub">Tự động quét sản phẩm — tìm ra deal rẻ nhất ngay lập tức.</p>
-        <form class="search-form" action="/" method="GET" onsubmit="showLoading(event)">
+        <form action="/" method="GET" onsubmit="return handleSearchSubmit()">
             <div class="search-wrap">
-                <span class="search-icon">🔎</span>
-                <input type="text" name="keyword" id="keyword-input"
-                       value="{{ keyword if keyword else '' }}"
-                       placeholder="iPhone 15, Samsung S24, MacBook..."
-                       autocomplete="off" required>
-                <button type="submit" id="search-btn">
-                    <span class="btn-label">Tìm Giá</span>
-                    <span class="btn-arrow">→</span>
-                </button>
+                <input type="text" name="keyword" id="keyword-input" value="{{ keyword if keyword else '' }}"
+                    placeholder="Nhập tên sản phẩm bạn muốn tìm..." required>
+                <button type="submit">Tìm Giá</button>
             </div>
         </form>
+    </section>
 
-        <!-- AI Image Search -->
-        <div class="search-divider">
-            <span>hoặc</span>
-        </div>
+    {% if keyword %}
+    <section style="padding: 0 40px 100px; max-width: 1200px; margin: 0 auto;">
+        <h2 style="font-family: 'Syne'; margin-bottom: 30px; font-size: 1.5rem;">Kết quả cho: <span
+                style="color: var(--accent);">"{{ keyword }}"</span></h2>
 
-        <div class="image-upload-area" id="upload-area">
-            <input type="file" id="image-input" accept="image/*" style="display:none">
-            <div class="upload-drop-zone" id="drop-zone" onclick="document.getElementById('image-input').click()">
-                <div class="upload-icon-wrap" id="upload-icon-wrap">
-                    <span class="upload-icon">📷</span>
+        {% if products and products|length > 0 %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-img-wrap">
+                    <img src="{{ product.img }}" alt="{{ product.title }}">
                 </div>
-                <p class="upload-title" id="upload-title">Tải ảnh sản phẩm lên</p>
-                <p class="upload-sub" id="upload-sub">Kéo thả hoặc nhấn để chọn ảnh — AI sẽ tự nhận diện tên sản phẩm</p>
-                <span class="upload-formats">JPG · PNG · WEBP</span>
-            </div>
+                <div
+                    style="font-size: 0.8rem; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">
+                    {{ product.site }}</div>
+                <h3
+                    style="font-size: 1rem; margin: 0 0 10px; line-height: 1.4; height: 2.8em; overflow: hidden; flex: 1;">
+                    {{ product.title }}</h3>
+                <p style="color: var(--accent); font-weight: 800; font-size: 1.3rem; margin-bottom: 20px;">{{
+                    product.price_str }}</p>
 
-            <!-- Preview + confirm -->
-            <div class="upload-preview" id="upload-preview" style="display:none">
-                <img id="preview-img" src="" alt="Preview">
-                <div class="preview-info">
-                    <p class="preview-name" id="preview-name">Ảnh đã chọn</p>
-                    <div class="preview-actions">
-                        <button class="btn-ai-search" id="btn-ai-search" onclick="runAiSearch()">
-                            <span id="ai-btn-text">🔍 Nhận diện & Tìm giá</span>
-                        </button>
-                        <button class="btn-cancel-upload" onclick="cancelUpload()">✕ Hủy</button>
-                    </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ product.link }}" target="_blank"
+                        style="flex: 1; background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; text-align: center; padding: 12px; border-radius: 10px; font-weight: 600; transition: 0.3s;">Xem
+                        Shop</a>
+                    <button onclick="addToCart(this)"
+                        style="background: var(--accent); border: none; padding: 12px 18px; border-radius: 10px; cursor: pointer; transition: 0.3s;">🛒</button>
                 </div>
+
+                <span class="product-data" style="display:none" data-title="{{ product.title }}"
+                    data-price="{{ product.price_str }}" data-img="{{ product.img }}" data-link="{{ product.link }}"
+                    data-site="{{ product.site }}"></span>
             </div>
-
-            <!-- AI result message -->
-            <div class="ai-result-msg" id="ai-result-msg" style="display:none"></div>
+            {% endfor %}
         </div>
-
-        <div class="hero-stats">
-    <div class="stat"><strong>{{ store_count }}</strong> cửa hàng</div>
-    <div class="stat-divider"></div>
-    <div class="stat"><strong>Real-time</strong> cào dữ liệu</div>
-    <div class="stat-divider"></div>
-    <div class="stat"><strong>3 lớp lọc</strong> chống rác</div>
-    <div class="stat-divider"></div>
-    <div class="stat"><strong>100%</strong> giá thực tế</div>
-</div>
-    </div>
-</section>
-
-<!-- Results Section -->
-{% if keyword %}
-<section class="results-section">
-    <div class="results-header">
-        <div class="results-meta">
-            {% if products %}
-                <h2 class="results-title">Kết quả cho <span class="keyword-highlight">"{{ keyword }}"</span></h2>
-                <p class="results-count">{{ products|length }} sản phẩm
-                    {% if is_fast_load %}
-                        <span class="cache-badge">⚡ Cache</span>
-                    {% else %}
-                        <span class="fresh-badge">🔄 Mới cào</span>
-                    {% endif %}
-                </p>
-            {% else %}
-                <h2 class="results-title">Không tìm thấy kết quả</h2>
-                <p class="results-count">Thử từ khóa khác nhé!</p>
-            {% endif %}
+        {% else %}
+        <div style="text-align: center; padding: 50px; background: #111116; border-radius: 20px;">
+            <p style="color: #888; font-size: 1.1rem;">Robot không tìm thấy sản phẩm nào. Bạn thử từ khóa khác xem sao
+                nhé!</p>
         </div>
-        {% if products %}
-        <div class="results-filters">
-    <span class="filter-label">Hiển thị:</span>
-    <button class="filter-btn active" onclick="filterSite('all', event)">Tất cả</button>
-    <button class="filter-btn" onclick="filterSite('Clickbuy', event)">Clickbuy</button>
-    <button class="filter-btn" onclick="filterSite('CellphoneS', event)">CellphoneS</button>
-    <button class="filter-btn" onclick="filterSite('Di Động 3A', event)">Di Động 3A</button>
-    <button class="filter-btn" onclick="filterSite('Smart Việt', event)">Smart Việt</button>
-    <button class="filter-btn" onclick="filterSite('Bạch Long Store', event)">Bạch Long</button>
-    <button class="filter-btn" onclick="filterSite('Tiến Trần Mobile', event)">Tiến Trần</button>
-</div>
         {% endif %}
-    </div>
-
-    <div class="products-grid" id="products-grid">
-        {% for product in products %}
-        <div class="product-card {% if loop.index == 1 %}best-price{% endif %}"
-             data-site="{{ product.site }}"
-             data-index="{{ loop.index }}">
-
-            {% if loop.index == 1 %}
-            <div class="best-badge">⭐ Giá Tốt Nhất</div>
-            {% endif %}
-
-            <div class="card-site-badge site-{{ product.site | replace(' ','') }}">{{ product.site }}</div>
-
-            <div class="card-img-wrap">
-                <img src="{{ product.img }}" alt="{{ product.title }}" loading="lazy"
-                     onerror="this.src='https://via.placeholder.com/200x200/1a1a24/555?text=No+Image'">
-            </div>
-
-            <div class="card-body">
-                <h3 class="card-title">{{ product.title }}</h3>
-                <div class="card-price-wrap">
-                    <span class="card-price">{{ product.price_str }}</span>
-                </div>
-
-                <div class="card-actions">
-                    <a href="{{ product.link }}" target="_blank" class="btn-store">
-                        Tới nơi bán <span>↗</span>
-                    </a>
-                    {% if session.get('user_id') %}
-                    <button class="btn-cart" onclick="addToCart(this)">🛒</button>
-                    <button class="btn-fav" onclick="saveFavorite(this)">♡</button>
-                    {% else %}
-                    <a href="/login" class="btn-cart" title="Đăng nhập để thêm vào giỏ">🛒</a>
-                    {% endif %}
-                </div>
-
-                <!-- Data attributes to avoid JS quote-escaping issues -->
-                <span class="product-data" style="display:none"
-                      data-title="{{ product.title | replace('"', '') }}"
-                      data-price="{{ product.price_str }}"
-                      data-img="{{ product.img }}"
-                      data-link="{{ product.link }}"
-                      data-site="{{ product.site }}"></span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if products | length == 0 %}
-    <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <h3>Không tìm thấy sản phẩm</h3>
-        <p>Hãy thử từ khóa khác như "iPhone", "Samsung", "Laptop"</p>
-    </div>
+    </section>
     {% endif %}
-</section>
 
-{% else %}
-<!-- Feature Cards khi chua tim kiem -->
-<section class="features-section">
-    <div class="features-grid">
-        <div class="feature-card">
-            <span class="feature-icon">⚡</span>
-            <h3>Cào Real-time</h3>
-            <p>Dữ liệu trực tiếp từ nhiều sàn thương mại điện tử, không qua trung gian.</p>
-        </div>
-        <div class="feature-card">
-            <span class="feature-icon">🏆</span>
-            <h3>Highlight Giá Rẻ</h3>
-            <p>Tự động đánh dấu sản phẩm có giá thấp nhất trong kết quả.</p>
-        </div>
-        <div class="feature-card">
-            <span class="feature-icon">💾</span>
-            <h3>Lưu Lịch Sử</h3>
-            <p>Toàn bộ kết quả được lưu vào database để tra cứu lại nhanh.</p>
-        </div>
-        <div class="feature-card">
-            <span class="feature-icon">🛒</span>
-            <h3>Giỏ Hàng</h3>
-            <p>Gom sản phẩm yêu thích vào giỏ, so sánh và đặt hàng dễ dàng.</p>
-        </div>
+    <div id="loading-overlay">
+        <div style="font-size: 5rem; margin-bottom: 20px; animation: pulse 1.5s infinite;">🤖</div>
+        <h2 style="font-family: 'Syne'; font-size: 2rem; margin: 0;">Robot đang quét giá...</h2>
+        <p style="color: #555; margin-top: 10px;">Vui lòng đợi trong giây lát</p>
     </div>
-</section>
-{% endif %}
 
-<!-- Toast notification -->
-<div id="toast" class="toast"></div>
+    <script src="/static/js/main.js"></script>
+    <script>
+        const isLoggedIn = {{ 'true' if session.get('user_id') else 'false' }};
 
-<footer class="footer">
-    <p>© 2025 PriceHunt — So sánh giá thông minh</p>
-</footer>
-
-<script src="/static/js/main.js"></script>
-<script>
-// Loading overlay
-function showLoading(e) {
-    var kw = document.getElementById('keyword-input').value.trim();
-    if (!kw) return;
-    document.getElementById('loading-overlay').classList.add('active');
-    document.getElementById('search-btn').disabled = true;
-
-    var messages = [
-        "Đang kết nối tới các cửa hàng...",
-        "Robot đang thu thập dữ liệu sản phẩm...",
-        "Đang so sánh giá từ nhiều nguồn...",
-        "Sắp xong rồi, chờ tí nhé! ⚡"
-    ];
-    var i = 0;
-    var subEl = document.querySelector('.loading-sub');
-    var interval = setInterval(function() {
-        i = (i + 1) % messages.length;
-        subEl.innerHTML = messages[i];
-        if (i === messages.length - 1) clearInterval(interval);
-    }, 3000);
-}
-
-// Navbar toggle
-function toggleMenu() {
-    document.querySelector('.nav-links').classList.toggle('open');
-}
-
-// Filter by site
-function filterSite(site, e) {
-    document.querySelectorAll('.product-card').forEach(function(card) {
-        card.style.display = (site === 'all' || card.dataset.site === site) ? '' : 'none';
-    });
-    document.querySelectorAll('.filter-btn').forEach(function(b) {
-        b.classList.remove('active');
-    });
-    if (e && e.target) e.target.classList.add('active');
-}
-
-// Get product data from hidden span (avoids quote-escaping bugs)
-function getProductData(btn) {
-    var span = btn.closest('.card-body').querySelector('.product-data');
-    return {
-        title:     span.dataset.title,
-        price_str: span.dataset.price,
-        img:       span.dataset.img,
-        link:      span.dataset.link,
-        site:      span.dataset.site
-    };
-}
-
-// Add to cart
-function addToCart(btn) {
-    var data = getProductData(btn);
-    fetch('/cart/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-        showToast('✅ Đã thêm vào giỏ hàng!');
-        if (res.count !== undefined) {
-            var el = document.getElementById('cart-count');
-            if (el) el.textContent = res.count;
+        function handleSearchSubmit() {
+            const input = document.getElementById('keyword-input').value.trim();
+            if (input !== "") {
+                document.getElementById('loading-overlay').style.display = 'flex';
+                return true;
+            }
+            return false;
         }
-    })
-    .catch(function() { showToast('❌ Lỗi kết nối'); });
-}
 
-// Save favorite
-function saveFavorite(btn) {
-    var data = getProductData(btn);
-    fetch('/favorites/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(function(r) { return r.json(); })
-    .then(function() { showToast('❤️ Đã lưu vào yêu thích!'); })
-    .catch(function() { showToast('❌ Lỗi kết nối'); });
-}
+        window.onpageshow = function (event) {
+            if (event.persisted) {
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        };
 
-// Toast
-function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3000);
-}
+        function addToCart(btn) {
+            if (!isLoggedIn) {
+                Swal.fire({
+                    title: 'Bạn chưa đăng nhập!',
+                    text: 'Vui lòng đăng nhập để lưu sản phẩm nhé.',
+                    icon: 'info',
+                    background: '#111116',
+                    color: '#fff',
+                    confirmButtonColor: '#f5a623',
+                    confirmButtonText: 'Đăng nhập'
+                }).then((r) => { if (r.isConfirmed) window.location.href = '/login'; });
+                return;
+            }
 
-// Update cart count on load
-{% if session.get('user_id') %}
-fetch('/cart/count')
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-        var el = document.getElementById('cart-count');
-        if (el) el.textContent = d.count;
-    });
-{% endif %}
+            const span = btn.closest('.product-card').querySelector('.product-data');
+            const data = { title: span.dataset.title, price_str: span.dataset.price, img: span.dataset.img, link: span.dataset.link, site: span.dataset.site };
 
-// ── AI Image Search ──────────────────────────────
-var selectedFile = null;
-
-document.addEventListener('DOMContentLoaded', function() {
-    var input = document.getElementById('image-input');
-    var dropZone = document.getElementById('drop-zone');
-    if (!input || !dropZone) return;
-
-    // File input change
-    input.addEventListener('change', function() {
-        if (input.files && input.files[0]) {
-            handleFileSelected(input.files[0]);
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(r => {
+                if (r.ok) {
+                    Swal.fire({ icon: 'success', title: 'Thành công!', showConfirmButton: false, timer: 1000, background: '#111116', color: '#fff' });
+                }
+            });
         }
-    });
-
-    // Drag & drop
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-    });
-    dropZone.addEventListener('dragleave', function() {
-        dropZone.classList.remove('drag-over');
-    });
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        var file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            handleFileSelected(file);
-        }
-    });
-});
-
-function handleFileSelected(file) {
-    selectedFile = file;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('preview-img').src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    document.getElementById('preview-name').textContent = file.name;
-    document.getElementById('drop-zone').style.display = 'none';
-    document.getElementById('upload-preview').style.display = 'flex';
-    document.getElementById('ai-result-msg').style.display = 'none';
-}
-
-function cancelUpload() {
-    selectedFile = null;
-    document.getElementById('image-input').value = '';
-    document.getElementById('upload-preview').style.display = 'none';
-    document.getElementById('drop-zone').style.display = 'flex';
-    document.getElementById('ai-result-msg').style.display = 'none';
-    document.getElementById('ai-btn-text').textContent = '🔍 Nhận diện & Tìm giá';
-    document.getElementById('btn-ai-search').disabled = false;
-}
-
-function runAiSearch() {
-    if (!selectedFile) return;
-
-    var btn = document.getElementById('btn-ai-search');
-    var btnText = document.getElementById('ai-btn-text');
-    var msgEl = document.getElementById('ai-result-msg');
-
-    // Show loading state
-    btn.disabled = true;
-    btnText.textContent = '⏳ AI đang phân tích ảnh...';
-    msgEl.style.display = 'none';
-
-    var formData = new FormData();
-    formData.append('image', selectedFile);
-
-    fetch('/upload-image', {
-        method: 'POST',
-        body: formData
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            // Show detected keyword then redirect
-            msgEl.className = 'ai-result-msg ai-success';
-            msgEl.innerHTML = '✅ Nhận diện: <strong>' + data.keyword + '</strong> — Đang tìm giá...';
-            msgEl.style.display = 'block';
-            btnText.textContent = '✅ Đã nhận diện!';
-
-            // Show loading overlay then redirect
-            setTimeout(function() {
-                document.getElementById('loading-overlay').classList.add('active');
-                window.location.href = data.redirect;
-            }, 1200);
-        } else {
-            msgEl.className = 'ai-result-msg ai-error';
-            msgEl.textContent = data.error || 'Không nhận diện được. Thử ảnh khác nhé!';
-            msgEl.style.display = 'block';
-            btn.disabled = false;
-            btnText.textContent = '🔍 Nhận diện & Tìm giá';
-        }
-    })
-    .catch(function() {
-        msgEl.className = 'ai-result-msg ai-error';
-        msgEl.textContent = '❌ Lỗi kết nối. Vui lòng thử lại.';
-        msgEl.style.display = 'block';
-        btn.disabled = false;
-        btnText.textContent = '🔍 Nhận diện & Tìm giá';
-    });
-}
-
-</script>
+    </script>
 </body>
+
 </html>
