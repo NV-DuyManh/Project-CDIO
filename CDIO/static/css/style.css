@@ -201,11 +201,9 @@ body {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(
-    circle,
-    rgba(245, 166, 35, 0.12) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(245, 166, 35, 0.12) 0%,
+      transparent 70%);
   pointer-events: none;
 }
 
@@ -343,10 +341,12 @@ body {
   color: var(--text2);
   font-size: 0.85rem;
 }
+
 .stat strong {
   color: var(--text);
   font-weight: 600;
 }
+
 .stat-divider {
   width: 1px;
   height: 20px;
@@ -452,15 +452,19 @@ body {
   0% {
     width: 0%;
   }
+
   20% {
     width: 30%;
   }
+
   50% {
     width: 60%;
   }
+
   80% {
     width: 85%;
   }
+
   100% {
     width: 95%;
   }
@@ -584,18 +588,23 @@ body {
 .product-card:nth-child(1) {
   animation-delay: 0.05s;
 }
+
 .product-card:nth-child(2) {
   animation-delay: 0.1s;
 }
+
 .product-card:nth-child(3) {
   animation-delay: 0.15s;
 }
+
 .product-card:nth-child(4) {
   animation-delay: 0.2s;
 }
+
 .product-card:nth-child(5) {
   animation-delay: 0.25s;
 }
+
 .product-card:nth-child(n + 6) {
   animation-delay: 0.3s;
 }
@@ -622,10 +631,12 @@ body {
 }
 
 @keyframes pulse-badge {
+
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5);
   }
+
   50% {
     box-shadow: 0 0 0 6px rgba(245, 166, 35, 0);
   }
@@ -648,6 +659,7 @@ body {
   background: #ff4757;
   color: #fff;
 }
+
 .site-CellphoneS {
   background: #eccc68;
   color: #333;
@@ -757,6 +769,7 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
+
 .btn-fav:hover {
   background: rgba(239, 68, 68, 0.15);
   border-color: var(--red);
@@ -1063,16 +1076,12 @@ td {
   bottom: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      circle at 20% 50%,
+    radial-gradient(circle at 20% 50%,
       rgba(245, 166, 35, 0.05) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 20%,
+      transparent 50%),
+    radial-gradient(circle at 80% 20%,
       rgba(255, 107, 53, 0.05) 0%,
-      transparent 50%
-    );
+      transparent 50%);
   z-index: -1;
 }
 
@@ -1196,6 +1205,7 @@ td {
   text-decoration: none;
   font-weight: 600;
 }
+
 .auth-switch a:hover {
   text-decoration: underline;
 }
@@ -1212,11 +1222,13 @@ td {
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
 }
+
 .alert-success {
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: #86efac;
 }
+
 .alert-info {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
@@ -1286,12 +1298,14 @@ td {
   align-items: center;
   gap: 0.2rem;
 }
+
 .pstat strong {
   font-family: "Syne", sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text);
 }
+
 .pstat span {
   color: var(--text3);
   font-size: 0.75rem;
@@ -1346,18 +1360,21 @@ td {
   flex: 1;
   min-width: 0;
 }
+
 .mini-title {
   font-size: 0.8rem;
   color: var(--text);
   line-height: 1.4;
   margin-bottom: 0.25rem;
 }
+
 .mini-price {
   font-size: 0.85rem;
   color: var(--accent);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
+
 .mini-actions {
   display: flex;
   gap: 0.4rem;
@@ -1382,6 +1399,7 @@ td {
   color: var(--text2);
   font-size: 0.875rem;
 }
+
 .empty-text a {
   color: var(--accent);
   text-decoration: none;
@@ -1403,11 +1421,13 @@ td {
   color: #4ade80;
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
+
 .status-pending {
   background: rgba(245, 166, 35, 0.15);
   color: var(--accent);
   border: 1px solid rgba(245, 166, 35, 0.3);
 }
+
 .status-failed {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
@@ -1458,12 +1478,14 @@ td {
   flex: 1;
   min-width: 0;
 }
+
 .cart-item-title {
   font-size: 0.9rem;
   color: var(--text);
   margin-bottom: 0.35rem;
   line-height: 1.4;
 }
+
 .cart-item-price {
   font-family: "Syne", sans-serif;
   color: var(--accent);
@@ -1497,6 +1519,7 @@ td {
 .cart-item-qty button:hover {
   background: var(--surface3);
 }
+
 .cart-item-qty span {
   min-width: 24px;
   text-align: center;
@@ -1656,6 +1679,7 @@ td {
 .payment-icon {
   font-size: 1.25rem;
 }
+
 .payment-label {
   font-weight: 500;
 }
@@ -1691,16 +1715,19 @@ td {
   flex: 1;
   min-width: 0;
 }
+
 .checkout-item-title {
   font-size: 0.82rem;
   color: var(--text);
   line-height: 1.4;
 }
+
 .checkout-item-qty {
   font-size: 0.75rem;
   color: var(--text3);
   margin-top: 0.2rem;
 }
+
 .checkout-item-price {
   color: var(--accent);
   font-weight: 600;
@@ -1760,9 +1787,11 @@ td {
     transform: scale(0);
     opacity: 0;
   }
+
   70% {
     transform: scale(1.15);
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -1779,6 +1808,7 @@ td {
 .result-success h1 {
   color: #4ade80;
 }
+
 .result-failed h1 {
   color: #fca5a5;
 }
@@ -1809,9 +1839,11 @@ td {
 .order-info-row:last-child {
   border-bottom: none;
 }
+
 .order-info-row span {
   color: var(--text2);
 }
+
 .order-info-row strong {
   color: var(--text);
 }
@@ -1900,6 +1932,7 @@ td {
 .admin-tab-content {
   display: none;
 }
+
 .admin-tab-content.active {
   display: block;
   animation: fadeIn 0.25s ease;
@@ -1989,6 +2022,7 @@ td {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1999,6 +2033,7 @@ td {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2010,6 +2045,7 @@ td {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2021,6 +2057,7 @@ td {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2031,13 +2068,16 @@ td {
    RESPONSIVE
    ================================================ */
 @media (max-width: 1024px) {
+
   .cart-layout,
   .checkout-layout {
     grid-template-columns: 1fr;
   }
+
   .profile-layout {
     grid-template-columns: 1fr;
   }
+
   .profile-sidebar {
     position: static;
   }
@@ -2065,11 +2105,13 @@ td {
   .nav-links.open {
     display: flex;
   }
+
   .nav-link,
   .nav-btn {
     width: 100%;
     text-align: center;
   }
+
   .nav-toggle {
     display: block;
   }
@@ -2077,10 +2119,12 @@ td {
   .hero {
     padding: 4rem 1.5rem 3rem;
   }
+
   .hero-stats {
     flex-direction: column;
     gap: 0.5rem;
   }
+
   .stat-divider {
     display: none;
   }
@@ -2089,6 +2133,7 @@ td {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0.75rem;
   }
+
   .results-header {
     flex-direction: column;
     align-items: flex-start;
@@ -2097,6 +2142,7 @@ td {
   .page-container {
     padding: 1.5rem 1rem 4rem;
   }
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
@@ -2106,6 +2152,7 @@ td {
     flex-direction: column;
     align-items: stretch;
   }
+
   .search-filter-wrap {
     max-width: 100%;
   }
@@ -2113,6 +2160,7 @@ td {
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .form-group[style*="span 2"] {
     grid-column: span 1;
   }
@@ -2126,6 +2174,7 @@ td {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .cart-item-card {
     flex-wrap: wrap;
   }
@@ -2345,10 +2394,12 @@ td {
     flex-direction: column;
     text-align: center;
   }
+
   .preview-actions {
     justify-content: center;
   }
 }
+
 /* ================================================================
    THÊM VÀO CUỐI file static/css/style.css
    Badge màu cho 4 store mới
@@ -2380,4 +2431,44 @@ td {
 .site-TienTranMobile {
   background: #0891b2;
   color: #fff;
+}
+
+h1.page-title,
+h1,
+h2,
+h3 {
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+  transform: none !important;
+}
+
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif !important;
+  font-size: 24px;
+  font-weight: 700;
+  /* Độ đậm vừa phải, sắc nét */
+  color: #ffffff !important;
+  /* Màu trắng thuần túy */
+  letter-spacing: -0.5px;
+  background: none !important;
+  /* Xóa bỏ gradient */
+  -webkit-text-fill-color: initial !important;
+  /* Reset lại màu chữ */
+  text-transform: none;
+  /* Giữ nguyên kiểu chữ thường/hoa như cũ */
+}
+
+.logo-icon {
+  font-size: 22px;
+  color: #f5a623;
+  /* Giữ màu cam cho tia chớp để làm điểm nhấn */
 }
