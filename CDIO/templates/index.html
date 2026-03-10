@@ -95,9 +95,9 @@
             text-transform: lowercase;
         }
 
-        /* --- HERO --- */
+        /* --- HERO & TÌM KIẾM --- */
         .hero {
-            padding: 100px 20px 60px;
+            padding: 80px 20px 40px;
             text-align: center;
         }
 
@@ -106,7 +106,7 @@
             font-weight: 900;
             line-height: 1.1;
             letter-spacing: -2px;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .hero-title span {
@@ -120,7 +120,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- SEARCH BOX --- */
         .search-wrap {
             background: #111116;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -153,6 +152,172 @@
             transition: 0.3s;
         }
 
+        /* --- AI UPLOAD BOX VÀ TAGS --- */
+        .ai-upload-box {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .ai-upload-box:hover {
+            border-color: rgba(245, 166, 35, 0.5);
+            background: rgba(245, 166, 35, 0.05);
+        }
+
+        .ai-icon-wrap {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .upload-preview {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #111116;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: none;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #fff;
+        }
+
+        .preview-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .preview-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin: 0 0 10px 0;
+            color: #fff;
+            word-break: break-all;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ai-search {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            flex: 1;
+            font-family: var(--font-main);
+        }
+
+        .btn-ai-search:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: var(--font-main);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 77, 77, 0.2);
+        }
+
+        .ai-msg {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .ai-msg.success {
+            color: #4ade80;
+        }
+
+        .ai-msg.error {
+            color: #ff4d4d;
+        }
+
+        .feature-tags {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-tag {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .feature-tag strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* --- BỘ LỌC CỬA HÀNG --- */
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #888;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: var(--font-main);
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
         /* --- PRODUCT CARDS --- */
         .product-card {
             background: #111116;
@@ -178,12 +343,133 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 15px;
+            position: relative;
         }
 
         .product-img-wrap img {
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
+        }
+
+        /* ==========================================================
+           NHÃN CỬA HÀNG (BADGE 3D SIÊU MÀU MÈ, BÓNG BẨY & CAO CẤP)
+           ========================================================== */
+        .store-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 6px 14px;
+            border-radius: 12px;
+            /* Bo góc nam tính, hiện đại */
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+            z-index: 10;
+            overflow: hidden;
+            /* Cắt phần ánh sáng lướt dư thừa */
+
+            /* Hiệu ứng 3D khối viền sáng tối */
+            border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.4);
+            border-bottom: 1.5px solid rgba(0, 0, 0, 0.3);
+            border-right: 1.5px solid rgba(0, 0, 0, 0.3);
+
+            /* Làm rõ chữ trên nền màu sặc sỡ */
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6);
+
+            /* Animation dải màu trôi liên tục */
+            background-size: 200% auto;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        /* Luồng sáng phản chiếu kim loại chạy chéo qua tem (Shine Effect) */
+        .store-badge::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -100%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: rotate(30deg);
+            animation: badgeShine 4s infinite;
+            pointer-events: none;
+            /* Không cản trở click */
+        }
+
+        @keyframes badgeShine {
+            0% {
+                left: -100%;
+                opacity: 0;
+            }
+
+            20% {
+                left: 200%;
+                opacity: 1;
+            }
+
+            100% {
+                left: 200%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* --- BẢNG MÀU GRADIENT VÀ ĐỔ BÓNG NEON CỰC GẮT --- */
+
+        .badge-clickbuy {
+            background-image: linear-gradient(to right, #ff0844 0%, #ffb199 51%, #ff0844 100%);
+            box-shadow: 0 5px 15px rgba(255, 8, 68, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .badge-cellphones {
+            background-image: linear-gradient(to right, #e52d27 0%, #b31217 51%, #e52d27 100%);
+            box-shadow: 0 5px 15px rgba(229, 45, 39, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .badge-didong3a {
+            background-image: linear-gradient(to right, #00c6ff 0%, #0072ff 51%, #00c6ff 100%);
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .badge-smartviet {
+            background-image: linear-gradient(to right, #11998e 0%, #38ef7d 51%, #11998e 100%);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .badge-bachlong {
+            background-image: linear-gradient(to right, #F2C94C 0%, #F2994A 51%, #F2C94C 100%);
+            box-shadow: 0 5px 15px rgba(242, 153, 74, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.8);
+            color: #5c3000;
+            /* Chữ đậm để nổi trên nền vàng chói */
+            text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.6);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .badge-tientran {
+            background-image: linear-gradient(to right, #8E2DE2 0%, #4A00E0 51%, #8E2DE2 100%);
+            box-shadow: 0 5px 15px rgba(142, 45, 226, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .badge-default {
+            background-image: linear-gradient(to right, #434343 0%, #000000 51%, #434343 100%);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.2);
         }
 
         /* --- LOADING OVERLAY --- */
@@ -214,7 +500,7 @@
             <a href="/" class="nav-item active">Tìm Kiếm</a>
             <a href="/history" class="nav-item">Lịch Sử</a>
             {% if session.get('user_id') %}
-            <a href="/cart" class="nav-item">🛒 <span id="cart-count">9</span></a>
+            <a href="/cart" class="nav-item">🛒 <span id="cart-count">0</span></a>
             <a href="/orders" class="nav-item">Đơn hàng</a>
             <a href="/profile" class="nav-user-btn">{{ session.get('username') }}</a>
             <a href="/logout" class="nav-item" style="color:rgba(255,77,77,0.5); font-size:0.8rem">Đăng xuất</a>
@@ -231,35 +517,111 @@
             <span>Săn giá <em>tốt nhất</em></span>
             <span>mọi sản phẩm</span>
         </h1>
+        <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem; margin-bottom: 30px;">Tự động quét sản phẩm — tìm ra
+            deal rẻ nhất ngay lập tức.</p>
 
         <form action="/" method="GET" onsubmit="return handleSearchSubmit()">
             <div class="search-wrap">
                 <input type="text" name="keyword" id="keyword-input" value="{{ keyword if keyword else '' }}"
-                    placeholder="Nhập tên sản phẩm bạn muốn tìm..." required>
+                    placeholder="Dán link hoặc nhập tên sản phẩm..." required>
                 <button type="submit">Tìm Giá</button>
             </div>
         </form>
+
+        <div style="display: flex; align-items: center; gap: 15px; max-width: 650px; margin: 20px auto;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.05);"></div>
+            <span style="color: rgba(255,255,255,0.3); font-size: 0.85rem; font-weight: 600;">hoặc</span>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.05);"></div>
+        </div>
+
+        <input type="file" id="image-input" accept="image/jpeg, image/png, image/webp" style="display: none;">
+
+        <div class="ai-upload-box" id="drop-zone" onclick="document.getElementById('image-input').click()">
+            <div class="ai-icon-wrap">📷</div>
+            <div style="color: #fff; font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Tải ảnh sản phẩm lên
+            </div>
+            <div style="color: rgba(255, 255, 255, 0.4); font-size: 0.85rem; margin-bottom: 15px;">Kéo thả hoặc nhấn để
+                chọn ảnh — AI sẽ tự nhận diện tên sản phẩm</div>
+            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.2); font-weight: 700; letter-spacing: 1px;">JPG .
+                PNG . WEBP</div>
+        </div>
+
+        <div class="upload-preview" id="upload-preview">
+            <img id="preview-img" class="preview-img" src="" alt="Preview">
+            <div class="preview-info">
+                <p class="preview-name" id="preview-name">Ảnh đã chọn</p>
+                <div class="preview-actions">
+                    <button class="btn-ai-search" id="btn-ai-search" onclick="runAiSearch()">
+                        <span id="ai-btn-text">🔍 Nhận diện & Tìm giá</span>
+                    </button>
+                    <button class="btn-cancel" onclick="cancelUpload()">✕ Hủy</button>
+                </div>
+                <div id="ai-result-msg" class="ai-msg"></div>
+            </div>
+        </div>
+
+        <div class="feature-tags">
+            <div class="feature-tag"><strong>6 cửa hàng</strong></div>
+            <div class="feature-tag"><strong>Real-time</strong> cào dữ liệu</div>
+            <div class="feature-tag"><strong>3 lớp lọc</strong> chống rác</div>
+            <div class="feature-tag"><strong>100%</strong> giá thực tế</div>
+        </div>
     </section>
 
     {% if keyword %}
     <section style="padding: 0 40px 100px; max-width: 1200px; margin: 0 auto;">
-        <h2 style="font-family: 'Syne'; margin-bottom: 30px; font-size: 1.5rem;">Kết quả cho: <span
-                style="color: var(--accent);">"{{ keyword }}"</span></h2>
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; flex-wrap: wrap; gap: 20px;">
+            <div>
+                <h2 style="font-family: 'Syne'; margin: 0 0 10px 0; font-size: 1.5rem;">Kết quả cho: <span
+                        style="color: var(--accent);">"{{ keyword }}"</span></h2>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 600;">{{ products|length
+                        }} sản phẩm</span>
+                    <span
+                        style="background: rgba(245, 166, 35, 0.1); color: var(--accent); padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;">⚡
+                        Cache</span>
+                </div>
+            </div>
+
+            <div class="site-filters" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="color: rgba(255,255,255,0.4); font-size: 0.8rem; font-weight: 600; margin-right: 5px;">Hiển
+                    thị:</span>
+                <button class="filter-btn active" data-filter="all">Tất cả</button>
+                <button class="filter-btn" data-filter="clickbuy">Clickbuy</button>
+                <button class="filter-btn" data-filter="cellphones">CellphoneS</button>
+                <button class="filter-btn" data-filter="didong3a">Di Động 3A</button>
+                <button class="filter-btn" data-filter="smartviet">Smart Việt</button>
+                <button class="filter-btn" data-filter="bachlong">Bạch Long</button>
+                <button class="filter-btn" data-filter="tientran">Tiến Trần</button>
+            </div>
+        </div>
 
         {% if products and products|length > 0 %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;">
+        <div class="products-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px;">
             {% for product in products %}
-            <div class="product-card">
+            <div class="product-card" data-site-filter="{{ product.site | lower | replace(' ', '') }}">
+
                 <div class="product-img-wrap">
+                    {% set site_lower = product.site | lower | replace(' ', '') %}
+                    <div class="store-badge 
+                        {% if 'clickbuy' in site_lower %}badge-clickbuy
+                        {% elif 'cellphones' in site_lower %}badge-cellphones
+                        {% elif 'didong3a' in site_lower %}badge-didong3a
+                        {% elif 'smartviet' in site_lower %}badge-smartviet
+                        {% elif 'bachlong' in site_lower %}badge-bachlong
+                        {% elif 'tientran' in site_lower %}badge-tientran
+                        {% else %}badge-default{% endif %}
+                    ">{{ product.site }}</div>
+
                     <img src="{{ product.img }}" alt="{{ product.title }}">
                 </div>
-                <div
-                    style="font-size: 0.8rem; color: #888; font-weight: 700; text-transform: uppercase; margin-bottom: 5px;">
-                    {{ product.site }}</div>
+
                 <h3
-                    style="font-size: 1rem; margin: 0 0 10px; line-height: 1.4; height: 2.8em; overflow: hidden; flex: 1;">
+                    style="font-size: 0.95rem; margin: 0 0 10px; line-height: 1.4; height: 2.8em; overflow: hidden; flex: 1;">
                     {{ product.title }}</h3>
-                <p style="color: var(--accent); font-weight: 800; font-size: 1.3rem; margin-bottom: 20px;">{{
+                <p style="color: var(--accent); font-weight: 800; font-size: 1.25rem; margin-bottom: 20px;">{{
                     product.price_str }}</p>
 
                 <div style="display: flex; gap: 10px;">
@@ -334,8 +696,120 @@
             }).then(r => {
                 if (r.ok) {
                     Swal.fire({ icon: 'success', title: 'Thành công!', showConfirmButton: false, timer: 1000, background: '#111116', color: '#fff' });
+                    if (typeof updateCartBadge === 'function') updateCartBadge();
                 }
             });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.product-card');
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filter = btn.dataset.filter;
+
+                    cards.forEach(card => {
+                        if (filter === 'all' || card.dataset.siteFilter.includes(filter) || filter.includes(card.dataset.siteFilter)) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+
+        // AI UPLOAD LOGIC
+        let selectedFile = null;
+        const imgInput = document.getElementById('image-input');
+        const dropZone = document.getElementById('drop-zone');
+        const uploadPreview = document.getElementById('upload-preview');
+
+        imgInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) handleFile(this.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent)'; dropZone.style.background = 'rgba(245, 166, 35, 0.1)'; });
+        dropZone.addEventListener('dragleave', e => { dropZone.style.borderColor = 'rgba(255, 255, 255, 0.15)'; dropZone.style.background = 'rgba(255, 255, 255, 0.02)'; });
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            dropZone.style.background = 'rgba(255, 255, 255, 0.02)';
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                imgInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('preview-img').src = e.target.result;
+            reader.readAsDataURL(file);
+            document.getElementById('preview-name').textContent = file.name;
+            dropZone.style.display = 'none';
+            uploadPreview.style.display = 'flex';
+            document.getElementById('ai-result-msg').style.display = 'none';
+        }
+
+        function cancelUpload() {
+            selectedFile = null;
+            imgInput.value = '';
+            uploadPreview.style.display = 'none';
+            dropZone.style.display = 'block';
+            document.getElementById('ai-result-msg').style.display = 'none';
+            document.getElementById('ai-btn-text').textContent = '🔍 Nhận diện & Tìm giá';
+            document.getElementById('btn-ai-search').disabled = false;
+        }
+
+        function runAiSearch() {
+            if (!selectedFile) return;
+
+            const btn = document.getElementById('btn-ai-search');
+            const btnText = document.getElementById('ai-btn-text');
+            const msgEl = document.getElementById('ai-result-msg');
+
+            btn.disabled = true;
+            btnText.textContent = '⏳ Đang phân tích...';
+            msgEl.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            fetch('/upload-image', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        msgEl.className = 'ai-msg success';
+                        msgEl.innerHTML = '✅ Đã nhận diện: <strong>' + data.keyword + '</strong>';
+                        msgEl.style.display = 'block';
+                        btnText.textContent = 'Đang chuyển trang...';
+                        setTimeout(() => {
+                            document.getElementById('loading-overlay').style.display = 'flex';
+                            window.location.href = data.redirect;
+                        }, 1000);
+                    } else {
+                        msgEl.className = 'ai-msg error';
+                        msgEl.textContent = data.error || 'Không nhận diện được sản phẩm.';
+                        msgEl.style.display = 'block';
+                        btn.disabled = false;
+                        btnText.textContent = '🔍 Nhận diện & Tìm giá';
+                    }
+                })
+                .catch(() => {
+                    msgEl.className = 'ai-msg error';
+                    msgEl.textContent = '❌ Lỗi kết nối server.';
+                    msgEl.style.display = 'block';
+                    btn.disabled = false;
+                    btnText.textContent = '🔍 Nhận diện & Tìm giá';
+                });
         }
     </script>
 </body>

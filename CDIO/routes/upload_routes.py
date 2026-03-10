@@ -7,14 +7,12 @@ from flask import Blueprint, request, jsonify
 from services.ai_service import detect_product_from_image
 from config.config import UPLOAD_FOLDER, ALLOWED_EXT
 
-upload_bp = Blueprint('upload', __name__)
+upload_bp = Blueprint('upload_bp', __name__)
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
 def _allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
-
 
 @upload_bp.route("/upload-image", methods=["POST"])
 def upload_image():
@@ -32,15 +30,15 @@ def upload_image():
         return jsonify({'error': 'Định dạng không hỗ trợ. Dùng JPG, PNG hoặc WEBP.'}), 400
 
     # Lưu file tạm
-    ext         = file.filename.rsplit('.', 1)[-1].lower()
+    ext = file.filename.rsplit('.', 1)[-1].lower()
     unique_name = f"{uuid.uuid4().hex}.{ext}"
-    save_path   = os.path.join(UPLOAD_FOLDER, unique_name)
+    save_path = os.path.join(UPLOAD_FOLDER, unique_name)
     file.save(save_path)
 
-    # Gọi AI
+    # Gọi AI xử lý qua hàm detect_product_from_image
     keyword = detect_product_from_image(save_path)
 
-    # Xóa file tạm
+    # Xóa file tạm sau khi nhận diện xong
     try:
         os.remove(save_path)
     except Exception:
@@ -48,12 +46,12 @@ def upload_image():
 
     if keyword:
         return jsonify({
-            'success':  True,
-            'keyword':  keyword,
+            'success': True,
+            'keyword': keyword,
             'redirect': f'/?keyword={urllib.parse.quote(keyword)}'
         })
     else:
         return jsonify({
             'success': False,
-            'error':   'Không nhận diện được sản phẩm. Vui lòng thử ảnh khác hoặc nhập tên thủ công.'
+            'error': 'Không nhận diện được sản phẩm. Vui lòng thử ảnh khác hoặc nhập tên thủ công.'
         }), 422
