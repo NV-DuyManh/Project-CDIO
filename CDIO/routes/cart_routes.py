@@ -83,8 +83,9 @@ def cart_add():
                  data.get('img'), data.get('link'), data.get('site'))
             )
         conn.commit()
-        cursor.execute("SELECT COUNT(*) as c FROM cart WHERE user_id=%s", (user_id,))
-        count = cursor.fetchone()['c']
+        # Đổi từ COUNT(*) sang SUM(quantity) để cộng dồn đúng số lượng
+        cursor.execute("SELECT COALESCE(SUM(quantity), 0) as c FROM cart WHERE user_id=%s", (user_id,))
+        count = int(cursor.fetchone()['c'])
         return jsonify({'ok': True, 'count': count})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
@@ -100,8 +101,9 @@ def cart_count():
     try:
         conn   = get_db_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT COUNT(*) as c FROM cart WHERE user_id=%s", (session['user_id'],))
-        count = cursor.fetchone()['c']
+        # Đổi từ COUNT(*) sang SUM(quantity) để đếm chính xác khi tải lại trang
+        cursor.execute("SELECT COALESCE(SUM(quantity), 0) as c FROM cart WHERE user_id=%s", (session['user_id'],))
+        count = int(cursor.fetchone()['c'])
         return jsonify({'count': count})
     finally:
         if 'conn' in locals() and conn:

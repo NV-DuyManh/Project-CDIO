@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session, redirect, url_for
 
 from services.search_service import search_all_stores
 from database.db import get_db_connection
@@ -11,10 +11,17 @@ search_bp = Blueprint('search', __name__)
 @search_bp.route("/", methods=["GET"])
 def home():
     keyword      = request.args.get("keyword")
+    
+    # Nếu không có keyword trên URL nhưng có trong session thì chuyển hướng về lại kết quả cũ
+    if not keyword and 'last_keyword' in session:
+        return redirect(url_for('search.home', keyword=session['last_keyword']))
+        
     all_products = []
     is_fast_load = False
 
     if keyword:
+        # Lưu từ khóa hiện tại vào session
+        session['last_keyword'] = keyword
         all_products, is_fast_load = search_all_stores(keyword)
 
     return render_template("index.html",

@@ -1,140 +1,265 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lịch Sử — PriceHunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Sử dụng font chữ đẹp và đồng nhất */
+        body,
+        h1,
+        h2,
+        h3,
+        button,
+        input {
+            font-family: 'DM Sans', sans-serif !important;
+        }
+
+        h1.page-title {
+            font-weight: 700 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        /* Cố định kích thước bảng không bị nhảy khi lọc */
+        #history-table {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Định nghĩa chiều rộng cố định cho từng cột */
+        #history-table th:nth-child(1) {
+            width: 12%;
+        }
+
+        /* Từ khóa */
+        #history-table th:nth-child(2) {
+            width: 12%;
+        }
+
+        /* Sàn */
+        #history-table th:nth-child(3) {
+            width: 80px;
+        }
+
+        /* Hình ảnh */
+        #history-table th:nth-child(4) {
+            width: 30%;
+        }
+
+        /* Tên sản phẩm */
+        #history-table th:nth-child(5) {
+            width: 12%;
+        }
+
+        /* Giá bán */
+        #history-table th:nth-child(6) {
+            width: 180px;
+        }
+
+        /* Thao tác */
+        #history-table th:nth-child(7) {
+            width: 12%;
+        }
+
+        /* Thời gian */
+
+        /* Xử lý tên sản phẩm quá dài - hiện dấu ... */
+        .title-cell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 0;
+            /* Bắt buộc để ellipsis hoạt động trong table-layout fixed */
+        }
+
+        /* Style cho thông báo Toast đẹp hơn */
+        #custom-toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #f5a623;
+            color: #000;
+            text-align: center;
+            border-radius: 12px;
+            padding: 16px;
+            position: fixed;
+            z-index: 9999;
+            right: 30px;
+            bottom: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        #custom-toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+
+        .table-img-wrap img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+    </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Tìm Kiếm</a>
-        <a href="/history" class="nav-link active">Lịch Sử</a>
-        {% if session.get('user_id') %}
+    <nav class="navbar">
+        <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link active">Lịch Sử</a>
+            {% if session.get('user_id') %}
             <a href="/cart" class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
             <a href="/orders" class="nav-link">Đơn hàng</a>
             <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
             <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-        {% else %}
+            {% else %}
             <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
             <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
-        {% endif %}
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
-
-<div class="page-container">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Lịch Sử Cào Dữ Liệu</h1>
-            <p class="page-sub">Toàn bộ sản phẩm đã được lưu vào database</p>
+            {% endif %}
         </div>
-        <a href="/" class="nav-btn btn-primary">+ Tìm kiếm mới</a>
-    </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+    </nav>
 
-    <!-- Search & Filter Bar -->
-    <div class="history-toolbar">
-        <div class="search-filter-wrap">
-            <span>🔎</span>
-            <input type="text" id="table-search" placeholder="Lọc theo tên, từ khóa, sàn..." oninput="filterTable()">
+    <div class="page-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Lịch Sử Cào Dữ Liệu</h1>
+                <p class="page-sub">Toàn bộ sản phẩm đã được lưu vào database</p>
+            </div>
+            <a href="/" class="nav-btn btn-primary">+ Tìm kiếm mới</a>
         </div>
-        <div class="site-filters">
-            <button class="filter-btn active" onclick="filterBySite('all', this)">Tất cả</button>
-            <button class="filter-btn" onclick="filterBySite('Clickbuy', this)">Clickbuy</button>
-            <button class="filter-btn" onclick="filterBySite('CellphoneS', this)">CellphoneS</button>
-        </div>
-    </div>
 
-    <div class="table-card">
-        <table id="history-table">
-            <thead>
-                <tr>
-                    <th>Từ khóa</th>
-                    <th>Sàn</th>
-                    <th>Hình ảnh</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Giá bán</th>
-                    <th>Liên kết</th>
-                    <th>Thời gian lưu</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                {% for product in products %}
-                <tr class="table-row" data-site="{{ product.site }}" data-keyword="{{ product.keyword }}" data-title="{{ product.title }}">
-                    <td>
-                        <a href="/?keyword={{ product.keyword }}" class="keyword-link">
-                            {{ product.keyword }}
-                        </a>
-                    </td>
-                    <td>
-                        <span class="site-pill site-{{ product.site | replace(' ','') }}">{{ product.site }}</span>
-                    </td>
-                    <td>
-                        <div class="table-img-wrap">
-                            <img src="{{ product.img }}" alt="{{ product.title }}"
-                                 onerror="this.src='https://via.placeholder.com/60x60/f8f9fa/999?text=?'">
-                        </div>
-                    </td>
-                    <td class="title-cell">{{ product.title }}</td>
-                    <td class="price-cell">{{ product.price_str }}</td>
-                    <td>
-                        <a href="{{ product.link }}" target="_blank" class="table-link-btn">Xem ↗</a>
-                    </td>
-                    <td class="date-cell">{{ product.created_at }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7" class="empty-row">
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <h3>Chưa có dữ liệu</h3>
-                            <p>Hãy tìm kiếm sản phẩm đầu tiên để dữ liệu xuất hiện ở đây</p>
-                            <a href="/" class="nav-btn btn-primary">Tìm kiếm ngay</a>
-                        </div>
-                    </td>
-                </tr>
+        <div class="history-toolbar">
+            <div class="search-filter-wrap">
+                <span>🔎</span>
+                <input type="text" id="table-search" placeholder="Lọc theo tên, từ khóa, sàn..."
+                    oninput="filterTable()">
+            </div>
+            <div class="site-filters">
+                <button class="filter-btn active" onclick="filterBySite('all', this)">Tất cả</button>
+                {% for site in products | map(attribute='site') | unique %}
+                <button class="filter-btn" onclick="filterBySite('{{ site }}', this)">{{ site }}</button>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <div class="table-card" style="overflow-x: auto;">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Từ khóa</th>
+                        <th>Sàn</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá bán</th>
+                        <th>Thao tác</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    {% for product in products %}
+                    <tr class="table-row" data-site="{{ product.site }}" data-keyword="{{ product.keyword }}"
+                        data-title="{{ product.title }}">
+                        <td>{{ product.keyword }}</td>
+                        <td>
+                            <span class="site-pill site-{{ product.site | replace(' ','') }}">{{ product.site }}</span>
+                        </td>
+                        <td>
+                            <div class="table-img-wrap">
+                                <img src="{{ product.img }}" alt="img"
+                                    onerror="this.src='https://via.placeholder.com/50x50?text=?'">
+                            </div>
+                        </td>
+                        <td class="title-cell" title="{{ product.title }}">{{ product.title }}</td>
+                        <td class="price-cell" style="font-weight: 600; color: #f5a623;">{{ product.price_str }}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ product.link }}" target="_blank" class="table-link-btn"
+                                    style="text-decoration: none; font-size: 12px;">Xem ↗</a>
+                                <button
+                                    onclick="addToCartHistory('{{ product.title | replace('\'', '\\\'') }}', '{{ product.price_str }}', '{{ product.img }}', '{{ product.link }}', '{{ product.site }}')"
+                                    class="nav-btn btn-primary"
+                                    style="padding: 6px 12px; font-size: 12px; height: auto;">
+                                    Thêm vào giỏ hàng
+                                </button>
+                            </div>
+                        </td>
+                        <td class="date-cell" style="font-size: 11px; opacity: 0.7;">{{ product.created_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="empty-row">Chưa có dữ liệu lịch sử</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="pagination" id="pagination"></div>
-</div>
+    <div id="custom-toast"></div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
+    <script>
+        // Logic lọc bảng
+        function filterTable() {
+            const q = document.getElementById('table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#table-body .table-row');
+            rows.forEach(row => {
+                const text = (row.dataset.keyword + row.dataset.title + row.dataset.site).toLowerCase();
+                const siteMatch = currentSiteFilter === 'all' || row.dataset.site === currentSiteFilter;
+                row.style.display = text.includes(q) && siteMatch ? '' : 'none';
+            });
+        }
 
-<script src="/static/js/main.js"></script>
-<script>
-let currentSiteFilter = 'all';
+        let currentSiteFilter = 'all';
+        function filterBySite(site, btn) {
+            currentSiteFilter = site;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterTable();
+        }
 
-function filterTable() {
-    const q = document.getElementById('table-search').value.toLowerCase();
-    const rows = document.querySelectorAll('#table-body .table-row');
-    rows.forEach(row => {
-        const text = (row.dataset.keyword + row.dataset.title + row.dataset.site).toLowerCase();
-        const siteMatch = currentSiteFilter === 'all' || row.dataset.site === currentSiteFilter;
-        row.style.display = text.includes(q) && siteMatch ? '' : 'none';
-    });
-}
+        // Cập nhật số lượng giỏ hàng ban đầu
+        {% if session.get('user_id') %}
+        fetch('/cart/count').then(r => r.json()).then(d => {
+            const el = document.getElementById('cart-count');
+            if (el) el.textContent = d.count || 0;
+        });
+        {% endif %}
 
-function filterBySite(site, btn) {
-    currentSiteFilter = site;
-    document.querySelectorAll('.site-filters .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterTable();
-}
+        // Thông báo Toast đẹp
+        function showToast(message) {
+            const toast = document.getElementById("custom-toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+                window.location.reload();
+            }, 1200);
+        }
 
-{% if session.get('user_id') %}
-fetch('/cart/count').then(r=>r.json()).then(d=>{
-    const el = document.getElementById('cart-count');
-    if(el && d.count) el.textContent = d.count;
-});
-{% endif %}
-</script>
+        // Thêm vào giỏ hàng
+        function addToCartHistory(title, price, img, link, site) {
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, price_str: price, img, link, site })
+            })
+                .then(res => res.ok ? showToast("Đã thêm vào giỏ hàng thành công! ✨") : alert("Lỗi hệ thống"))
+                .catch(err => console.error(err));
+        }
+    </script>
 </body>
+
 </html>
