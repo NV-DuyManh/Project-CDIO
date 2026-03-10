@@ -25,7 +25,6 @@
             margin: 0;
         }
 
-        /* Navbar master */
         .navbar {
             height: 75px;
             display: flex;
@@ -92,6 +91,20 @@
             padding: 10px 20px;
             border-radius: 12px;
             text-decoration: none;
+            text-transform: lowercase;
+        }
+
+        #cart-count {
+            background: var(--accent);
+            color: #000;
+            font-size: 11px;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         /* Table Style */
@@ -158,9 +171,9 @@
             <a href="/" class="nav-item">Tìm Kiếm</a>
             <a href="/history" class="nav-item">Lịch Sử</a>
             {% if session.get('user_id') %}
-            <a href="/cart" class="cart-pill">🛒 <span id="cart-count">0</span></a>
+            <a href="/cart" class="cart-pill">🛒 <span id="cart-count">...</span></a>
             <a href="/orders" class="nav-item active">Đơn hàng</a>
-            <a href="/profile" class="nav-user-btn">tin</a>
+            <a href="/profile" class="nav-user-btn">{{ session.get('username') }}</a>
             <a href="/logout" class="nav-item" style="color:rgba(255,77,77,0.5)">Đăng xuất</a>
             {% endif %}
         </div>
@@ -208,6 +221,26 @@
             {% endif %}
         </div>
     </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Tự động đồng bộ số lượng giỏ hàng khi tải trang
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof updateCartBadge === 'function') {
+                updateCartBadge();
+            } else {
+                // Nếu hàm không tồn tại, gọi API lấy số lượng thật từ server
+                fetch('/api/cart/count')
+                    .then(res => res.json())
+                    .then(data => {
+                        let badge = document.getElementById('cart-count');
+                        if (badge && data.count !== undefined) {
+                            badge.innerText = data.count;
+                        }
+                    }).catch(err => console.log('Không tải được số lượng giỏ hàng.'));
+            }
+        });
+    </script>
 </body>
 
 </html>
