@@ -1,184 +1,338 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard — PriceHunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* CSS bổ sung cho màn hình Terminal của Bot */
+        .bot-terminal {
+            background: #0a0a0f;
+            border: 1px solid #1a1a24;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            height: 450px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            color: #d1d1e0;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            padding-bottom: 4px;
+        }
+
+        .log-time {
+            color: #f5a623;
+            opacity: 0.8;
+        }
+
+        .log-success {
+            color: #2ecc71;
+        }
+
+        .log-error {
+            color: #e74c3c;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+
+        /* Hiệu ứng nhấp nháy cho đèn trạng thái */
+        .bot-pulse {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px #2ecc71;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+    </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Trang chủ</a>
-        <a href="/admin" class="nav-link active">Admin</a>
-        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Trang chủ</a>
+            <a href="/admin" class="nav-link active">Admin</a>
+            <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+    </nav>
 
-<div class="page-container">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">🛡️ Admin Dashboard</h1>
-            <p class="page-sub">Quản lý toàn bộ hệ thống PriceHunt</p>
+    <div class="page-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">🛡️ Admin Dashboard</h1>
+                <p class="page-sub">Quản lý toàn bộ hệ thống PriceHunt</p>
+            </div>
+        </div>
+
+        <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+                <span class="admin-stat-icon">👤</span>
+                <div><strong>{{ stats.users }}</strong><span>Người dùng</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-icon">📦</span>
+                <div><strong>{{ stats.orders }}</strong><span>Đơn hàng</span></div>
+            </div>
+            <div class="admin-stat-card">
+                <span class="admin-stat-icon">🛍️</span>
+                <div><strong>{{ stats.products }}</strong><span>Sản phẩm cào</span></div>
+            </div>
+            <div class="admin-stat-card" style="border: 1px solid rgba(245, 166, 35, 0.2);">
+                <div style="display: flex; align-items: center;">
+                    <span class="bot-pulse"></span>
+                    <strong>Hoạt động</strong>
+                </div>
+                <span>Bot cào ngầm</span>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showTab('users', this)">👤 Người dùng</button>
+            <button class="admin-tab" onclick="showTab('orders', this)">📦 Đơn hàng</button>
+            <button class="admin-tab" onclick="showTab('comments', this)">💬 Bình luận</button>
+            <button class="admin-tab" onclick="showTab('products', this)">🛍️ Sản phẩm</button>
+            <button class="admin-tab" onclick="showTab('bot', this)">🤖 Bot Activity</button>
+        </div>
+
+        <div id="tab-users" class="admin-tab-content active">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td><code>{{ user.id }}</code></td>
+                            <td><strong>{{ user.username }}</strong></td>
+                            <td>{{ user.email }}</td>
+                            <td class="date-cell">{{ user.created_at }}</td>
+                            <td>
+                                {% if not user.is_admin %}
+                                <form action="/admin/delete/user/{{ user.id }}" method="POST" style="display:inline"
+                                    onsubmit="return confirm('Xóa người dùng này?')">
+                                    <button type="submit" class="btn-delete">Xóa</button>
+                                </form>
+                                {% else %}
+                                <span class="admin-badge">Admin</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-orders" class="admin-tab-content">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày</th>
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in all_orders %}
+                        <tr>
+                            <td><code>#{{ order.id }}</code></td>
+                            <td>{{ order.username or order.user_id }}</td>
+                            <td class="title-cell">{{ order.product_name[:40] }}...</td>
+                            <td class="price-cell">{{ order.price }}</td>
+                            <td><span class="status-badge status-{{ order.status }}">{{ order.status }}</span></td>
+                            <td class="date-cell">{{ order.created_at }}</td>
+                            <td>
+                                <form action="/admin/delete/order/{{ order.id }}" method="POST"
+                                    onsubmit="return confirm('Xóa?')">
+                                    <button type="submit" class="btn-delete">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-comments" class="admin-tab-content">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Sản phẩm</th>
+                            <th>Rating</th>
+                            <th>Nội dung</th>
+                            <th>Ngày</th>
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comment in all_comments %}
+                        <tr>
+                            <td><code>{{ comment.id }}</code></td>
+                            <td>{{ comment.username or comment.user_id }}</td>
+                            <td class="title-cell">{{ comment.product_title[:30] }}...</td>
+                            <td>{{ '⭐' * (comment.rating or 0) }}</td>
+                            <td>{{ comment.content[:50] }}...</td>
+                            <td class="date-cell">{{ comment.created_at }}</td>
+                            <td>
+                                <form action="/admin/delete/comment/{{ comment.id }}" method="POST"
+                                    onsubmit="return confirm('Xóa?')">
+                                    <button type="submit" class="btn-delete">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-products" class="admin-tab-content">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Keyword</th>
+                            <th>Sàn</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Thời gian</th>
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in all_products %}
+                        <tr>
+                            <td><strong>{{ p.keyword }}</strong></td>
+                            <td><span class="site-pill site-{{ p.site | replace(' ','') }}">{{ p.site }}</span></td>
+                            <td class="title-cell">{{ p.title[:40] }}...</td>
+                            <td class="price-cell">{{ p.price_str }}</td>
+                            <td class="date-cell">{{ p.created_at }}</td>
+                            <td>
+                                <form action="/admin/delete/product/{{ p.id }}" method="POST"
+                                    onsubmit="return confirm('Xóa?')">
+                                    <button type="submit" class="btn-delete">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-bot" class="admin-tab-content">
+            <div class="table-card" style="padding: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin:0">>_ Nhật ký Robot (Live Feed)</h3>
+                    <span id="bot-last-sync" style="font-size: 0.8rem; opacity: 0.5;">Cập nhật: Đang kết nối...</span>
+                </div>
+
+                <div class="bot-terminal" id="bot-logs-container">
+                    <div class="log-entry log-info"><span>[SYSTEM]</span> Đang khởi tạo kết nối tới Background
+                        Scheduler...</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Stats Row -->
-    <div class="admin-stats-grid">
-        <div class="admin-stat-card">
-            <span class="admin-stat-icon">👤</span>
-            <div><strong>{{ stats.users }}</strong><span>Người dùng</span></div>
-        </div>
-        <div class="admin-stat-card">
-            <span class="admin-stat-icon">📦</span>
-            <div><strong>{{ stats.orders }}</strong><span>Đơn hàng</span></div>
-        </div>
-        <div class="admin-stat-card">
-            <span class="admin-stat-icon">💬</span>
-            <div><strong>{{ stats.comments }}</strong><span>Bình luận</span></div>
-        </div>
-        <div class="admin-stat-card">
-            <span class="admin-stat-icon">🛍️</span>
-            <div><strong>{{ stats.products }}</strong><span>Sản phẩm đã cào</span></div>
-        </div>
-    </div>
+    <footer class="footer">
+        <p>© 2025 PriceHunt</p>
+    </footer>
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Hàm chuyển Tab (giữ nguyên logic cũ)
+        function showTab(name, btn) {
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            btn.classList.add('active');
+        }
 
-    <!-- Tabs -->
-    <div class="admin-tabs">
-        <button class="admin-tab active" onclick="showTab('users', this)">👤 Người dùng</button>
-        <button class="admin-tab" onclick="showTab('orders', this)">📦 Đơn hàng</button>
-        <button class="admin-tab" onclick="showTab('comments', this)">💬 Bình luận</button>
-        <button class="admin-tab" onclick="showTab('products', this)">🛍️ Sản phẩm</button>
-    </div>
+        // HÀM TỰ ĐỘNG CẬP NHẬT NHẬT KÝ BOT
+        function updateBotLogs() {
+            fetch('/api/bot-logs')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('bot-logs-container');
+                    const syncLabel = document.getElementById('bot-last-sync');
 
-    <!-- Users Tab -->
-    <div id="tab-users" class="admin-tab-content active">
-        <div class="table-card">
-            <table>
-                <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Ngày tạo</th><th>Hành động</th></tr></thead>
-                <tbody>
-                {% for user in users %}
-                <tr>
-                    <td><code>{{ user.id }}</code></td>
-                    <td><strong>{{ user.username }}</strong></td>
-                    <td>{{ user.email }}</td>
-                    <td class="date-cell">{{ user.created_at }}</td>
-                    <td>
-                        {% if not user.is_admin %}
-                        <form action="/admin/delete/user/{{ user.id }}" method="POST" style="display:inline"
-                              onsubmit="return confirm('Xóa người dùng này?')">
-                            <button type="submit" class="btn-delete">Xóa</button>
-                        </form>
-                        {% else %}
-                        <span class="admin-badge">Admin</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="5" class="empty-row">Không có dữ liệu</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                    if (data.length > 0) {
+                        container.innerHTML = data.map(log => {
+                            // Xác định màu sắc dựa trên nội dung tin nhắn
+                            let statusClass = 'log-info';
+                            if (log.includes('✅')) statusClass = 'log-success';
+                            if (log.includes('❌')) statusClass = 'log-error';
 
-    <!-- Orders Tab -->
-    <div id="tab-orders" class="admin-tab-content">
-        <div class="table-card">
-            <table>
-                <thead><tr><th>ID</th><th>User</th><th>Sản phẩm</th><th>Giá</th><th>Trạng thái</th><th>Ngày</th><th>Xóa</th></tr></thead>
-                <tbody>
-                {% for order in all_orders %}
-                <tr>
-                    <td><code>#{{ order.id }}</code></td>
-                    <td>{{ order.username or order.user_id }}</td>
-                    <td class="title-cell">{{ order.product_name[:40] }}...</td>
-                    <td class="price-cell">{{ order.price }}</td>
-                    <td><span class="status-badge status-{{ order.status }}">{{ order.status }}</span></td>
-                    <td class="date-cell">{{ order.created_at }}</td>
-                    <td>
-                        <form action="/admin/delete/order/{{ order.id }}" method="POST" onsubmit="return confirm('Xóa?')">
-                            <button type="submit" class="btn-delete">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="7" class="empty-row">Không có dữ liệu</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                            // Tách thời gian và nội dung (Giả sử định dạng: [HH:MM:SS] Message)
+                            const timeMatch = log.match(/\[(.*?)\]/);
+                            const timeStr = timeMatch ? timeMatch[0] : "";
+                            const message = log.replace(timeStr, "");
 
-    <!-- Comments Tab -->
-    <div id="tab-comments" class="admin-tab-content">
-        <div class="table-card">
-            <table>
-                <thead><tr><th>ID</th><th>User</th><th>Sản phẩm</th><th>Rating</th><th>Nội dung</th><th>Ngày</th><th>Xóa</th></tr></thead>
-                <tbody>
-                {% for comment in all_comments %}
-                <tr>
-                    <td><code>{{ comment.id }}</code></td>
-                    <td>{{ comment.username or comment.user_id }}</td>
-                    <td class="title-cell">{{ comment.product_title[:30] if comment.product_title else 'N/A' }}...</td>
-                    <td>{{ '⭐' * (comment.rating or 0) }}</td>
-                    <td>{{ comment.content[:50] if comment.content else '' }}...</td>
-                    <td class="date-cell">{{ comment.created_at }}</td>
-                    <td>
-                        <form action="/admin/delete/comment/{{ comment.id }}" method="POST" onsubmit="return confirm('Xóa?')">
-                            <button type="submit" class="btn-delete">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="7" class="empty-row">Không có dữ liệu</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                            return `<div class="log-entry ${statusClass}"><span class="log-time">${timeStr}</span> ${message}</div>`;
+                        }).join('');
 
-    <!-- Products Tab -->
-    <div id="tab-products" class="admin-tab-content">
-        <div class="table-card">
-            <table>
-                <thead><tr><th>Keyword</th><th>Sàn</th><th>Tên</th><th>Giá</th><th>Thời gian</th><th>Xóa</th></tr></thead>
-                <tbody>
-                {% for p in all_products %}
-                <tr>
-                    <td><strong>{{ p.keyword }}</strong></td>
-                    <td><span class="site-pill site-{{ p.site | replace(' ','') }}">{{ p.site }}</span></td>
-                    <td class="title-cell">{{ p.title[:40] }}...</td>
-                    <td class="price-cell">{{ p.price_str }}</td>
-                    <td class="date-cell">{{ p.created_at }}</td>
-                    <td>
-                        <form action="/admin/delete/product/{{ p.id }}" method="POST" onsubmit="return confirm('Xóa?')">
-                            <button type="submit" class="btn-delete">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="6" class="empty-row">Không có dữ liệu</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                        syncLabel.innerText = "Cập nhật: " + new Date().toLocaleTimeString();
+                    }
+                })
+                .catch(err => console.error("Lỗi lấy log bot:", err));
+        }
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-function showTab(name, btn) {
-    document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    btn.classList.add('active');
-}
-</script>
+        // Tự động cập nhật mỗi 3 giây
+        setInterval(updateBotLogs, 3000);
+        updateBotLogs(); // Chạy ngay khi load trang
+    </script>
 </body>
+
 </html>

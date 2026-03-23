@@ -6,7 +6,7 @@ import os
 DB_CONFIG = {
     "host":     "localhost",
     "user":     "root",
-    "password": "Duymanh20092005#",
+    "password": "123456789",
     "database": "cdio",
     "charset":  "utf8mb4"
 }

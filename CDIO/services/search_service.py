@@ -1,14 +1,5 @@
-"""
-services/search_service.py
-==========================
-Điều phối toàn bộ luồng tìm kiếm:
-  1. Kiểm tra cache DB
-  2. Scrape song song 6 cửa hàng
-  3. Lọc 3 lớp (blacklist → model match → price range)
-  4. Lưu DB
-"""
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta # Thêm để check thời gian
 
 # ── Scrapers ─────────────────────────────────────────────────────────
 from scrapers.clickbuy_scraper   import scrape_clickbuy
@@ -23,10 +14,9 @@ from database.db           import get_data_from_db, save_to_db
 from utils.price_parser    import is_valid_price
 from services.filter_service import apply_all_filters
 
-
 # ════════════════════════════════════════════════════════════════════
 # REGISTRY — chỉ cần thêm 1 dòng khi có store mới
-# ════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════─═══════
 SCRAPER_REGISTRY: dict = {
     "Clickbuy":         scrape_clickbuy,
     "CellphoneS":       scrape_cellphones,
@@ -36,26 +26,30 @@ SCRAPER_REGISTRY: dict = {
     "Tiến Trần Mobile": scrape_tientran,
 }
 
-
-def search_all_stores(keyword: str) -> tuple:
+def search_all_stores(keyword: str, user_id=None) -> tuple:
     """
-    Tìm kiếm sản phẩm trên tất cả cửa hàng trong SCRAPER_REGISTRY.
-
-    Flow:
-      1. Kiểm tra cache DB  → nếu có: trả về ngay (fast load)
-      2. Scrape song song   → gom kết quả từ tất cả stores
-      3. Lọc 3 lớp          → loại rác, sai model, giá bất thường
-      4. Lưu vào DB         → cache cho lần sau
-
-    Returns:
-      (products: list[dict], is_fast_load: bool)
+    Tìm kiếm sản phẩm trên tất cả cửa hàng.
+    FIX: Thêm user_id và logic kiểm tra cập nhật giá theo thời gian.
     """
-    # ── Bước 1: Cache ────────────────────────────────────────────────
+    
+    # ── Bước 1: Cache & Freshness Check ──────────────────────────────
     cached = get_data_from_db(keyword)
     if cached:
-        return cached, True
+        # Lấy thời gian cào của bản ghi gần nhất
+        last_updated = cached[0].get('created_at')
+        
+        # LOGIC: Nếu dữ liệu mới cào trong vòng 30 phút -> Dùng luôn (Fast Load)
+        # Giúp giảm tải cho server và tránh bị store block IP
+        if last_updated:
+            now = datetime.now()
+            # Tính khoảng cách thời gian
+            time_diff = now - last_updated
+            if time_diff < timedelta(minutes=30):
+                print(f"⚡ [Fast Load] Trả về kết quả từ DB (Cập nhật {time_diff.seconds // 60} phút trước)")
+                return cached, True
 
-    # ── Bước 2: Scrape song song ─────────────────────────────────────
+    # ── Bước 2: Scrape song song (Nếu DB trống hoặc dữ liệu quá cũ) ────
+    print(f"🔄 [Scraping] Đang cào dữ liệu mới cho từ khóa: {keyword}...")
     raw_products = []
 
     with ThreadPoolExecutor(max_workers=len(SCRAPER_REGISTRY)) as executor:
@@ -79,15 +73,13 @@ def search_all_stores(keyword: str) -> tuple:
         if is_valid_price(p.get('raw_price'))
     ]
 
-    # ── Bước 4: Áp dụng 3 lớp lọc ───────────────────────────────────
-    #   Lớp 1: Blacklist từ phụ kiện + kiểm tra liên quan keyword
-    #   Lớp 2: Exact model match (iphone 15 ≠ iphone 16)
-    #   Lớp 3: Price range (loại giá lệch quá xa median)
+    # ── Bước 4: Áp dụng 3 lớp lọc (Blacklist, Model Match, Price Range) ─
     filtered_products = apply_all_filters(raw_products, keyword)
 
     print(f"[search] {len(raw_products)} thô → {len(filtered_products)} sau lọc")
 
-    # ── Bước 5: Lưu DB ───────────────────────────────────────────────
-    save_to_db(keyword, filtered_products)
+    # ── Bước 5: Lưu DB (Kèm theo user_id của người tìm) ───────────────
+    # Hàm save_to_db bây giờ sẽ nhận thêm user_id để lưu vào lịch sử
+    save_to_db(keyword, filtered_products, user_id=user_id)
 
     return filtered_products, False
