@@ -1,7 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-
 
 def get_chrome_driver():
     """Tạo Chrome driver headless dùng chung cho tất cả scrapers."""
@@ -12,7 +9,8 @@ def get_chrome_driver():
     options.add_argument("--no-sandbox")
     options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
     )
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
+    
+    # Bỏ hoàn toàn webdriver_manager, để Selenium tự động lo việc khớp phiên bản
+    return webdriver.Chrome(options=options)
