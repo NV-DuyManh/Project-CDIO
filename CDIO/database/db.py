@@ -29,8 +29,11 @@ def save_to_db(keyword, products, user_id=None):
         conn   = get_db_connection()
         cursor = conn.cursor()
         
-        # Xóa dữ liệu cũ của từ khóa này để cập nhật giá mới nhất
-        cursor.execute("DELETE FROM search_history WHERE LOWER(keyword) = LOWER(%s)", (keyword.strip(),))
+        # Xóa dữ liệu cũ của từ khóa này (chỉ xóa của user hiện tại hoặc guest)
+        if user_id:
+            cursor.execute("DELETE FROM search_history WHERE LOWER(keyword) = LOWER(%s) AND user_id = %s", (keyword.strip(), user_id))
+        else:
+            cursor.execute("DELETE FROM search_history WHERE LOWER(keyword) = LOWER(%s) AND user_id IS NULL", (keyword.strip(),))
         
         # Thêm user_id vào câu lệnh INSERT
         sql = """INSERT INTO search_history 
@@ -40,13 +43,13 @@ def save_to_db(keyword, products, user_id=None):
         for p in products:
             cursor.execute(sql, (
                 keyword.strip(), 
-                user_id, # Lưu ID người dùng (có thể là None nếu khách chưa login)
-                p['site'], 
-                p['title'],
-                p['price_str'], 
+                user_id, 
+                p.get('site', 'Unknown'), 
+                p.get('title', ''),
+                p.get('price_str', ''), 
                 p.get('raw_price', 0), 
-                p['img'], 
-                p['link']
+                p.get('img', ''), 
+                p.get('link', '')
             ))
         conn.commit()
     except Exception as e:
@@ -61,7 +64,7 @@ def init_extra_tables():
         conn   = get_db_connection()
         cursor = conn.cursor()
         
-        # 1. Bảng Users (Giữ nguyên)
+        # 1. Bảng Users 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,7 +76,7 @@ def init_extra_tables():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """)
 
-        # 2. Bảng Search History (NÂNG CẤP: Thêm user_id và created_at)
+        # 2. Bảng Search History (Tạo mới nếu chưa có)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS search_history (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -82,15 +85,21 @@ def init_extra_tables():
                 site VARCHAR(50),
                 title TEXT,
                 price_str VARCHAR(100),
-                raw_price DECIMAL(15,2),
+                raw_price BIGINT,
                 img TEXT,
                 link TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """)
+        
+        # Cập nhật cột user_id cho bảng search_history nếu bảng cũ đã tồn tại mà chưa có cột này
+        try:
+            cursor.execute("ALTER TABLE search_history ADD COLUMN user_id INT NULL")
+            cursor.execute("ALTER TABLE search_history ADD FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL")
+        except Exception:
+            pass # Bỏ qua nếu cột đã tồn tại
 
-        # 3. Bảng Cart (Giữ nguyên)
+        # 3. Bảng Cart
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS cart (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -102,7 +111,7 @@ def init_extra_tables():
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """)
 
-        # 4. Bảng Orders (NÂNG CẤP: Để fix thanh toán)
+        # 4. Bảng Orders
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS orders (
                 id INT AUTO_INCREMENT PRIMARY KEY,

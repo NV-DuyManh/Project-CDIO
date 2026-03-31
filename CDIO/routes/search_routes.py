@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from services.search_service import search_all_stores
-from database.db import get_db_connection
+from database.db import get_db_connection, save_to_db
 from config.config import STORES
 import pymysql.cursors
 
@@ -43,7 +43,7 @@ def suggestions():
     return jsonify(results[:8])
 
 # ════════════════════════════════════════════════════════════════════
-# TRANG CHỦ / TÌM KIẾM (ĐÃ FIX: LƯU USER_ID & FAST LOAD)
+# TRANG CHỦ / TÌM KIẾM
 # ════════════════════════════════════════════════════════════════════
 
 @search_bp.route("/", methods=["GET"])
@@ -60,8 +60,11 @@ def home():
 
     if keyword:
         session['last_keyword'] = keyword
-        # QUAN TRỌNG: Truyền user_id vào hàm search để lưu lịch sử đúng người
-        all_products, is_fast_load = search_all_stores(keyword, user_id=user_id)
+        all_products, is_fast_load = search_all_stores(keyword)
+        
+        # Lưu vào lịch sử kèm user_id nếu là dữ liệu cào mới
+        if all_products and not is_fast_load:
+            save_to_db(keyword, all_products, user_id=user_id)
 
     return render_template("index.html",
                            products=all_products,
@@ -70,7 +73,7 @@ def home():
                            store_count=len(STORES))
 
 # ════════════════════════════════════════════════════════════════════
-# LỊCH SỬ CÀO (ĐÃ FIX: CHỈ HIỆN CỦA RIÊNG USER ĐÓ)
+# LỊCH SỬ CÀO
 # ════════════════════════════════════════════════════════════════════
 
 @search_bp.route("/history", methods=["GET"])
@@ -81,15 +84,21 @@ def history():
     if not user_id:
         return render_template("history.html", products=[], msg="Vui lòng đăng nhập để xem lịch sử")
 
-    conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-    
-    # CHỈ LẤY LỊCH SỬ CỦA USER_ID ĐANG ĐĂNG NHẬP
-    sql = "SELECT * FROM search_history WHERE user_id = %s ORDER BY created_at DESC LIMIT 100"
-    cursor.execute(sql, (user_id,))
-    
-    data = cursor.fetchall()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        
+        # CHỈ LẤY LỊCH SỬ CỦA USER_ID ĐANG ĐĂNG NHẬP
+        sql = "SELECT * FROM search_history WHERE user_id = %s ORDER BY created_at DESC LIMIT 100"
+        cursor.execute(sql, (user_id,))
+        data = cursor.fetchall()
+    except Exception as e:
+        print(f"Lỗi lấy lịch sử: {e}")
+        data = []
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
+            
     return render_template("history.html", products=data)
 
 # ════════════════════════════════════════════════════════════════════
@@ -98,7 +107,6 @@ def history():
 
 @search_bp.route("/api/bot-logs")
 def get_bot_logs():
-    # Cần import BOT_LOGS từ app để tránh lỗi vòng lặp import
     try:
         from app import BOT_LOGS
         return jsonify(BOT_LOGS)

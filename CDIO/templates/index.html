@@ -10,6 +10,133 @@
         href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        #cart-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #cart-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-modal {
+            background: #1a1a24;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 320px;
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #cart-modal-overlay.active .cart-modal {
+            transform: scale(1);
+        }
+
+        .modal-icon-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-spinner {
+            width: 65px;
+            height: 65px;
+            border: 4px solid rgba(245, 166, 35, 0.2);
+            border-top-color: #f5a623;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal-check,
+        .modal-error {
+            width: 75px;
+            height: 75px;
+            display: none;
+            position: absolute;
+        }
+
+        .modal-check-circle,
+        .modal-error-circle {
+            stroke-width: 4;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: stroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .modal-check-circle {
+            stroke: #22c55e;
+        }
+
+        .modal-error-circle {
+            stroke: #ef4444;
+        }
+
+        .modal-check-path,
+        .modal-error-path {
+            stroke-width: 4;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+        }
+
+        .modal-check-path {
+            stroke: #22c55e;
+        }
+
+        .modal-error-path {
+            stroke: #ef4444;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .modal-desc {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: #aaa;
+            margin: 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -232,14 +359,32 @@
             <p>Gom sản phẩm yêu thích vào giỏ, so sánh và đặt hàng dễ dàng.</p>
         </div>
     </div>
-</section>
-{% endif %}
 
-<div id="toast" class="toast"></div>
+    </section>
+    {% endif %}
 
-<footer class="footer">
-    <p>© 2025 PriceHunt — So sánh giá thông minh</p>
-</footer>
+    <div id="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="modal-icon-container">
+                <div class="modal-spinner" id="modal-spinner"></div>
+                <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
+                    <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="modal-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+                <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
+                    <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="modal-error-path" fill="none" d="M16 16 36 36 M36 16 16 36"/>
+                </svg>
+            </div>
+            <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
+            <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 PriceHunt — So sánh giá thông minh</p>
+    </footer>
+
 
 <script>
     let debounceTimer;
@@ -330,13 +475,193 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if (e && e.target) e.target.classList.add('active');
     }
-
+    // Add to cart - Tự động tạo Modal xịn xò
     function addToCart(btn) {
         var span = btn.closest('.card-body').querySelector('.product-data');
         var data = {
-            title: span.dataset.title, price_str: span.dataset.price,
-            img: span.dataset.img, link: span.dataset.link, site: span.dataset.site
+            title: span.dataset.title,
+            price_str: span.dataset.price,
+            img: span.dataset.img,
+            link: span.dataset.link,
+            site: span.dataset.site
         };
+
+        // 1. XÓA SẠCH modal cũ (để dọn dẹp tàn dư bị lỗi nếu có)
+        var oldOverlay = document.getElementById('cart-modal-overlay');
+        if (oldOverlay) {
+            oldOverlay.remove();
+        }
+
+        // 2. TẠO LẠI modal chuẩn 100% với HTML và CSS xịn
+        document.body.insertAdjacentHTML('beforeend', `
+                        <style>
+                            #cart-modal-overlay {
+                                position: fixed;
+                                inset: 0;
+                                background: rgba(0, 0, 0, 0.75);
+                                backdrop-filter: blur(5px);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                z-index: 10000;
+                                opacity: 0;
+                                visibility: hidden;
+                                transition: opacity 0.3s ease, visibility 0.3s ease;
+                            }
+
+                            #cart-modal-overlay.active {
+                                opacity: 1;
+                                visibility: visible;
+                            }
+
+                            .cart-modal {
+                                background: #1a1a24;
+                                border: 1px solid rgba(255, 255, 255, 0.1);
+                                border-radius: 20px;
+                                padding: 40px;
+                                text-align: center;
+                                width: 320px;
+                                transform: scale(0.8);
+                                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+                            }
+
+                            #cart-modal-overlay.active .cart-modal {
+                                transform: scale(1);
+                            }
+
+                            .modal-icon-container {
+                                width: 80px;
+                                height: 80px;
+                                margin: 0 auto 20px;
+                                position: relative;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            }
+
+                            .modal-spinner {
+                                width: 65px;
+                                height: 65px;
+                                border: 4px solid rgba(245, 166, 35, 0.2);
+                                border-top-color: #f5a623;
+                                border-radius: 50%;
+                                animation: spin 0.8s linear infinite;
+                                position: absolute;
+                                display: none;
+                            }
+
+                            @keyframes spin {
+                                100% {
+                                    transform: rotate(360deg);
+                                }
+                            }
+
+                            .modal-check,
+                            .modal-error {
+                                width: 75px;
+                                height: 75px;
+                                display: none;
+                                position: absolute;
+                            }
+
+                            .modal-check-circle,
+                            .modal-error-circle {
+                                stroke-width: 4;
+                                stroke-dasharray: 166;
+                                stroke-dashoffset: 166;
+                                animation: stroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+                            }
+
+                            .modal-check-circle {
+                                stroke: #22c55e;
+                            }
+
+                            .modal-error-circle {
+                                stroke: #ef4444;
+                            }
+
+                            .modal-check-path,
+                            .modal-error-path {
+                                stroke-width: 4;
+                                stroke-dasharray: 48;
+                                stroke-dashoffset: 48;
+                                stroke-linecap: round;
+                                stroke-linejoin: round;
+                                animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+                            }
+
+                            .modal-check-path {
+                                stroke: #22c55e;
+                            }
+
+                            .modal-error-path {
+                                stroke: #ef4444;
+                            }
+
+                            @keyframes stroke {
+                                100% {
+                                    stroke-dashoffset: 0;
+                                }
+                            }
+
+                            .modal-title {
+                                font-family: 'Syne', sans-serif;
+                                font-size: 24px;
+                                color: #fff;
+                                margin-bottom: 8px;
+                                font-weight: 700;
+                                transition: color 0.3s ease;
+                            }
+
+                            .modal-desc {
+                                font-family: 'DM Sans', sans-serif;
+                                font-size: 15px;
+                                color: #aaa;
+                                margin: 0;
+                            }
+                        </style>
+                        <div id="cart-modal-overlay">
+                            <div class="cart-modal">
+                                <div class="modal-icon-container">
+                                    <div class="modal-spinner" id="modal-spinner"></div>
+                                    <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
+                                        <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none" />
+                                        <path class="modal-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                                    </svg>
+                                    <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
+                                        <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none" />
+                                        <path class="modal-error-path" fill="none" d="M16 16 36 36 M36 16 16 36" />
+                                    </svg>
+                                </div>
+                                <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
+                                <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
+                            </div>
+                        </div>
+                        `);
+
+        // 3. Kích hoạt Modal lên giữa màn hình
+        const overlay = document.getElementById('cart-modal-overlay');
+        const spinner = document.getElementById('modal-spinner');
+        const check = document.getElementById('modal-check');
+        const errorIcon = document.getElementById('modal-error');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDesc = document.getElementById('modal-desc');
+
+        spinner.style.display = 'block';
+        check.style.display = 'none';
+        errorIcon.style.display = 'none';
+        modalTitle.textContent = 'Đang xử lý...';
+        modalTitle.style.color = '#fff';
+        modalDesc.textContent = 'Đang thêm sản phẩm vào giỏ hàng';
+
+        // Force DOM vẽ lại để chạy animation mượt mà
+        void overlay.offsetWidth;
+        overlay.classList.add('active');
+
+        const startTime = Date.now();
+
+        // 4. Gửi request lưu giỏ hàng
         fetch('/cart/add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -344,10 +669,51 @@
         })
             .then(r => r.json())
             .then(res => {
-                showToast('✅ Đã thêm vào giỏ hàng!');
-                if (res.count !== undefined) document.getElementById('cart-count').textContent = res.count;
+                const elapsed = Date.now() - startTime;
+                const delay = Math.max(0, 700 - elapsed);
+
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+
+                    if (res.ok || res.count !== undefined) {
+                        check.style.display = 'block';
+                        modalTitle.textContent = 'Thành công!';
+                        modalTitle.style.color = '#22c55e';
+                        modalDesc.textContent = 'Sản phẩm đã nằm trong giỏ hàng.';
+
+                        const countEl = document.getElementById('cart-count');
+                        if (countEl && res.count !== undefined) {
+                            countEl.textContent = res.count;
+                            countEl.style.transform = "scale(1.5)";
+                            countEl.style.transition = "transform 0.2s";
+                            setTimeout(() => countEl.style.transform = "scale(1)", 200);
+                        }
+                    } else {
+                        errorIcon.style.display = 'block';
+                        modalTitle.textContent = 'Thất bại';
+                        modalTitle.style.color = '#ef4444';
+                        modalDesc.textContent = 'Vui lòng đăng nhập để thêm vào giỏ hàng.';
+                    }
+
+                    setTimeout(() => { overlay.classList.remove('active'); }, 1500);
+                }, delay);
+            })
+            .catch(() => {
+                const elapsed = Date.now() - startTime;
+                const delay = Math.max(0, 700 - elapsed);
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    errorIcon.style.display = 'block';
+                    modalTitle.textContent = 'Lỗi mạng';
+                    modalTitle.style.color = '#ef4444';
+                    modalDesc.textContent = 'Không thể kết nối đến máy chủ.';
+                    setTimeout(() => overlay.classList.remove('active'), 1500);
+                }, delay);
             });
     }
+
+
+
 
     function saveFavorite(btn) {
         var span = btn.closest('.card-body').querySelector('.product-data');
@@ -361,13 +727,7 @@
         }).then(() => showToast('❤️ Đã lưu yêu thích!'));
     }
 
-    function showToast(msg) {
-        var t = document.getElementById('toast');
-        if (t) {
-            t.textContent = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-    }
+
 
     {% if session.get('user_id') %}
     fetch('/cart/count').then(r => r.json()).then(d => {

@@ -9,6 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         /* Sử dụng font chữ đẹp và đồng nhất */
@@ -22,6 +23,7 @@
         }
 
         h1.page-title {
+            font-family: 'Syne', sans-serif !important;
             font-weight: 700 !important;
             letter-spacing: -0.02em !important;
         }
@@ -38,37 +40,29 @@
             width: 12%;
         }
 
-        /* Từ khóa */
         #history-table th:nth-child(2) {
             width: 12%;
         }
 
-        /* Sàn */
         #history-table th:nth-child(3) {
             width: 80px;
         }
 
-        /* Hình ảnh */
         #history-table th:nth-child(4) {
             width: 30%;
         }
 
-        /* Tên sản phẩm */
         #history-table th:nth-child(5) {
             width: 12%;
         }
 
-        /* Giá bán */
         #history-table th:nth-child(6) {
             width: 180px;
         }
 
-        /* Thao tác */
         #history-table th:nth-child(7) {
             width: 12%;
         }
-
-        /* Thời gian */
 
         /* Xử lý tên sản phẩm quá dài - hiện dấu ... */
         .title-cell {
@@ -76,39 +70,146 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 0;
-            /* Bắt buộc để ellipsis hoạt động trong table-layout fixed */
-        }
-
-        /* Style cho thông báo Toast đẹp hơn */
-        #custom-toast {
-            visibility: hidden;
-            min-width: 280px;
-            background-color: #f5a623;
-            color: #000;
-            text-align: center;
-            border-radius: 12px;
-            padding: 16px;
-            position: fixed;
-            z-index: 9999;
-            right: 30px;
-            bottom: 30px;
-            font-size: 15px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        #custom-toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 50px;
         }
 
         .table-img-wrap img {
             width: 50px;
             height: 50px;
             object-fit: contain;
+        }
+
+        /* =========================================================
+           MODAL THÔNG BÁO GIỮA MÀN HÌNH (CHUYÊN NGHIỆP)
+           ========================================================= */
+        #cart-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #cart-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-modal {
+            background: #1a1a24;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 320px;
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #cart-modal-overlay.active .cart-modal {
+            transform: scale(1);
+        }
+
+        .modal-icon-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 1. Vòng tròn đang load (Spinner) */
+        .modal-spinner {
+            width: 65px;
+            height: 65px;
+            border: 4px solid rgba(245, 166, 35, 0.2);
+            border-top-color: #f5a623;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 2. Dấu tích xanh thành công (SVG Draw Animation) */
+        .modal-check,
+        .modal-error {
+            width: 75px;
+            height: 75px;
+            display: none;
+            position: absolute;
+        }
+
+        .modal-check-circle {
+            stroke: #22c55e;
+            stroke-width: 4;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: stroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .modal-check-path {
+            stroke: #22c55e;
+            stroke-width: 4;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+        }
+
+        /* 3. Dấu X đỏ lỗi (SVG Draw Animation) */
+        .modal-error-circle {
+            stroke: #ef4444;
+            stroke-width: 4;
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: stroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .modal-error-path {
+            stroke: #ef4444;
+            stroke-width: 4;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .modal-desc {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: #aaa;
+            margin: 0;
         }
     </style>
 </head>
@@ -208,7 +309,25 @@
         </div>
     </div>
 
-    <div id="custom-toast"></div>
+    <div id="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="modal-icon-container">
+                <div class="modal-spinner" id="modal-spinner"></div>
+
+                <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
+                    <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none" />
+                    <path class="modal-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                </svg>
+
+                <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
+                    <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none" />
+                    <path class="modal-error-path" fill="none" d="M16 16 36 36 M36 16 16 36" />
+                </svg>
+            </div>
+            <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
+            <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
+        </div>
+    </div>
 
     <script>
         // Logic lọc bảng
@@ -230,7 +349,7 @@
             filterTable();
         }
 
-        // Cập nhật số lượng giỏ hàng ban đầu
+        // Cập nhật số lượng giỏ hàng ban đầu khi tải trang
         {% if session.get('user_id') %}
         fetch('/cart/count').then(r => r.json()).then(d => {
             const el = document.getElementById('cart-count');
@@ -238,26 +357,88 @@
         });
         {% endif %}
 
-        // Thông báo Toast đẹp
-        function showToast(message) {
-            const toast = document.getElementById("custom-toast");
-            toast.textContent = message;
-            toast.classList.add("show");
-            setTimeout(() => {
-                toast.classList.remove("show");
-                window.location.reload();
-            }, 1200);
-        }
-
-        // Thêm vào giỏ hàng
+        // -------------------------------------------------------------
+        // LOGIC THÊM VÀO GIỎ HÀNG & HIỂN THỊ MODAL CHUYÊN NGHIỆP
+        // -------------------------------------------------------------
         function addToCartHistory(title, price, img, link, site) {
+            const overlay = document.getElementById('cart-modal-overlay');
+            const spinner = document.getElementById('modal-spinner');
+            const check = document.getElementById('modal-check');
+            const errorIcon = document.getElementById('modal-error');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDesc = document.getElementById('modal-desc');
+
+            // Bước 1: Khởi tạo trạng thái đang xử lý (Loading)
+            spinner.style.display = 'block';
+            check.style.display = 'none';
+            errorIcon.style.display = 'none';
+            modalTitle.textContent = 'Đang xử lý...';
+            modalTitle.style.color = '#fff';
+            modalDesc.textContent = 'Đang thêm sản phẩm vào giỏ hàng';
+            overlay.classList.add('active'); // Hiện modal lên giữa màn hình
+
+            // Bắt đầu đo thời gian để vòng xoay xoay đủ lâu cho đẹp (tối thiểu 600ms)
+            const startTime = Date.now();
+
+            // Gửi dữ liệu ngầm không load lại trang
             fetch('/cart/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title, price_str: price, img, link, site })
             })
-                .then(res => res.ok ? showToast("Đã thêm vào giỏ hàng thành công! ✨") : alert("Lỗi hệ thống"))
-                .catch(err => console.error(err));
+                .then(res => res.json())
+                .then(data => {
+                    const elapsed = Date.now() - startTime;
+                    const delay = Math.max(0, 700 - elapsed); // Bắt ép xoay ít nhất 0.7s
+
+                    setTimeout(() => {
+                        spinner.style.display = 'none'; // Tắt vòng xoay
+
+                        if (data.ok) {
+                            // Hiện dấu tích xanh
+                            check.style.display = 'block';
+                            modalTitle.textContent = 'Thành công!';
+                            modalTitle.style.color = '#22c55e'; // Màu xanh lá
+                            modalDesc.textContent = 'Sản phẩm đã nằm trong giỏ hàng.';
+
+                            // Cập nhật số lượng trên icon góc phải ngay lập tức
+                            const countEl = document.getElementById('cart-count');
+                            if (countEl && data.count !== undefined) {
+                                countEl.textContent = data.count;
+                                countEl.style.transform = "scale(1.5)";
+                                countEl.style.transition = "transform 0.2s";
+                                setTimeout(() => countEl.style.transform = "scale(1)", 200);
+                            }
+                        } else {
+                            // Hiện dấu X đỏ
+                            errorIcon.style.display = 'block';
+                            modalTitle.textContent = 'Thất bại';
+                            modalTitle.style.color = '#ef4444'; // Màu đỏ
+                            modalDesc.textContent = 'Vui lòng đăng nhập để thêm vào giỏ hàng.';
+                        }
+
+                        // Tự động tắt bảng sau 1.5 giây
+                        setTimeout(() => {
+                            overlay.classList.remove('active');
+                        }, 1500);
+
+                    }, delay);
+                })
+                .catch(err => {
+                    console.error(err);
+                    const elapsed = Date.now() - startTime;
+                    const delay = Math.max(0, 700 - elapsed);
+
+                    setTimeout(() => {
+                        spinner.style.display = 'none';
+                        errorIcon.style.display = 'block';
+                        modalTitle.textContent = 'Lỗi mạng';
+                        modalTitle.style.color = '#ef4444';
+                        modalDesc.textContent = 'Không thể kết nối đến máy chủ.';
+
+                        setTimeout(() => overlay.classList.remove('active'), 1500);
+                    }, delay);
+                });
         }
     </script>
 </body>
