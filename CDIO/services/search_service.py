@@ -1,16 +1,16 @@
 """
 services/search_service.py
 ==========================
-Điều phối toàn bộ luồng tìm kiếm:
-  1. Kiểm tra cache DB
-  2. Scrape song song 6 cửa hàng
-  3. Lọc 3 lớp (blacklist → model match → price range)
-  4. Lưu DB
+Search orchestration with:
+  - Keyword normalization
+  - Stale-While-Revalidate (SWR) caching
+  - Parallel scraping
+  - 3-layer filtering
+  - Price-alert triggering after refresh
 """
-
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ── Scrapers ─────────────────────────────────────────────────────────
 from scrapers.clickbuy_scraper   import scrape_clickbuy
 from scrapers.cellphones_scraper import scrape_cellphones
 from scrapers.didong3a_scraper   import scrape_didong3a
@@ -18,14 +18,15 @@ from scrapers.smartviets_scraper import scrape_smartviets
 from scrapers.bachlong_scraper   import scrape_bachlong
 from scrapers.tientran_scraper   import scrape_tientran
 
-# ── Helpers ───────────────────────────────────────────────────────────
-from database.db           import get_data_from_db, save_to_db
-from utils.price_parser    import is_valid_price
-from services.filter_service import apply_all_filters
-
+from database.db              import (get_data_from_db, get_stale_data_from_db,
+                                      save_to_db, log_keyword_search)
+from utils.price_parser       import is_valid_price
+from services.filter_service  import apply_all_filters
+from services.keyword_normalizer import normalize_keyword
+from config.config            import CACHE_TTL_SECONDS
 
 # ════════════════════════════════════════════════════════════════════
-# REGISTRY — chỉ cần thêm 1 dòng khi có store mới
+# SCRAPER REGISTRY
 # ════════════════════════════════════════════════════════════════════
 SCRAPER_REGISTRY: dict = {
     "Clickbuy":         scrape_clickbuy,
@@ -37,57 +38,98 @@ SCRAPER_REGISTRY: dict = {
 }
 
 
-def search_all_stores(keyword: str) -> tuple:
+# ════════════════════════════════════════════════════════════════════
+# CORE SCRAPE PIPELINE (reusable)
+# ════════════════════════════════════════════════════════════════════
+
+def _scrape_and_save(keyword: str, user_id: int = None) -> list:
     """
-    Tìm kiếm sản phẩm trên tất cả cửa hàng trong SCRAPER_REGISTRY.
-
-    Flow:
-      1. Kiểm tra cache DB  → nếu có: trả về ngay (fast load)
-      2. Scrape song song   → gom kết quả từ tất cả stores
-      3. Lọc 3 lớp          → loại rác, sai model, giá bất thường
-      4. Lưu vào DB         → cache cho lần sau
-
-    Returns:
-      (products: list[dict], is_fast_load: bool)
+    Full scrape → filter → save pipeline.
+    Called both synchronously (first search) and from background threads (SWR refresh).
     """
-    # ── Bước 1: Cache ────────────────────────────────────────────────
-    cached = get_data_from_db(keyword)
-    if cached:
-        return cached, True
-
-    # ── Bước 2: Scrape song song ─────────────────────────────────────
-    raw_products = []
+    raw_products: list = []
 
     with ThreadPoolExecutor(max_workers=len(SCRAPER_REGISTRY)) as executor:
         future_map = {
-            executor.submit(fn, keyword): store_name
-            for store_name, fn in SCRAPER_REGISTRY.items()
+            executor.submit(fn, keyword): name
+            for name, fn in SCRAPER_REGISTRY.items()
         }
-
         for future in as_completed(future_map):
-            store_name = future_map[future]
+            name = future_map[future]
             try:
-                results = future.result()
+                results = future.result() or []
                 raw_products.extend(results)
-                print(f"[scraper:{store_name}] {len(results)} sản phẩm")
-            except Exception as e:
-                print(f"[scraper:{store_name}] Lỗi: {e}")
+                print(f"[scraper:{name}] {len(results)} products")
+            except Exception as exc:
+                print(f"[scraper:{name}] Error: {exc}")
 
-    # ── Bước 3: Tiền lọc giá hợp lệ ─────────────────────────────────
-    raw_products = [
-        p for p in raw_products
-        if is_valid_price(p.get('raw_price'))
-    ]
+    # Pre-filter: valid prices only
+    raw_products = [p for p in raw_products if is_valid_price(p.get("raw_price"))]
 
-    # ── Bước 4: Áp dụng 3 lớp lọc ───────────────────────────────────
-    #   Lớp 1: Blacklist từ phụ kiện + kiểm tra liên quan keyword
-    #   Lớp 2: Exact model match (iphone 15 ≠ iphone 16)
-    #   Lớp 3: Price range (loại giá lệch quá xa median)
-    filtered_products = apply_all_filters(raw_products, keyword)
+    # 3-layer filter
+    filtered = apply_all_filters(raw_products, keyword)
+    print(f"[search] '{keyword}' → {len(raw_products)} raw / {len(filtered)} filtered")
 
-    print(f"[search] {len(raw_products)} thô → {len(filtered_products)} sau lọc")
+    # Persist
+    save_to_db(keyword, filtered, user_id)
 
-    # ── Bước 5: Lưu DB ───────────────────────────────────────────────
-    save_to_db(keyword, filtered_products)
+    # Trigger price alerts in background (non-blocking)
+    threading.Thread(
+        target=_run_price_alerts, args=(keyword, filtered), daemon=True
+    ).start()
 
-    return filtered_products, False
+    return filtered
+
+
+def _run_price_alerts(keyword: str, products: list):
+    """Safely run price-alert check without blocking the search response."""
+    try:
+        from services.price_alert_service import check_and_trigger_alerts
+        check_and_trigger_alerts(keyword, products)
+    except Exception as e:
+        print(f"[price_alert] Error: {e}")
+
+
+# ════════════════════════════════════════════════════════════════════
+# PUBLIC SEARCH API
+# ════════════════════════════════════════════════════════════════════
+
+def search_all_stores(keyword: str, user_id: int = None) -> tuple:
+    """
+    Stale-While-Revalidate search.
+
+    Returns: (products, is_from_cache, is_stale)
+
+    Flow:
+      1. Normalize keyword
+      2. Fresh cache hit   → return immediately              (from_cache=True,  stale=False)
+      3. Stale cache hit   → return old data + bg refresh    (from_cache=True,  stale=True)
+      4. No cache at all   → scrape now, block               (from_cache=False, stale=False)
+    """
+    # ── Step 1: Normalize ────────────────────────────────────────
+    normalized = normalize_keyword(keyword)
+    if normalized != keyword.lower().strip():
+        print(f"[normalize] '{keyword}' → '{normalized}'")
+
+    # ── Step 2: Fresh cache? ─────────────────────────────────────
+    fresh = get_data_from_db(normalized, ttl=CACHE_TTL_SECONDS)
+    if fresh:
+        log_keyword_search(normalized)  # update suggestion count
+        return list(fresh), True, False
+
+    # ── Step 3: Stale cache? ─────────────────────────────────────
+    stale = get_stale_data_from_db(normalized)
+    if stale:
+        # Kick off background refresh — caller gets old data instantly
+        threading.Thread(
+            target=_scrape_and_save,
+            args=(normalized, user_id),
+            daemon=True,
+            name=f"swr-refresh-{normalized[:20]}",
+        ).start()
+        log_keyword_search(normalized)
+        return list(stale), True, True  # is_stale=True signals UI to poll
+
+    # ── Step 4: No cache — scrape synchronously ──────────────────
+    products = _scrape_and_save(normalized, user_id)
+    return products, False, False
