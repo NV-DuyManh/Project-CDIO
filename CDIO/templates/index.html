@@ -363,7 +363,7 @@
     </section>
     {% endif %}
 
-    <div id="cart-modal-overlay">
+<div id="cart-modal-overlay">
         <div class="cart-modal">
             <div class="modal-icon-container">
                 <div class="modal-spinner" id="modal-spinner"></div>
@@ -380,9 +380,9 @@
             <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
         </div>
     </div>
+
     {% if is_background_updating %}
     <style>
-        /* CSS cho Modal và Banner */
         #refresh-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10001; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
         #refresh-modal-overlay.active { opacity: 1; visibility: visible; }
         .refresh-modal { background: #1a1a24; border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 20px; padding: 35px 30px; text-align: center; width: 360px; transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
@@ -400,16 +400,15 @@
                         background: transparent; color: #aaa; border: 1px solid rgba(255,255,255,0.2); padding: 12px
                         20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; flex: 1;
                         font-family: 'DM Sans' , sans-serif; font-size: 15px; } .btn-stay:hover { background:
-                        rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.4); } /* Banner nhỏ góc
-                        trái báo đang load */ #loading-banner { position: fixed; bottom: 30px; left: 30px; background:
-                        rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding:
-                        12px 20px; border-radius: 12px; font-weight: 600; font-size: 13px; z-index: 9999; box-shadow: 0
-                        10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); transition: transform 0.5s
-                        cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease; transform: translateX(-150%);
-                        opacity: 0; display: flex; align-items: center; gap: 12px; } #loading-banner.show { transform:
-                        translateX(0); opacity: 1; } .tiny-spinner { width: 16px; height: 16px; border: 2px solid
-                        rgba(147, 197, 253, 0.3); border-top-color: #93c5fd; border-radius: 50%; animation: spin 0.8s
-                        linear infinite; } </style>
+                        rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.4); } #loading-banner {
+                        position: fixed; bottom: 30px; left: 30px; background: rgba(59, 130, 246, 0.15); border: 1px
+                        solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding: 12px 20px; border-radius: 12px;
+                        font-weight: 600; font-size: 13px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                        backdrop-filter: blur(10px); transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+                        opacity 0.5s ease; transform: translateX(-150%); opacity: 0; display: flex; align-items: center;
+                        gap: 12px; } #loading-banner.show { transform: translateX(0); opacity: 1; } .tiny-spinner {
+                        width: 16px; height: 16px; border: 2px solid rgba(147, 197, 253, 0.3); border-top-color:
+                        #93c5fd; border-radius: 50%; animation: spin 0.8s linear infinite; } </style>
 
                         <div id="loading-banner">
                             <div class="tiny-spinner"></div>
@@ -424,7 +423,7 @@
                                     muốn tải lại trang để xem ngay?</p>
                                 <div class="refresh-btn-group">
                                     <button class="btn-stay" onclick="closeRefreshModal()">Ở lại trang</button>
-                                    <button class="btn-reload" onclick="window.location.reload()">Tải lại ngay</button>
+                                    <button class="btn-reload" onclick="reloadFreshData()">Tải lại ngay</button>
                                 </div>
                             </div>
                         </div>
@@ -434,25 +433,21 @@
                                 const loadingBanner = document.getElementById("loading-banner");
                                 const refreshModal = document.getElementById("refresh-modal-overlay");
 
-                                // Hiện banner "Đang quét ngầm" sau 0.5s
-                                setTimeout(() => {
-                                    loadingBanner.classList.add("show");
-                                }, 500);
+                                setTimeout(() => { if (loadingBanner) loadingBanner.classList.add("show"); }, 500);
 
-                                // Giả lập 15s sau bot cào xong -> Tắt banner, Bật Modal giữa màn hình
                                 setTimeout(() => {
-                                    loadingBanner.classList.remove("show"); // Giấu banner đi
-
-                                    // Đợi banner lặn hẳn (0.5s) rồi mới bung Modal cho mượt
-                                    setTimeout(() => {
-                                        refreshModal.classList.add("active");
-                                    }, 500);
+                                    if (loadingBanner) loadingBanner.classList.remove("show");
+                                    setTimeout(() => { if (refreshModal) refreshModal.classList.add("active"); }, 500);
                                 }, 15000);
                             });
 
-                            // Hàm tắt Modal nếu khách chọn "Ở lại trang"
                             function closeRefreshModal() {
-                                document.getElementById("refresh-modal-overlay").classList.remove("active");
+                                const modal = document.getElementById("refresh-modal-overlay");
+                                if (modal) modal.classList.remove("active");
+                            }
+
+                            function reloadFreshData() {
+                                window.location.href = "/?keyword=" + encodeURIComponent("{{ keyword }}") + "&updated=1";
                             }
                         </script>
                         {% endif %}
@@ -472,7 +467,6 @@
 
                                 clearTimeout(debounceTimer);
 
-                                // Gõ 1 chữ cái là hiện ngay (length < 1)
                                 if (!val || val.trim().length < 1) {
                                     box.style.display = "none";
                                     return;
@@ -483,39 +477,33 @@
                                         .then(res => res.json())
                                         .then(data => {
                                             if (data && data.length > 0) {
-                                                // ĐÃ SỬA: Xóa dấu cách thừa ở selectSuggestion(' ${item.trim()}')
                                                 box.innerHTML = data.map(item => `
-                        <li onclick="selectSuggestion('${item.trim()}')"
-                            style="padding: 12px 20px; cursor: pointer; color: #8888a0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); transition: all 0.2s;"
-                            onmouseover="this.style.backgroundColor='#22222e'; this.style.color='#f5a623'"
-                            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#8888a0'">
-                            ${item.toLowerCase().replace(val.toLowerCase(), `<strong
-                                style="color: #f0f0f5;">${val.toLowerCase()}</strong>`)}
-                        </li>
-                        `).join("");
+                            <li onclick="selectSuggestion('${item.trim()}')"
+                                style="padding: 12px 20px; cursor: pointer; color: #8888a0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); transition: all 0.2s;"
+                                onmouseover="this.style.backgroundColor='#22222e'; this.style.color='#f5a623'"
+                                onmouseout="this.style.backgroundColor='transparent'; this.style.color='#8888a0'">
+                                ${item.toLowerCase().replace(val.toLowerCase(), `<strong style="color: #f0f0f5;">${val.toLowerCase()}</strong>`)}
+                            </li>
+                            `).join("");
                                                 box.style.display = "block";
                                             } else {
                                                 box.style.display = "none";
                                             }
                                         })
                                         .catch(err => console.error("Lỗi fetch:", err));
-                                }, 200); // Tốc độ 200ms cho cảm giác phản hồi tức thì
+                                }, 200);
                             }
 
-                            // 2. Hàm khi người dùng click vào một gợi ý
                             function selectSuggestion(val) {
                                 const input = document.getElementById("keyword-input");
                                 if (input) {
-                                    input.value = val; // Đã sạch dấu cách
+                                    input.value = val;
                                     const box = document.getElementById("suggestions-box");
                                     if (box) box.style.display = "none";
-
-                                    // Tự động bấm nút tìm kiếm luôn cho chuyên nghiệp
                                     input.closest("form").submit();
                                 }
                             }
 
-                            // 3. Đóng hộp gợi ý khi nhấn ra ngoài vùng tìm kiếm
                             document.addEventListener("click", function (e) {
                                 const wrap = document.querySelector(".search-wrap");
                                 const box = document.getElementById("suggestions-box");
@@ -524,7 +512,6 @@
                                 }
                             });
 
-                            // --- CÁC HÀM TIỆN ÍCH KHÁC GIỮ NGUYÊN ---
                             function showLoading(e) {
                                 var kw = document.getElementById('keyword-input').value.trim();
                                 if (!kw) return;
@@ -551,7 +538,8 @@
                                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                                 if (e && e.target) e.target.classList.add('active');
                             }
-                            // Add to cart - Tự động tạo Modal xịn xò
+
+                            // HÀM ADD TO CART - CHUẨN 100%
                             function addToCart(btn) {
                                 var span = btn.closest('.card-body').querySelector('.product-data');
                                 var data = {
@@ -562,161 +550,6 @@
                                     site: span.dataset.site
                                 };
 
-                                // 1. XÓA SẠCH modal cũ (để dọn dẹp tàn dư bị lỗi nếu có)
-                                var oldOverlay = document.getElementById('cart-modal-overlay');
-                                if (oldOverlay) {
-                                    oldOverlay.remove();
-                                }
-
-                                // 2. TẠO LẠI modal chuẩn 100% với HTML và CSS xịn
-                                document.body.insertAdjacentHTML('beforeend', `
-                        <style>
-                            #cart-modal-overlay {
-                                position: fixed;
-                                inset: 0;
-                                background: rgba(0, 0, 0, 0.75);
-                                backdrop-filter: blur(5px);
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                z-index: 10000;
-                                opacity: 0;
-                                visibility: hidden;
-                                transition: opacity 0.3s ease, visibility 0.3s ease;
-                            }
-
-                            #cart-modal-overlay.active {
-                                opacity: 1;
-                                visibility: visible;
-                            }
-
-                            .cart-modal {
-                                background: #1a1a24;
-                                border: 1px solid rgba(255, 255, 255, 0.1);
-                                border-radius: 20px;
-                                padding: 40px;
-                                text-align: center;
-                                width: 320px;
-                                transform: scale(0.8);
-                                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-                            }
-
-                            #cart-modal-overlay.active .cart-modal {
-                                transform: scale(1);
-                            }
-
-                            .modal-icon-container {
-                                width: 80px;
-                                height: 80px;
-                                margin: 0 auto 20px;
-                                position: relative;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            }
-
-                            .modal-spinner {
-                                width: 65px;
-                                height: 65px;
-                                border: 4px solid rgba(245, 166, 35, 0.2);
-                                border-top-color: #f5a623;
-                                border-radius: 50%;
-                                animation: spin 0.8s linear infinite;
-                                position: absolute;
-                                display: none;
-                            }
-
-                            @keyframes spin {
-                                100% {
-                                    transform: rotate(360deg);
-                                }
-                            }
-
-                            .modal-check,
-                            .modal-error {
-                                width: 75px;
-                                height: 75px;
-                                display: none;
-                                position: absolute;
-                            }
-
-                            .modal-check-circle,
-                            .modal-error-circle {
-                                stroke-width: 4;
-                                stroke-dasharray: 166;
-                                stroke-dashoffset: 166;
-                                animation: stroke 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-                            }
-
-                            .modal-check-circle {
-                                stroke: #22c55e;
-                            }
-
-                            .modal-error-circle {
-                                stroke: #ef4444;
-                            }
-
-                            .modal-check-path,
-                            .modal-error-path {
-                                stroke-width: 4;
-                                stroke-dasharray: 48;
-                                stroke-dashoffset: 48;
-                                stroke-linecap: round;
-                                stroke-linejoin: round;
-                                animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
-                            }
-
-                            .modal-check-path {
-                                stroke: #22c55e;
-                            }
-
-                            .modal-error-path {
-                                stroke: #ef4444;
-                            }
-
-                            @keyframes stroke {
-                                100% {
-                                    stroke-dashoffset: 0;
-                                }
-                            }
-
-                            .modal-title {
-                                font-family: 'Syne', sans-serif;
-                                font-size: 24px;
-                                color: #fff;
-                                margin-bottom: 8px;
-                                font-weight: 700;
-                                transition: color 0.3s ease;
-                            }
-
-                            .modal-desc {
-                                font-family: 'DM Sans', sans-serif;
-                                font-size: 15px;
-                                color: #aaa;
-                                margin: 0;
-                            }
-                        </style>
-                        <div id="cart-modal-overlay">
-                            <div class="cart-modal">
-                                <div class="modal-icon-container">
-                                    <div class="modal-spinner" id="modal-spinner"></div>
-                                    <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
-                                        <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none" />
-                                        <path class="modal-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-                                    </svg>
-                                    <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
-                                        <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none" />
-                                        <path class="modal-error-path" fill="none" d="M16 16 36 36 M36 16 16 36" />
-                                    </svg>
-                                </div>
-                                <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
-                                <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
-                            </div>
-                        </div>
-                        `);
-
-                                // 3. Kích hoạt Modal lên giữa màn hình
                                 const overlay = document.getElementById('cart-modal-overlay');
                                 const spinner = document.getElementById('modal-spinner');
                                 const check = document.getElementById('modal-check');
@@ -724,6 +557,7 @@
                                 const modalTitle = document.getElementById('modal-title');
                                 const modalDesc = document.getElementById('modal-desc');
 
+                                // Bật hiệu ứng Loading
                                 spinner.style.display = 'block';
                                 check.style.display = 'none';
                                 errorIcon.style.display = 'none';
@@ -731,13 +565,11 @@
                                 modalTitle.style.color = '#fff';
                                 modalDesc.textContent = 'Đang thêm sản phẩm vào giỏ hàng';
 
-                                // Force DOM vẽ lại để chạy animation mượt mà
-                                void overlay.offsetWidth;
+                                // Kích hoạt Modal lên giữa màn hình
                                 overlay.classList.add('active');
 
                                 const startTime = Date.now();
 
-                                // 4. Gửi request lưu giỏ hàng
                                 fetch('/cart/add', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -746,7 +578,7 @@
                                     .then(r => r.json())
                                     .then(res => {
                                         const elapsed = Date.now() - startTime;
-                                        const delay = Math.max(0, 700 - elapsed);
+                                        const delay = Math.max(0, 700 - elapsed); // Bắt buộc xoay ít nhất 0.7s cho đẹp
 
                                         setTimeout(() => {
                                             spinner.style.display = 'none';
@@ -757,6 +589,7 @@
                                                 modalTitle.style.color = '#22c55e';
                                                 modalDesc.textContent = 'Sản phẩm đã nằm trong giỏ hàng.';
 
+                                                // Cập nhật số lượng trên Navbar
                                                 const countEl = document.getElementById('cart-count');
                                                 if (countEl && res.count !== undefined) {
                                                     countEl.textContent = res.count;
@@ -771,6 +604,7 @@
                                                 modalDesc.textContent = 'Vui lòng đăng nhập để thêm vào giỏ hàng.';
                                             }
 
+                                            // Tự tắt sau 1.5s
                                             setTimeout(() => { overlay.classList.remove('active'); }, 1500);
                                         }, delay);
                                     })
@@ -788,9 +622,7 @@
                                     });
                             }
 
-
-
-
+                            // HÀM SAVE FAVORITE TẬN DỤNG LẠI MODAL
                             function saveFavorite(btn) {
                                 var span = btn.closest('.card-body').querySelector('.product-data');
                                 fetch('/favorites/add', {
@@ -800,10 +632,25 @@
                                         title: span.dataset.title, price_str: span.dataset.price,
                                         img: span.dataset.img, link: span.dataset.link, site: span.dataset.site
                                     })
-                                }).then(() => showToast('❤️ Đã lưu yêu thích!'));
+                                }).then(() => {
+                                    const overlay = document.getElementById('cart-modal-overlay');
+                                    const spinner = document.getElementById('modal-spinner');
+                                    const check = document.getElementById('modal-check');
+                                    const errorIcon = document.getElementById('modal-error');
+                                    const modalTitle = document.getElementById('modal-title');
+                                    const modalDesc = document.getElementById('modal-desc');
+
+                                    spinner.style.display = 'none';
+                                    errorIcon.style.display = 'none';
+                                    check.style.display = 'block';
+                                    modalTitle.textContent = 'Đã thích!';
+                                    modalTitle.style.color = '#22c55e';
+                                    modalDesc.textContent = 'Sản phẩm đã được lưu vào mục yêu thích.';
+
+                                    overlay.classList.add('active');
+                                    setTimeout(() => { overlay.classList.remove('active'); }, 1500);
+                                });
                             }
-
-
 
                             {% if session.get('user_id') %}
                             fetch('/cart/count').then(r => r.json()).then(d => {
@@ -811,6 +658,78 @@
                                 if (el) el.textContent = d.count;
                             });
                             {% endif %}
+
+                            // KHÔI PHỤC LẠI TÍNH NĂNG TẢI ẢNH AI ĐÃ BỊ XÓA NHẦM TRƯỚC ĐÓ
+                            let selectedFile = null;
+                            function handleFileSelected(file) {
+                                selectedFile = file;
+                                var reader = new FileReader();
+                                reader.onload = function (e) {
+                                    document.getElementById('preview-img').src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                                document.getElementById('preview-name').textContent = file.name;
+                                document.getElementById('drop-zone').style.display = 'none';
+                                document.getElementById('upload-preview').style.display = 'flex';
+                                document.getElementById('ai-result-msg').style.display = 'none';
+                            }
+
+                            function cancelUpload() {
+                                selectedFile = null;
+                                document.getElementById('image-input').value = '';
+                                document.getElementById('upload-preview').style.display = 'none';
+                                document.getElementById('drop-zone').style.display = 'flex';
+                                document.getElementById('ai-result-msg').style.display = 'none';
+                                const btnText = document.getElementById('ai-btn-text');
+                                if (btnText) btnText.textContent = '🔍 Nhận diện & Tìm giá';
+                                const btn = document.getElementById('btn-ai-search');
+                                if (btn) btn.disabled = false;
+                            }
+
+                            function runAiSearch() {
+                                if (!selectedFile) return;
+                                var btn = document.getElementById('btn-ai-search');
+                                var btnText = document.getElementById('ai-btn-text');
+                                var msgEl = document.getElementById('ai-result-msg');
+
+                                btn.disabled = true;
+                                btnText.textContent = '⏳ AI đang phân tích ảnh...';
+                                msgEl.style.display = 'none';
+
+                                var formData = new FormData();
+                                formData.append('image', selectedFile);
+
+                                fetch('/upload-image', {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            msgEl.className = 'ai-result-msg ai-success';
+                                            msgEl.innerHTML = '✅ Nhận diện: <strong>' + data.keyword + '</strong> — Đang tìm giá...';
+                                            msgEl.style.display = 'block';
+                                            btnText.textContent = '✅ Đã nhận diện!';
+                                            setTimeout(function () {
+                                                document.getElementById('loading-overlay').classList.add('active');
+                                                window.location.href = data.redirect;
+                                            }, 1200);
+                                        } else {
+                                            msgEl.className = 'ai-result-msg ai-error';
+                                            msgEl.textContent = data.error || 'Không nhận diện được. Thử ảnh khác nhé!';
+                                            msgEl.style.display = 'block';
+                                            btn.disabled = false;
+                                            btnText.textContent = '🔍 Nhận diện & Tìm giá';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        msgEl.className = 'ai-result-msg ai-error';
+                                        msgEl.textContent = '❌ Lỗi kết nối. Vui lòng thử lại.';
+                                        msgEl.style.display = 'block';
+                                        btn.disabled = false;
+                                        btnText.textContent = '🔍 Nhận diện & Tìm giá';
+                                    });
+                            }
 
                             document.addEventListener('DOMContentLoaded', function () {
                                 var input = document.getElementById('image-input');
