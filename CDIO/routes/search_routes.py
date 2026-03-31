@@ -1,6 +1,7 @@
+import threading
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from services.search_service import search_all_stores
-from database.db import get_db_connection, save_to_db
+from database.db import get_db_connection, save_to_db, get_data_from_db
 from config.config import STORES
 import pymysql.cursors
 
@@ -43,6 +44,31 @@ def suggestions():
     return jsonify(results[:8])
 
 # ════════════════════════════════════════════════════════════════════
+# HÀM CHẠY NGẦM (BACKGROUND TASK)
+# ════════════════════════════════════════════════════════════════════
+def background_scrape_task(keyword, user_id):
+    """Hàm chạy ngầm: Tạm xóa cache cũ và cào lại giá mới nhất"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Xóa cache cũ của từ khóa này
+        if user_id:
+            cursor.execute("DELETE FROM search_history WHERE LOWER(keyword) = LOWER(%s) AND user_id = %s", (keyword.strip(), user_id))
+        else:
+            cursor.execute("DELETE FROM search_history WHERE LOWER(keyword) = LOWER(%s) AND user_id IS NULL", (keyword.strip(),))
+        conn.commit()
+        conn.close()
+
+        # Gọi hàm cào (lúc này db đã trống nên bot buộc phải đi cào web)
+        fresh_products, is_fast = search_all_stores(keyword)
+        
+        if fresh_products and not is_fast:
+            save_to_db(keyword, fresh_products, user_id=user_id)
+        print(f"[Background] Đã cập nhật xong giá mới nhất cho: {keyword}")
+    except Exception as e:
+        print(f"[Background] Lỗi cào ngầm: {e}")
+
+# ════════════════════════════════════════════════════════════════════
 # TRANG CHỦ / TÌM KIẾM
 # ════════════════════════════════════════════════════════════════════
 
@@ -57,19 +83,35 @@ def home():
 
     all_products = []
     is_fast_load = False
+    is_background_updating = False
 
     if keyword:
         session['last_keyword'] = keyword
-        all_products, is_fast_load = search_all_stores(keyword)
         
-        # Lưu vào lịch sử kèm user_id nếu là dữ liệu cào mới
-        if all_products and not is_fast_load:
-            save_to_db(keyword, all_products, user_id=user_id)
+        # 1. TÌM TRONG DATABASE TRƯỚC (Stale)
+        cached_data = get_data_from_db(keyword)
+        
+        if cached_data:
+            # NẾU CÓ CŨ -> Trả về ngay lập tức cho khách xem
+            all_products = cached_data
+            is_fast_load = True
+            is_background_updating = True # Bật cờ báo cho giao diện biết
+            
+            # 2. CHẠY NGẦM BOT CÀO DỮ LIỆU (While-revalidate)
+            thread = threading.Thread(target=background_scrape_task, args=(keyword, user_id))
+            thread.daemon = True
+            thread.start()
+        else:
+            # NẾU CHƯA TỪNG CÓ -> Bắt buộc chờ để cào lần đầu tiên
+            all_products, is_fast_load = search_all_stores(keyword)
+            if all_products and not is_fast_load:
+                save_to_db(keyword, all_products, user_id=user_id)
 
     return render_template("index.html",
                            products=all_products,
                            keyword=keyword,
                            is_fast_load=is_fast_load,
+                           is_background_updating=is_background_updating,
                            store_count=len(STORES))
 
 # ════════════════════════════════════════════════════════════════════

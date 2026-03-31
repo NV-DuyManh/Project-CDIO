@@ -380,35 +380,111 @@
             <p class="modal-desc" id="modal-desc">Vui lòng đợi trong giây lát</p>
         </div>
     </div>
+    {% if is_background_updating %}
+    <style>
+        /* CSS cho Modal và Banner */
+        #refresh-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10001; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        #refresh-modal-overlay.active { opacity: 1; visibility: visible; }
+        .refresh-modal { background: #1a1a24; border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 20px; padding: 35px 30px; text-align: center; width: 360px; transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        #refresh-modal-overlay.active .refresh-modal { transform: scale(1); }
+        .refresh-icon { font-size: 50px; margin-bottom: 15px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: scale(0); }
+        #refresh-modal-overlay.active .refresh-icon { animation-delay: 0.2s; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .refresh-title { font-family: ' Syne', sans-serif; font-size: 24px; color: #fff; margin-bottom: 12px;
+                        font-weight: 700; } .refresh-desc { font-family: 'DM Sans' , sans-serif; font-size: 15px; color:
+                        #aaa; margin-bottom: 28px; line-height: 1.5; } .refresh-btn-group { display: flex; gap: 12px;
+                        justify-content: center; } .btn-reload { background: #22c55e; color: #000; border: none;
+                        padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition:
+                        transform 0.2s, background 0.2s; flex: 1; font-family: 'DM Sans' , sans-serif; font-size: 15px;
+                        } .btn-reload:hover { background: #16a34a; transform: translateY(-2px); } .btn-stay {
+                        background: transparent; color: #aaa; border: 1px solid rgba(255,255,255,0.2); padding: 12px
+                        20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; flex: 1;
+                        font-family: 'DM Sans' , sans-serif; font-size: 15px; } .btn-stay:hover { background:
+                        rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.4); } /* Banner nhỏ góc
+                        trái báo đang load */ #loading-banner { position: fixed; bottom: 30px; left: 30px; background:
+                        rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; padding:
+                        12px 20px; border-radius: 12px; font-weight: 600; font-size: 13px; z-index: 9999; box-shadow: 0
+                        10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); transition: transform 0.5s
+                        cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease; transform: translateX(-150%);
+                        opacity: 0; display: flex; align-items: center; gap: 12px; } #loading-banner.show { transform:
+                        translateX(0); opacity: 1; } .tiny-spinner { width: 16px; height: 16px; border: 2px solid
+                        rgba(147, 197, 253, 0.3); border-top-color: #93c5fd; border-radius: 50%; animation: spin 0.8s
+                        linear infinite; } </style>
 
-    <footer class="footer">
-        <p>© 2025 PriceHunt — So sánh giá thông minh</p>
-    </footer>
+                        <div id="loading-banner">
+                            <div class="tiny-spinner"></div>
+                            Đang ngầm quét giá mới nhất...
+                        </div>
+
+                        <div id="refresh-modal-overlay">
+                            <div class="refresh-modal">
+                                <div class="refresh-icon">✨</div>
+                                <h3 class="refresh-title">Cập nhật thành công!</h3>
+                                <p class="refresh-desc">Hệ thống vừa lấy được dữ liệu giá mới nhất từ các sàn. Bạn có
+                                    muốn tải lại trang để xem ngay?</p>
+                                <div class="refresh-btn-group">
+                                    <button class="btn-stay" onclick="closeRefreshModal()">Ở lại trang</button>
+                                    <button class="btn-reload" onclick="window.location.reload()">Tải lại ngay</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            document.addEventListener("DOMContentLoaded", () => {
+                                const loadingBanner = document.getElementById("loading-banner");
+                                const refreshModal = document.getElementById("refresh-modal-overlay");
+
+                                // Hiện banner "Đang quét ngầm" sau 0.5s
+                                setTimeout(() => {
+                                    loadingBanner.classList.add("show");
+                                }, 500);
+
+                                // Giả lập 15s sau bot cào xong -> Tắt banner, Bật Modal giữa màn hình
+                                setTimeout(() => {
+                                    loadingBanner.classList.remove("show"); // Giấu banner đi
+
+                                    // Đợi banner lặn hẳn (0.5s) rồi mới bung Modal cho mượt
+                                    setTimeout(() => {
+                                        refreshModal.classList.add("active");
+                                    }, 500);
+                                }, 15000);
+                            });
+
+                            // Hàm tắt Modal nếu khách chọn "Ở lại trang"
+                            function closeRefreshModal() {
+                                document.getElementById("refresh-modal-overlay").classList.remove("active");
+                            }
+                        </script>
+                        {% endif %}
+
+                        <footer class="footer">
+                            <p>© 2025 PriceHunt — So sánh giá thông minh</p>
+                        </footer>
 
 
-<script>
-    let debounceTimer;
+                        <script>
+                            let debounceTimer;
 
-    // 1. Hàm xử lý gợi ý khi gõ (Autocomplete)
-    function handleAutocomplete(val) {
-        const box = document.getElementById("suggestions-box");
-        if (!box) return;
+                            // 1. Hàm xử lý gợi ý khi gõ (Autocomplete)
+                            function handleAutocomplete(val) {
+                                const box = document.getElementById("suggestions-box");
+                                if (!box) return;
 
-        clearTimeout(debounceTimer);
+                                clearTimeout(debounceTimer);
 
-        // Gõ 1 chữ cái là hiện ngay (length < 1)
-        if (!val || val.trim().length < 1) {
-            box.style.display = "none";
-            return;
-        }
+                                // Gõ 1 chữ cái là hiện ngay (length < 1)
+                                if (!val || val.trim().length < 1) {
+                                    box.style.display = "none";
+                                    return;
+                                }
 
-        debounceTimer = setTimeout(() => {
-            fetch("/api/suggestions?q=" + encodeURIComponent(val))
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        // ĐÃ SỬA: Xóa dấu cách thừa ở selectSuggestion(' ${item.trim()}')
-                        box.innerHTML = data.map(item => `
+                                debounceTimer = setTimeout(() => {
+                                    fetch("/api/suggestions?q=" + encodeURIComponent(val))
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data && data.length > 0) {
+                                                // ĐÃ SỬA: Xóa dấu cách thừa ở selectSuggestion(' ${item.trim()}')
+                                                box.innerHTML = data.map(item => `
                         <li onclick="selectSuggestion('${item.trim()}')"
                             style="padding: 12px 20px; cursor: pointer; color: #8888a0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); transition: all 0.2s;"
                             onmouseover="this.style.backgroundColor='#22222e'; this.style.color='#f5a623'"
@@ -417,83 +493,83 @@
                                 style="color: #f0f0f5;">${val.toLowerCase()}</strong>`)}
                         </li>
                         `).join("");
-                        box.style.display = "block";
-                    } else {
-                        box.style.display = "none";
-                    }
-                })
-                .catch(err => console.error("Lỗi fetch:", err));
-        }, 200); // Tốc độ 200ms cho cảm giác phản hồi tức thì
-    }
+                                                box.style.display = "block";
+                                            } else {
+                                                box.style.display = "none";
+                                            }
+                                        })
+                                        .catch(err => console.error("Lỗi fetch:", err));
+                                }, 200); // Tốc độ 200ms cho cảm giác phản hồi tức thì
+                            }
 
-    // 2. Hàm khi người dùng click vào một gợi ý
-    function selectSuggestion(val) {
-        const input = document.getElementById("keyword-input");
-        if (input) {
-            input.value = val; // Đã sạch dấu cách
-            const box = document.getElementById("suggestions-box");
-            if (box) box.style.display = "none";
+                            // 2. Hàm khi người dùng click vào một gợi ý
+                            function selectSuggestion(val) {
+                                const input = document.getElementById("keyword-input");
+                                if (input) {
+                                    input.value = val; // Đã sạch dấu cách
+                                    const box = document.getElementById("suggestions-box");
+                                    if (box) box.style.display = "none";
 
-            // Tự động bấm nút tìm kiếm luôn cho chuyên nghiệp
-            input.closest("form").submit();
-        }
-    }
+                                    // Tự động bấm nút tìm kiếm luôn cho chuyên nghiệp
+                                    input.closest("form").submit();
+                                }
+                            }
 
-    // 3. Đóng hộp gợi ý khi nhấn ra ngoài vùng tìm kiếm
-    document.addEventListener("click", function (e) {
-        const wrap = document.querySelector(".search-wrap");
-        const box = document.getElementById("suggestions-box");
-        if (box && wrap && !wrap.contains(e.target)) {
-            box.style.display = "none";
-        }
-    });
+                            // 3. Đóng hộp gợi ý khi nhấn ra ngoài vùng tìm kiếm
+                            document.addEventListener("click", function (e) {
+                                const wrap = document.querySelector(".search-wrap");
+                                const box = document.getElementById("suggestions-box");
+                                if (box && wrap && !wrap.contains(e.target)) {
+                                    box.style.display = "none";
+                                }
+                            });
 
-    // --- CÁC HÀM TIỆN ÍCH KHÁC GIỮ NGUYÊN ---
-    function showLoading(e) {
-        var kw = document.getElementById('keyword-input').value.trim();
-        if (!kw) return;
-        document.getElementById('loading-overlay').classList.add('active');
-        document.getElementById('search-btn').disabled = true;
-        var messages = ["Đang kết nối...", "Đang săn giá...", "Sắp xong rồi! ⚡"];
-        var i = 0;
-        var subEl = document.querySelector('.loading-sub');
-        var interval = setInterval(function () {
-            i = (i + 1) % messages.length;
-            subEl.innerHTML = messages[i];
-            if (i === messages.length - 1) clearInterval(interval);
-        }, 3000);
-    }
+                            // --- CÁC HÀM TIỆN ÍCH KHÁC GIỮ NGUYÊN ---
+                            function showLoading(e) {
+                                var kw = document.getElementById('keyword-input').value.trim();
+                                if (!kw) return;
+                                document.getElementById('loading-overlay').classList.add('active');
+                                document.getElementById('search-btn').disabled = true;
+                                var messages = ["Đang kết nối...", "Đang săn giá...", "Sắp xong rồi! ⚡"];
+                                var i = 0;
+                                var subEl = document.querySelector('.loading-sub');
+                                var interval = setInterval(function () {
+                                    i = (i + 1) % messages.length;
+                                    subEl.innerHTML = messages[i];
+                                    if (i === messages.length - 1) clearInterval(interval);
+                                }, 3000);
+                            }
 
-    function toggleMenu() {
-        document.querySelector('.nav-links').classList.toggle('open');
-    }
+                            function toggleMenu() {
+                                document.querySelector('.nav-links').classList.toggle('open');
+                            }
 
-    function filterSite(site, e) {
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.style.display = (site === 'all' || card.dataset.site === site) ? '' : 'none';
-        });
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        if (e && e.target) e.target.classList.add('active');
-    }
-    // Add to cart - Tự động tạo Modal xịn xò
-    function addToCart(btn) {
-        var span = btn.closest('.card-body').querySelector('.product-data');
-        var data = {
-            title: span.dataset.title,
-            price_str: span.dataset.price,
-            img: span.dataset.img,
-            link: span.dataset.link,
-            site: span.dataset.site
-        };
+                            function filterSite(site, e) {
+                                document.querySelectorAll('.product-card').forEach(card => {
+                                    card.style.display = (site === 'all' || card.dataset.site === site) ? '' : 'none';
+                                });
+                                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                                if (e && e.target) e.target.classList.add('active');
+                            }
+                            // Add to cart - Tự động tạo Modal xịn xò
+                            function addToCart(btn) {
+                                var span = btn.closest('.card-body').querySelector('.product-data');
+                                var data = {
+                                    title: span.dataset.title,
+                                    price_str: span.dataset.price,
+                                    img: span.dataset.img,
+                                    link: span.dataset.link,
+                                    site: span.dataset.site
+                                };
 
-        // 1. XÓA SẠCH modal cũ (để dọn dẹp tàn dư bị lỗi nếu có)
-        var oldOverlay = document.getElementById('cart-modal-overlay');
-        if (oldOverlay) {
-            oldOverlay.remove();
-        }
+                                // 1. XÓA SẠCH modal cũ (để dọn dẹp tàn dư bị lỗi nếu có)
+                                var oldOverlay = document.getElementById('cart-modal-overlay');
+                                if (oldOverlay) {
+                                    oldOverlay.remove();
+                                }
 
-        // 2. TẠO LẠI modal chuẩn 100% với HTML và CSS xịn
-        document.body.insertAdjacentHTML('beforeend', `
+                                // 2. TẠO LẠI modal chuẩn 100% với HTML và CSS xịn
+                                document.body.insertAdjacentHTML('beforeend', `
                         <style>
                             #cart-modal-overlay {
                                 position: fixed;
@@ -640,119 +716,119 @@
                         </div>
                         `);
 
-        // 3. Kích hoạt Modal lên giữa màn hình
-        const overlay = document.getElementById('cart-modal-overlay');
-        const spinner = document.getElementById('modal-spinner');
-        const check = document.getElementById('modal-check');
-        const errorIcon = document.getElementById('modal-error');
-        const modalTitle = document.getElementById('modal-title');
-        const modalDesc = document.getElementById('modal-desc');
+                                // 3. Kích hoạt Modal lên giữa màn hình
+                                const overlay = document.getElementById('cart-modal-overlay');
+                                const spinner = document.getElementById('modal-spinner');
+                                const check = document.getElementById('modal-check');
+                                const errorIcon = document.getElementById('modal-error');
+                                const modalTitle = document.getElementById('modal-title');
+                                const modalDesc = document.getElementById('modal-desc');
 
-        spinner.style.display = 'block';
-        check.style.display = 'none';
-        errorIcon.style.display = 'none';
-        modalTitle.textContent = 'Đang xử lý...';
-        modalTitle.style.color = '#fff';
-        modalDesc.textContent = 'Đang thêm sản phẩm vào giỏ hàng';
+                                spinner.style.display = 'block';
+                                check.style.display = 'none';
+                                errorIcon.style.display = 'none';
+                                modalTitle.textContent = 'Đang xử lý...';
+                                modalTitle.style.color = '#fff';
+                                modalDesc.textContent = 'Đang thêm sản phẩm vào giỏ hàng';
 
-        // Force DOM vẽ lại để chạy animation mượt mà
-        void overlay.offsetWidth;
-        overlay.classList.add('active');
+                                // Force DOM vẽ lại để chạy animation mượt mà
+                                void overlay.offsetWidth;
+                                overlay.classList.add('active');
 
-        const startTime = Date.now();
+                                const startTime = Date.now();
 
-        // 4. Gửi request lưu giỏ hàng
-        fetch('/cart/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-            .then(r => r.json())
-            .then(res => {
-                const elapsed = Date.now() - startTime;
-                const delay = Math.max(0, 700 - elapsed);
+                                // 4. Gửi request lưu giỏ hàng
+                                fetch('/cart/add', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(data)
+                                })
+                                    .then(r => r.json())
+                                    .then(res => {
+                                        const elapsed = Date.now() - startTime;
+                                        const delay = Math.max(0, 700 - elapsed);
 
-                setTimeout(() => {
-                    spinner.style.display = 'none';
+                                        setTimeout(() => {
+                                            spinner.style.display = 'none';
 
-                    if (res.ok || res.count !== undefined) {
-                        check.style.display = 'block';
-                        modalTitle.textContent = 'Thành công!';
-                        modalTitle.style.color = '#22c55e';
-                        modalDesc.textContent = 'Sản phẩm đã nằm trong giỏ hàng.';
+                                            if (res.ok || res.count !== undefined) {
+                                                check.style.display = 'block';
+                                                modalTitle.textContent = 'Thành công!';
+                                                modalTitle.style.color = '#22c55e';
+                                                modalDesc.textContent = 'Sản phẩm đã nằm trong giỏ hàng.';
 
-                        const countEl = document.getElementById('cart-count');
-                        if (countEl && res.count !== undefined) {
-                            countEl.textContent = res.count;
-                            countEl.style.transform = "scale(1.5)";
-                            countEl.style.transition = "transform 0.2s";
-                            setTimeout(() => countEl.style.transform = "scale(1)", 200);
-                        }
-                    } else {
-                        errorIcon.style.display = 'block';
-                        modalTitle.textContent = 'Thất bại';
-                        modalTitle.style.color = '#ef4444';
-                        modalDesc.textContent = 'Vui lòng đăng nhập để thêm vào giỏ hàng.';
-                    }
+                                                const countEl = document.getElementById('cart-count');
+                                                if (countEl && res.count !== undefined) {
+                                                    countEl.textContent = res.count;
+                                                    countEl.style.transform = "scale(1.5)";
+                                                    countEl.style.transition = "transform 0.2s";
+                                                    setTimeout(() => countEl.style.transform = "scale(1)", 200);
+                                                }
+                                            } else {
+                                                errorIcon.style.display = 'block';
+                                                modalTitle.textContent = 'Thất bại';
+                                                modalTitle.style.color = '#ef4444';
+                                                modalDesc.textContent = 'Vui lòng đăng nhập để thêm vào giỏ hàng.';
+                                            }
 
-                    setTimeout(() => { overlay.classList.remove('active'); }, 1500);
-                }, delay);
-            })
-            .catch(() => {
-                const elapsed = Date.now() - startTime;
-                const delay = Math.max(0, 700 - elapsed);
-                setTimeout(() => {
-                    spinner.style.display = 'none';
-                    errorIcon.style.display = 'block';
-                    modalTitle.textContent = 'Lỗi mạng';
-                    modalTitle.style.color = '#ef4444';
-                    modalDesc.textContent = 'Không thể kết nối đến máy chủ.';
-                    setTimeout(() => overlay.classList.remove('active'), 1500);
-                }, delay);
-            });
-    }
-
-
-
-
-    function saveFavorite(btn) {
-        var span = btn.closest('.card-body').querySelector('.product-data');
-        fetch('/favorites/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title: span.dataset.title, price_str: span.dataset.price,
-                img: span.dataset.img, link: span.dataset.link, site: span.dataset.site
-            })
-        }).then(() => showToast('❤️ Đã lưu yêu thích!'));
-    }
+                                            setTimeout(() => { overlay.classList.remove('active'); }, 1500);
+                                        }, delay);
+                                    })
+                                    .catch(() => {
+                                        const elapsed = Date.now() - startTime;
+                                        const delay = Math.max(0, 700 - elapsed);
+                                        setTimeout(() => {
+                                            spinner.style.display = 'none';
+                                            errorIcon.style.display = 'block';
+                                            modalTitle.textContent = 'Lỗi mạng';
+                                            modalTitle.style.color = '#ef4444';
+                                            modalDesc.textContent = 'Không thể kết nối đến máy chủ.';
+                                            setTimeout(() => overlay.classList.remove('active'), 1500);
+                                        }, delay);
+                                    });
+                            }
 
 
 
-    {% if session.get('user_id') %}
-    fetch('/cart/count').then(r => r.json()).then(d => {
-        var el = document.getElementById('cart-count');
-        if (el) el.textContent = d.count;
-    });
-    {% endif %}
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var input = document.getElementById('image-input');
-        var dropZone = document.getElementById('drop-zone');
-        if (!input || !dropZone) return;
-        input.addEventListener('change', function () {
-            if (input.files && input.files[0])
-                handleFileSelected(input.files[0]);
-        });
-        dropZone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files[0]) handleFileSelected(e.dataTransfer.files[0]);
-        });
-    });
-</script>
+                            function saveFavorite(btn) {
+                                var span = btn.closest('.card-body').querySelector('.product-data');
+                                fetch('/favorites/add', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        title: span.dataset.title, price_str: span.dataset.price,
+                                        img: span.dataset.img, link: span.dataset.link, site: span.dataset.site
+                                    })
+                                }).then(() => showToast('❤️ Đã lưu yêu thích!'));
+                            }
+
+
+
+                            {% if session.get('user_id') %}
+                            fetch('/cart/count').then(r => r.json()).then(d => {
+                                var el = document.getElementById('cart-count');
+                                if (el) el.textContent = d.count;
+                            });
+                            {% endif %}
+
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var input = document.getElementById('image-input');
+                                var dropZone = document.getElementById('drop-zone');
+                                if (!input || !dropZone) return;
+                                input.addEventListener('change', function () {
+                                    if (input.files && input.files[0])
+                                        handleFileSelected(input.files[0]);
+                                });
+                                dropZone.addEventListener('dragover', e => {
+                                    e.preventDefault();
+                                    dropZone.classList.add('drag-over');
+                                });
+                                dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+                                dropZone.addEventListener('drop', e => {
+                                    e.preventDefault();
+                                    dropZone.classList.remove('drag-over');
+                                    if (e.dataTransfer.files[0]) handleFileSelected(e.dataTransfer.files[0]);
+                                });
+                            });
+                        </script>
