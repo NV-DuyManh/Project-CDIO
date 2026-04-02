@@ -1,131 +1,147 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đơn Hàng — PriceHunt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         .qty-badge {
             display: inline-block;
-            background: rgba(245,166,35,0.15);
+            background: rgba(245, 166, 35, 0.15);
             color: #f5a623;
-            border: 1px solid rgba(245,166,35,0.3);
+            border: 1px solid rgba(245, 166, 35, 0.3);
             border-radius: 6px;
             padding: 2px 8px;
             font-size: 0.78rem;
             font-weight: 600;
             margin-left: 6px;
         }
+
         .price-unit {
             font-size: 0.78rem;
             color: #888;
             display: block;
         }
+
         .price-total {
             font-weight: 700;
             color: #f5a623;
         }
     </style>
 </head>
+
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Tìm Kiếm</a>
-        <a href="/cart" class="nav-link">🛒</a>
-        <a href="/orders" class="nav-link active">Đơn hàng</a>
-        <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
-        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
-
-<div class="page-container">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">📦 Đơn hàng của bạn</h1>
-            <p class="page-sub">Theo dõi toàn bộ lịch sử mua hàng</p>
+    <nav class="navbar">
+        <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link">Lịch Sử</a>
+            <a href="/cart" class="nav-link cart-link">🛒 Giỏ hàng <span class="cart-count" id="cart-count">0</span></a>
+            <a href="/orders" class="nav-link active">Đơn hàng</a>
+            <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
+            <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
         </div>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">📦 Đơn hàng của bạn</h1>
+                <p class="page-sub">Theo dõi toàn bộ lịch sử mua hàng</p>
+            </div>
+        </div>
+
+        {% if orders %}
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Sản phẩm</th>
+                        <th>SL</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                        <th>Phương thức TT</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    {% set qty = order.quantity if order.quantity else 1 %}
+                    {% set unit = order.unit_price if order.unit_price else 0 %}
+                    {% set total = order.total_price if order.total_price else 0 %}
+                    <tr>
+                        <td><code class="order-id">#{{ order.id }}</code></td>
+                        <td class="title-cell">{{ order.product_name }}</td>
+
+                        <td style="text-align:center">
+                            <span class="qty-badge">×{{ qty }}</span>
+                        </td>
+
+                        <td class="price-cell">
+                            {% if unit > 0 %}
+                            {{ "{:,.0f}đ".format(unit).replace(',', '.') }}
+                            {% else %}
+                            {{ order.price }}
+                            {% endif %}
+                        </td>
+
+                        <td class="price-cell price-total">
+                            {% if total > 0 %}
+                            {{ "{:,.0f}đ".format(total).replace(',', '.') }}
+                            {% elif unit > 0 %}
+                            {{ "{:,.0f}đ".format(unit * qty).replace(',', '.') }}
+                            {% else %}
+                            {{ order.price }}
+                            {% endif %}
+                        </td>
+
+                        <td>{{ order.payment_method or 'N/A' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ order.status }}">
+                                {% if order.status == 'paid' %}✓ Đã thanh toán
+                                {% elif order.status == 'pending' %}⏳ Chờ xử lý
+                                {% elif order.status == 'failed' %}✕ Thất bại
+                                {% else %}{{ order.status }}{% endif %}
+                            </span>
+                        </td>
+                        <td class="date-cell">{{ order.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:5rem 0">
+            <div class="empty-icon">📦</div>
+            <h3>Chưa có đơn hàng nào</h3>
+            <p>Hãy tìm kiếm và mua sắm để đơn hàng xuất hiện ở đây</p>
+            <a href="/" class="nav-btn btn-primary" style="margin-top:1rem">Mua sắm ngay</a>
+        </div>
+        {% endif %}
     </div>
 
-    {% if orders %}
-    <div class="table-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Sản phẩm</th>
-                    <th>SL</th>
-                    <th>Đơn giá</th>
-                    <th>Thành tiền</th>
-                    <th>Phương thức TT</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày đặt</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for order in orders %}
-            {% set qty = order.quantity if order.quantity else 1 %}
-            {% set unit = order.unit_price if order.unit_price else 0 %}
-            {% set total = order.total_price if order.total_price else 0 %}
-            <tr>
-                <td><code class="order-id">#{{ order.id }}</code></td>
-                <td class="title-cell">{{ order.product_name }}</td>
+    <footer class="footer">
+        <p>© 2025 PriceHunt</p>
+    </footer>
+    <script src="/static/js/main.js"></script>
 
-                <!-- Số lượng -->
-                <td style="text-align:center">
-                    <span class="qty-badge">×{{ qty }}</span>
-                </td>
-
-                <!-- Đơn giá -->
-                <td class="price-cell">
-                    {% if unit > 0 %}
-                        {{ "{:,.0f}đ".format(unit).replace(',', '.') }}
-                    {% else %}
-                        {{ order.price }}
-                    {% endif %}
-                </td>
-
-                <!-- Thành tiền -->
-                <td class="price-cell price-total">
-                    {% if total > 0 %}
-                        {{ "{:,.0f}đ".format(total).replace(',', '.') }}
-                    {% elif unit > 0 %}
-                        {{ "{:,.0f}đ".format(unit * qty).replace(',', '.') }}
-                    {% else %}
-                        {{ order.price }}
-                    {% endif %}
-                </td>
-
-                <td>{{ order.payment_method or 'N/A' }}</td>
-                <td>
-                    <span class="status-badge status-{{ order.status }}">
-                        {% if order.status == 'paid' %}✓ Đã thanh toán
-                        {% elif order.status == 'pending' %}⏳ Chờ xử lý
-                        {% elif order.status == 'failed' %}✕ Thất bại
-                        {% else %}{{ order.status }}{% endif %}
-                    </span>
-                </td>
-                <td class="date-cell">{{ order.created_at }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div class="empty-state" style="padding:5rem 0">
-        <div class="empty-icon">📦</div>
-        <h3>Chưa có đơn hàng nào</h3>
-        <p>Hãy tìm kiếm và mua sắm để đơn hàng xuất hiện ở đây</p>
-        <a href="/" class="nav-btn btn-primary" style="margin-top:1rem">Mua sắm ngay</a>
-    </div>
-    {% endif %}
-</div>
-
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
+    <script>
+        {% if session.get('user_id') %}
+        fetch('/cart/count').then(r => r.json()).then(d => {
+            const el = document.getElementById('cart-count');
+            if (el) el.textContent = d.count || 0;
+        });
+        {% endif %}
+    </script>
 </body>
+
 </html>

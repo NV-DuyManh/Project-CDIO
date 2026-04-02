@@ -256,7 +256,9 @@ body {
 /* Search Form */
 .search-form {
   animation: fadeInUp 0.6s ease 0.3s both;
+
 }
+
 
 .search-wrap {
   display: flex;
@@ -326,6 +328,57 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* --- Suggestions Dropdown --- */
+.search-form {
+  position: relative;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 105%;
+  left: 40px;
+  right: 140px;
+  background-color: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  z-index: 1000;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  box-shadow: var(--shadow);
+  display: none;
+  overflow: hidden;
+  text-align: left;
+}
+
+.suggestion-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: var(--surface3);
+  color: var(--accent);
+}
+
+.suggestion-item strong {
+  color: var(--text);
+}
+
+@media (max-width: 768px) {
+  .suggestions-list {
+    left: 10px;
+    right: 10px;
+  }
 }
 
 .hero-stats {
@@ -2471,4 +2524,44 @@ h3 {
   font-size: 22px;
   color: #f5a623;
   /* Giữ màu cam cho tia chớp để làm điểm nhấn */
+}
+
+/* --- Suggestions Dropdown --- */
+.search-form {
+  position: relative;
+  /* Để menu gợi ý bám theo form */
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 105%;
+  left: 20px;
+  right: 140px;
+  /* Canh chỉnh để không đè lên nút tìm kiếm */
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  z-index: 1000;
+  list-style: none;
+  padding: 5px 0;
+  box-shadow: var(--shadow);
+  display: none;
+  /* Ẩn khi không có dữ liệu */
+}
+
+.suggestion-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--text2);
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+  background: var(--surface3);
+  color: var(--accent);
+}
+
+.suggestion-item strong {
+  color: var(--text);
 }
