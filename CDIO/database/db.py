@@ -13,7 +13,20 @@ def get_data_from_db(keyword):
         # Lấy thêm created_at để search_service biết giá cào từ lúc nào
         sql    = "SELECT *, created_at FROM search_history WHERE LOWER(keyword) = LOWER(%s) ORDER BY raw_price ASC"
         cursor.execute(sql, (keyword.strip(),))
-        return cursor.fetchall()
+        rows = cursor.fetchall()
+
+        # LỌC TRÙNG LẶP TỪ DATABASE (Do nhiều user cùng search 1 từ khóa)
+        seen = set()
+        unique_rows = []
+        for r in rows:
+            # Tạo khóa nhận dạng: Sàn + Tên + Giá
+            identifier = (r['site'], r['title'], r['raw_price'])
+            if identifier not in seen:
+                seen.add(identifier)
+                unique_rows.append(r)
+
+        return unique_rows
+        
     except Exception as e:
         print(f"Lỗi get_data_from_db: {e}")
         return []

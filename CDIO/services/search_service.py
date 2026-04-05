@@ -178,13 +178,25 @@ def search_all_stores(keyword: str, user_id=None) -> tuple:
                 print(f"[scraper:{store_name}] Lỗi: {e}")
 
     # ── Bước 3: Tiền lọc giá hợp lệ ─────────────────────────────────
+    # ── Bước 3: Tiền lọc giá hợp lệ ─────────────────────────────────
     raw_products = [
         p for p in raw_products
         if is_valid_price(p.get('raw_price'))
     ]
 
-    # ── Bước 4: Áp dụng 3 lớp lọc ───────────────────────────────────
+# ── Bước 4: Áp dụng 3 lớp lọc ───────────────────────────────────
     filtered_products = apply_all_filters(raw_products, normalized_kw)
+
+    # ── Bước 4.5: Loại bỏ sản phẩm trùng lặp bằng (Sàn + Tên + Giá) ─
+    unique_products = []
+    seen_items = set()
+    for p in filtered_products:
+        identifier = (p.get('site'), p.get('title'), p.get('raw_price'))
+        if identifier not in seen_items:
+            seen_items.add(identifier)
+            unique_products.append(p)
+    filtered_products = unique_products
+    # ────────────────────────────────────────────────────────────────
 
     print(f"[search] {len(raw_products)} thô → {len(filtered_products)} sau lọc")
 

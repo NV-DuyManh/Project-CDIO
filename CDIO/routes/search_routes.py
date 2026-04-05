@@ -1,4 +1,5 @@
 import threading
+from datetime import datetime, timedelta # THÊM DÒNG NÀY
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from services.search_service import search_all_stores
 from database.db import get_db_connection, save_to_db, get_data_from_db
@@ -65,8 +66,9 @@ def home():
     updated = request.args.get("updated")
     user_id = session.get('user_id')
 
+    # FIX: Tự động thêm updated="1" khi chuyển từ Lịch sử/Giỏ hàng về trang chủ
     if not keyword and 'last_keyword' in session:
-        return redirect(url_for('search.home', keyword=session['last_keyword']))
+        return redirect(url_for('search.home', keyword=session['last_keyword'], updated="1"))
 
     all_products = []
     is_fast_load = False
@@ -83,7 +85,6 @@ def home():
             is_fast_load = True
             
             # CỨ TÌM KIẾM BÌNH THƯỜNG LÀ CÀO NGẦM (Miễn là không có cờ updated=1)
-            # Đã bỏ luật chặn 30 phút!
             if updated != "1":
                 is_background_updating = True 
                 thread = threading.Thread(target=background_scrape_task, args=(keyword, user_id))
