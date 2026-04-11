@@ -1,9 +1,10 @@
 """
-routes/category_routes.py — Fixed
-- /category/brand/iphone  → redirect sang iPhone 16 Series (series mặc định)
-- /category/brand/samsung → redirect sang Galaxy S25 Series
-- /category/series/<slug> → hiện sản phẩm từ DB
-- Fallback query nếu db.py thiếu hàm get_products_by_series
+routes/category_routes.py — Fixed v3
+Fix 4 lỗi:
+1. Sort không nhảy trang (xử lý ở template)
+2. Hover submenu (xử lý ở CSS)
+3. Brand iphone/samsung query cả title VÀ keyword column
+4. Other brand lấy tất cả không phải iphone/samsung
 """
 
 from flask import Blueprint, render_template, abort, request, redirect, url_for
@@ -29,12 +30,6 @@ BRAND_LABELS = {
     "other":   "Thương hiệu khác",
 }
 
-# Series mặc định khi click vào brand
-BRAND_DEFAULT_SERIES = {
-    "iphone":  "iphone-16",
-    "samsung": "samsung-s25",
-}
-
 
 def _get_conn():
     from database.db import get_db_connection
@@ -42,7 +37,7 @@ def _get_conn():
 
 
 def _query_by_series(keyword, sort, page, per_page):
-    """Ưu tiên hàm có sẵn trong db.py, fallback query thủ công."""
+    """Truy vấn theo series — tìm trong title VÀ keyword column."""
     try:
         from database.db import get_products_by_series
         return get_products_by_series(keyword, sort=sort, page=page, per_page=per_page)
@@ -58,29 +53,30 @@ def _query_by_series(keyword, sort, page, per_page):
         like   = f"%{keyword.lower()}%"
 
         cur.execute(
-            "SELECT COUNT(*) AS c FROM search_history WHERE LOWER(title) LIKE %s",
-            (like,)
+            "SELECT COUNT(*) AS c FROM search_history "
+            "WHERE LOWER(title) LIKE %s OR LOWER(keyword) LIKE %s",
+            (like, like)
         )
         total = cur.fetchone()["c"]
 
         cur.execute(
-            f"SELECT * FROM search_history WHERE LOWER(title) LIKE %s "
+            f"SELECT * FROM search_history "
+            f"WHERE LOWER(title) LIKE %s OR LOWER(keyword) LIKE %s "
             f"ORDER BY raw_price {order} LIMIT %s OFFSET %s",
-            (like, per_page, offset)
+            (like, like, per_page, offset)
         )
-        return cur.fetchall(), total
+        rows = cur.fetchall()
+        print(f"[category] series '{keyword}': {total} total, {len(rows)} rows")
+        return rows, total
     finally:
         conn.close()
 
 
-def _query_other(sort, page, per_page):
-    """Sản phẩm không phải iPhone / Samsung."""
-    try:
-        from database.db import get_products_by_brand
-        return get_products_by_brand("other", sort=sort, page=page, per_page=per_page)
-    except (ImportError, AttributeError):
-        pass
-
+def _query_by_brand(brand, sort, page, per_page):
+    """
+    Truy vấn TẤT CẢ sản phẩm của brand.
+    Tìm trong cả title VÀ keyword column.
+    """
     import pymysql.cursors
     conn = _get_conn()
     try:
@@ -88,30 +84,43 @@ def _query_other(sort, page, per_page):
         order  = "ASC" if sort == "asc" else "DESC"
         offset = (page - 1) * per_page
 
-        cur.execute(
-            "SELECT COUNT(*) AS c FROM search_history "
-            "WHERE LOWER(title) NOT LIKE '%iphone%' AND LOWER(title) NOT LIKE '%samsung%' "
-            "AND LOWER(title) NOT LIKE '%galaxy%'"
-        )
+        if brand == "iphone":
+            where = (
+                "(LOWER(title) LIKE '%iphone%' OR LOWER(keyword) LIKE '%iphone%')"
+            )
+        elif brand == "samsung":
+            where = (
+                "(LOWER(title) LIKE '%samsung%' OR LOWER(title) LIKE '%galaxy%' "
+                "OR LOWER(keyword) LIKE '%samsung%' OR LOWER(keyword) LIKE '%galaxy%')"
+            )
+        else:
+            # other: không phải iphone, không phải samsung/galaxy
+            # Chỉ lọc theo title, không lọc keyword để bắt được nhiều hơn
+            where = (
+                "LOWER(title) NOT LIKE '%iphone%' "
+                "AND LOWER(title) NOT LIKE '%samsung%' "
+                "AND LOWER(title) NOT LIKE '%galaxy%' "
+                "AND title IS NOT NULL AND title != '' "
+                "AND raw_price > 0"
+            )
+
+        cur.execute(f"SELECT COUNT(*) AS c FROM search_history WHERE {where}")
         total = cur.fetchone()["c"]
 
         cur.execute(
-            f"SELECT * FROM search_history "
-            f"WHERE LOWER(title) NOT LIKE '%iphone%' AND LOWER(title) NOT LIKE '%samsung%' "
-            f"AND LOWER(title) NOT LIKE '%galaxy%' "
+            f"SELECT * FROM search_history WHERE {where} "
             f"ORDER BY raw_price {order} LIMIT %s OFFSET %s",
             (per_page, offset)
         )
-        return cur.fetchall(), total
+        rows = cur.fetchall()
+        print(f"[category] brand '{brand}': {total} total, {len(rows)} rows")
+        return rows, total
     finally:
         conn.close()
 
 
 # ════════════════════════════════════════════════════════════════
-# BRAND PAGE — redirect về series mặc định
-# /category/brand/iphone  → /category/series/iphone-16
-# /category/brand/samsung → /category/series/samsung-s25
-# /category/brand/other   → hiện trang other
+# BRAND PAGE
 # ════════════════════════════════════════════════════════════════
 @category_bp.route("/category/brand/<brand>")
 def brand_page(brand: str):
@@ -119,20 +128,14 @@ def brand_page(brand: str):
     if brand not in BRAND_LABELS:
         abort(404)
 
-    # iphone / samsung → redirect sang series mặc định
-    if brand in BRAND_DEFAULT_SERIES:
-        return redirect(url_for("category.series_page",
-                                series_slug=BRAND_DEFAULT_SERIES[brand]))
-
-    # other → hiện trang
     sort     = request.args.get("sort", "asc")
     page     = max(1, int(request.args.get("page", 1)))
     per_page = 60
 
     try:
-        products, total = _query_other(sort, page, per_page)
+        products, total = _query_by_brand(brand, sort, page, per_page)
     except Exception as e:
-        print(f"[category] other error: {e}")
+        print(f"[category] brand '{brand}' error: {e}")
         products, total = [], 0
 
     total_pages = max(1, (total + per_page - 1) // per_page)
@@ -140,10 +143,10 @@ def brand_page(brand: str):
     return render_template(
         "category_new.html",
         view          = "brand",
-        brand_key     = "other",
-        brand_label   = "Thương hiệu khác",
+        brand_key     = brand,
+        brand_label   = BRAND_LABELS[brand],
         series_slug   = None,
-        series_label  = None,
+        series_label  = BRAND_LABELS[brand],
         products      = products,
         total         = total,
         page          = page,
@@ -154,7 +157,7 @@ def brand_page(brand: str):
 
 
 # ════════════════════════════════════════════════════════════════
-# SERIES PAGE — /category/series/<series_slug>
+# SERIES PAGE
 # ════════════════════════════════════════════════════════════════
 @category_bp.route("/category/series/<series_slug>")
 def series_page(series_slug: str):
@@ -169,11 +172,11 @@ def series_page(series_slug: str):
 
     try:
         if series_slug == "other":
-            products, total = _query_other(sort, page, per_page)
+            products, total = _query_by_brand("other", sort, page, per_page)
         else:
             products, total = _query_by_series(keyword, sort, page, per_page)
     except Exception as e:
-        print(f"[category] series_page '{series_slug}' error: {e}")
+        print(f"[category] series '{series_slug}' error: {e}")
         products, total = [], 0
 
     total_pages = max(1, (total + per_page - 1) // per_page)

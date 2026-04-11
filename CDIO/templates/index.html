@@ -8,25 +8,90 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/dropdown.css">
+  <style>
+    /* FIX: Tắt scroll-behavior smooth để sort không nhảy đầu trang */
+    html { scroll-behavior: auto !important; }
+
+    /* NAVBAR */
+    .navbar {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      padding: 0 1.5rem !important;
+      gap: 0 !important;
+    }
+    .nav-logo { flex-shrink: 0; margin-right: 0.75rem; }
+    .nav-left  { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+    .nav-center{ flex: 1; display: flex; justify-content: center; padding: 0 1.5rem; }
+    .nav-right { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; margin-left: 0.5rem; }
+
+    .nav-sf-wrap { position: relative; width: 100%; max-width: 500px; }
+    .nav-sbar {
+      display: flex; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 0.32rem 0.32rem 0.32rem 1.1rem;
+      gap: 0.5rem; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+    }
+    .nav-sbar:focus-within {
+      border-color: rgba(245,166,35,.45); box-shadow: 0 0 0 3px rgba(245,166,35,.08);
+    }
+    .nav-sbar input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 0.88rem; font-family: "DM Sans", sans-serif; min-width: 0;
+    }
+    .nav-sbar input::placeholder { color: var(--text3); }
+    .nav-sbar button {
+      background: var(--accent); border: none; border-radius: 99px;
+      color: #000; font-size: 0.82rem; cursor: pointer;
+      padding: 0.4rem 1.1rem; font-weight: 600;
+      font-family: "DM Sans", sans-serif; white-space: nowrap; flex-shrink: 0;
+      transition: background 0.18s;
+    }
+    .nav-sbar button:hover { background: #ffc04a; }
+
+    .nav-sug-drop {
+      position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); z-index: 9000;
+      list-style: none; padding: 4px 0; margin: 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45);
+      display: none; overflow: hidden;
+    }
+    .nav-sug-drop.show { display: block; }
+    .nsug-li {
+      padding: 0.55rem 1rem; cursor: pointer; color: var(--text2); font-size: 0.85rem; transition: all 0.15s;
+    }
+    .nsug-li:hover { background: var(--surface2); color: var(--accent); }
+    .nsug-li mark { background: none; color: var(--accent); font-weight: 700; }
+
+    /* FIX 2: Hover submenu */
+    .cat-dropdown { z-index: 9999 !important; }
+    .cat-submenu  { z-index: 10000 !important; }
+    .cat-item.has-sub:hover > .cat-submenu {
+      opacity: 1 !important; visibility: visible !important;
+      pointer-events: auto !important; transform: translateX(0) scale(1) !important;
+    }
+
+    @media(max-width:768px){
+      .navbar{flex-wrap:wrap;height:auto;padding:.5rem 1rem;}
+      .nav-center{order:3;flex:0 0 100%;padding:.5rem 0 0;}
+      .nav-right{margin-left:auto;}
+    }
+  </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════
-     NAVBAR — logo phải, links trái, auth + search trên cùng phải
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ NAVBAR ══ -->
 <nav class="navbar">
-  <!-- Logo BÊN PHẢI -->
   <a href="/" class="nav-logo">
     <span class="logo-icon">⚡</span>
     <span class="logo-text">PriceHunt</span>
   </a>
 
-  <!-- Links BÊN TRÁI -->
-  <div class="nav-links" id="nav-links">
+  <div class="nav-left">
     <a href="/"        class="nav-link active">Tìm Kiếm</a>
     <a href="/history" class="nav-link">Lịch Sử</a>
 
-    <!-- Danh mục dropdown -->
     <div class="nav-category-wrap" id="cat-wrap">
       <button class="nav-category-btn" id="cat-btn"
               aria-haspopup="true" aria-expanded="false"
@@ -34,25 +99,24 @@
         Danh mục <span class="caret">▼</span>
       </button>
       <div class="cat-dropdown" id="cat-dropdown" role="menu">
-
-        <!-- iPhone -->
-        <div class="cat-item has-sub">
-          <span>📱 iPhone</span>
-          <span class="sub-arrow">▶</span>
+        <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+          <span>📱 iPhone</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
             <span class="cat-sub-label">Dòng sản phẩm</span>
+            <a href="/category/brand/iphone"      class="cat-sub-item">Tất cả iPhone</a>
+            <div class="cat-divider"></div>
             <a href="/category/series/iphone-17"  class="cat-sub-item">iPhone 17 Series</a>
             <a href="/category/series/iphone-16"  class="cat-sub-item">iPhone 16 Series</a>
             <a href="/category/series/iphone-15"  class="cat-sub-item">iPhone 15 Series</a>
             <a href="/category/series/iphone-14"  class="cat-sub-item">iPhone 14 Series</a>
           </div>
-        </div>
-
-        <!-- Samsung -->
-        <div class="cat-item has-sub">
-          <span>🌐 Samsung</span>
-          <span class="sub-arrow">▶</span>
+        </a>
+        <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+          <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
+            <span class="cat-sub-label">Dòng sản phẩm</span>
+            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
+            <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy S</span>
             <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
             <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
@@ -61,28 +125,30 @@
             <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
             <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
           </div>
-        </div>
-
-        <div class="cat-divider"></div>
-        <a href="/category/brand/other" class="cat-item">
-          <span>📦 Thương hiệu khác</span>
         </a>
+        <div class="cat-divider"></div>
+        <a href="/category/brand/other" class="cat-item"><span>📦 Thương hiệu khác</span></a>
       </div>
     </div>
+  </div>
 
-    <!-- Navbar search (mini) -->
-    <div style="position:relative;">
-      <form id="nav-search-form" action="/" method="GET" autocomplete="off">
-        <div class="nav-search-wrap">
-          <input type="text" id="nav-search-input" name="keyword"
-                 placeholder="Tìm sản phẩm..." autocomplete="off">
-          <button type="submit" class="nav-search-btn">Tìm</button>
+  <!-- Search giữa -->
+  <div class="nav-center">
+    <div class="nav-sf-wrap">
+      <form id="nav-sf" action="/" method="GET" autocomplete="off">
+        <div class="nav-sbar">
+          <input type="text" id="nav-si" name="keyword"
+                 value="{{ keyword or '' }}"
+                 placeholder="Tìm sản phẩm, ví dụ: iPhone 16 Pro..." autocomplete="off">
+          <button type="submit">Tìm kiếm</button>
         </div>
       </form>
-      <ul class="nav-suggestions" id="nav-suggestions"></ul>
+      <ul class="nav-sug-drop" id="nav-sl"></ul>
     </div>
+  </div>
 
-    <!-- Auth links -->
+  <!-- Auth phải -->
+  <div class="nav-right">
     {% if session.get('user_id') %}
       <a href="/cart"    class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
       <a href="/orders"  class="nav-link">Đơn hàng</a>
@@ -93,9 +159,6 @@
       <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
     {% endif %}
   </div>
-
-  <button class="nav-toggle"
-          onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
 </nav>
 
 <!-- Loading overlay -->
@@ -108,9 +171,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     HERO / SEARCH BAR
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ HERO ══ -->
 <section class="hero">
   <div class="hero-bg-grid"></div>
   <div class="hero-content">
@@ -118,24 +179,19 @@
     <h1 class="hero-title">Tìm giá tốt nhất<br>cho <em>điện thoại</em> của bạn</h1>
     <p class="hero-sub">Tìm kiếm sản phẩm đã có trong hệ thống từ {{ store_count }}+ cửa hàng uy tín.</p>
 
-    <form class="search-form" id="search-form" method="GET" action="/"
-          onsubmit="showLoading()">
+    <form class="search-form" id="search-form" method="GET" action="/" onsubmit="showLoading()">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" name="keyword" id="search-input"
                value="{{ keyword or '' }}"
                placeholder="Nhập tên sản phẩm, ví dụ: iPhone 16 Pro..."
-               autocomplete="off"
-               oninput="fetchSuggestions(this.value)">
+               autocomplete="off" oninput="fetchSuggestions(this.value)">
         <input type="hidden" name="sort" value="{{ sort or 'asc' }}">
-        <button type="submit" id="search-btn">
-          <span>Tìm kiếm</span>
-        </button>
+        <button type="submit" id="search-btn"><span>Tìm kiếm</span></button>
       </div>
       <ul class="suggestions-list" id="suggestions-list"></ul>
     </form>
 
-    <!-- AI Image Upload -->
     <div class="search-divider"><span>hoặc tìm bằng ảnh</span></div>
     <div class="image-upload-area">
       <div class="upload-drop-zone" id="drop-zone"
@@ -146,8 +202,7 @@
         <p class="upload-sub">Nhận diện sản phẩm tự động bằng AI</p>
         <span class="upload-formats">JPG · PNG · WEBP</span>
       </div>
-      <input type="file" id="image-input" accept="image/*" style="display:none"
-             onchange="handleImageSelect(event)">
+      <input type="file" id="image-input" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
       <div id="upload-preview" style="display:none"></div>
       <div id="ai-result-msg"></div>
     </div>
@@ -162,9 +217,7 @@
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════
-     RESULTS
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ RESULTS ══ -->
 {% if keyword %}
 <section class="results-section">
 
@@ -172,11 +225,8 @@
   <div class="db-miss-banner">
     <div class="db-miss-text">
       Không tìm thấy <strong>"{{ keyword }}"</strong> trong hệ thống.
-      Hãy kích hoạt cào để lấy dữ liệu mới nhất từ các cửa hàng.
     </div>
-    <a href="/scrape?keyword={{ keyword | urlencode }}" class="btn-scrape-now">
-      🤖 Cào dữ liệu ngay
-    </a>
+    <a href="/scrape?keyword={{ keyword | urlencode }}" class="btn-scrape-now">🤖 Cào dữ liệu ngay</a>
   </div>
   {% endif %}
 
@@ -188,12 +238,13 @@
       </h2>
       <p class="results-count">Tìm thấy <strong>{{ total }}</strong> sản phẩm</p>
     </div>
+    <!-- FIX: Sort dùng JS để không scroll lên đầu -->
     <div class="sort-bar">
       <span class="sort-label">Sắp xếp:</span>
-      <a href="?keyword={{ keyword | urlencode }}&sort=asc&page=1"
-         class="sort-btn {% if sort == 'asc' %}active{% endif %}">↑ Giá thấp → cao</a>
-      <a href="?keyword={{ keyword | urlencode }}&sort=desc&page=1"
-         class="sort-btn {% if sort == 'desc' %}active{% endif %}">↓ Giá cao → thấp</a>
+      <button onclick="sortChange('asc')"
+              class="sort-btn {% if sort == 'asc' %}active{% endif %}">↑ Giá thấp → cao</button>
+      <button onclick="sortChange('desc')"
+              class="sort-btn {% if sort == 'desc' %}active{% endif %}">↓ Giá cao → thấp</button>
     </div>
   </div>
 
@@ -242,18 +293,18 @@
   {% set total_pages = total_pages | default(1) %}
   {% if total_pages > 1 %}
   <nav class="pagination" style="margin-top:2rem">
-    <a href="?keyword={{ keyword|urlencode }}&sort={{ sort }}&page={{ [page-1,1]|max }}"
-       class="page-btn {% if page==1 %}disabled{% endif %}">‹</a>
+    <button onclick="pageChange({{ [page-1,1]|max }})"
+            class="page-btn {% if page==1 %}disabled{% endif %}">‹</button>
     {% for p in range(1, total_pages+1) %}
       {% if p==1 or p==total_pages or (p>=page-2 and p<=page+2) %}
-        <a href="?keyword={{ keyword|urlencode }}&sort={{ sort }}&page={{ p }}"
-           class="page-btn {% if p==page %}active{% endif %}">{{ p }}</a>
+        <button onclick="pageChange({{ p }})"
+                class="page-btn {% if p==page %}active{% endif %}">{{ p }}</button>
       {% elif p==page-3 or p==page+3 %}
         <span class="page-btn disabled">…</span>
       {% endif %}
     {% endfor %}
-    <a href="?keyword={{ keyword|urlencode }}&sort={{ sort }}&page={{ [page+1,total_pages]|min }}"
-       class="page-btn {% if page==total_pages %}disabled{% endif %}">›</a>
+    <button onclick="pageChange({{ [page+1,total_pages]|min }})"
+            class="page-btn {% if page==total_pages %}disabled{% endif %}">›</button>
   </nav>
   {% endif %}
   {% endif %}
@@ -263,26 +314,10 @@
 {% else %}
 <section class="features-section">
   <div class="features-grid">
-    <div class="feature-card">
-      <span class="feature-icon">🔍</span>
-      <h3>Tìm kiếm thông minh</h3>
-      <p>Tìm kiếm toàn bộ sản phẩm đã có trong hệ thống, so sánh giá từ nhiều cửa hàng.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">💰</span>
-      <h3>So sánh giá</h3>
-      <p>Xem ngay sản phẩm nào có giá tốt nhất, sắp xếp từ thấp đến cao hoặc ngược lại.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🤖</span>
-      <h3>Nhận diện ảnh AI</h3>
-      <p>Chụp hoặc tải ảnh điện thoại lên, AI sẽ nhận diện và tìm giá tự động.</p>
-    </div>
-    <div class="feature-card">
-      <span class="feature-icon">🛒</span>
-      <h3>Giỏ hàng & Đặt mua</h3>
-      <p>Lưu sản phẩm yêu thích, thêm vào giỏ và đặt hàng chỉ trong vài bước.</p>
-    </div>
+    <div class="feature-card"><span class="feature-icon">🔍</span><h3>Tìm kiếm thông minh</h3><p>Tìm kiếm toàn bộ sản phẩm đã có trong hệ thống, so sánh giá từ nhiều cửa hàng.</p></div>
+    <div class="feature-card"><span class="feature-icon">💰</span><h3>So sánh giá</h3><p>Xem ngay sản phẩm nào có giá tốt nhất, sắp xếp từ thấp đến cao hoặc ngược lại.</p></div>
+    <div class="feature-card"><span class="feature-icon">🤖</span><h3>Nhận diện ảnh AI</h3><p>Chụp hoặc tải ảnh điện thoại lên, AI sẽ nhận diện và tìm giá tự động.</p></div>
+    <div class="feature-card"><span class="feature-icon">🛒</span><h3>Giỏ hàng & Đặt mua</h3><p>Lưu sản phẩm yêu thích, thêm vào giỏ và đặt hàng chỉ trong vài bước.</p></div>
   </div>
 </section>
 {% endif %}
@@ -305,69 +340,129 @@
     <p  class="modal-desc"  id="modal-desc">Vui lòng đợi trong giây lát</p>
   </div>
 </div>
-
 <div id="toast" class="toast"></div>
 <footer class="footer"><p>© 2025 PriceHunt — So sánh giá thông minh</p></footer>
 
-<!-- Scripts CUỐI body -->
 <script src="/static/js/main.js"></script>
 <script src="/static/js/dropdown.js"></script>
 <script>
-function showLoading() {
+/* Sort & Pagination — giữ scroll */
+function sortChange(s) {
+  var url = new URL(window.location.href);
+  url.searchParams.set('sort', s);
+  url.searchParams.set('page', 1);
+  var sy = window.scrollY;
+  sessionStorage.setItem('restoreScroll', sy);
+  window.location.href = url.toString();
+}
+function pageChange(p) {
+  var url = new URL(window.location.href);
+  url.searchParams.set('page', p);
+  var sy = window.scrollY;
+  sessionStorage.setItem('restoreScroll', sy);
+  window.location.href = url.toString();
+}
+window.addEventListener('load', function(){
+  var sy = sessionStorage.getItem('restoreScroll');
+  if(sy){ sessionStorage.removeItem('restoreScroll'); window.scrollTo(0, parseInt(sy)); }
+});
+
+function showLoading(){
   var kw = document.getElementById('search-input').value.trim();
-  if (!kw) return;
+  if(!kw) return;
   document.getElementById('loading-overlay').classList.add('active');
 }
 
 /* Hero suggestions */
 function fetchSuggestions(q) {
   var list = document.getElementById('suggestions-list');
-  if (!q || q.length < 2) { list.style.display='none'; return; }
-  fetch('/api/suggestions?q=' + encodeURIComponent(q))
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (!data.length) { list.style.display='none'; return; }
-      list.innerHTML = data.map(function(s) {
-        var hi = s.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<strong>$1</strong>');
-        return '<li class="suggestion-item" onclick="selectSug(\''+s.replace(/'/g,"\\'")+'\')">' + hi + '</li>';
+  if(!q||q.length<2){list.style.display='none';return;}
+  fetch('/api/suggestions?q='+encodeURIComponent(q))
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.length){list.style.display='none';return;}
+      list.innerHTML=data.map(function(s){
+        var hi=s.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<strong>$1</strong>');
+        return '<li class="suggestion-item" onclick="selectSug(\''+s.replace(/'/g,"\\'")+'\')">' +hi+'</li>';
       }).join('');
       list.style.display='block';
-    }).catch(function(){ list.style.display='none'; });
+    }).catch(function(){list.style.display='none';});
 }
-function selectSug(val) {
-  document.getElementById('search-input').value = val;
+function selectSug(val){
+  document.getElementById('search-input').value=val;
   document.getElementById('suggestions-list').style.display='none';
   document.getElementById('search-form').submit();
 }
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.search-form'))
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.search-form'))
     document.getElementById('suggestions-list').style.display='none';
 });
 
-/* Store filter */
-function filterSite(site, btn) {
-  document.querySelectorAll('#products-grid .product-card').forEach(function(c) {
-    c.style.display = (site==='all' || c.dataset.site===site) ? '' : 'none';
+/* Navbar suggestions */
+(function(){
+  var inp=document.getElementById('nav-si');
+  var list=document.getElementById('nav-sl');
+  if(!inp||!list)return;
+  var timer;
+  inp.addEventListener('input',function(){
+    clearTimeout(timer);
+    var q=inp.value.trim();
+    if(q.length<2){list.classList.remove('show');return;}
+    timer=setTimeout(function(){
+      fetch('/api/suggestions?q='+encodeURIComponent(q))
+        .then(function(r){return r.json();})
+        .then(function(data){
+          if(!data.length){list.classList.remove('show');return;}
+          list.innerHTML=data.slice(0,8).map(function(s){
+            var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+            return '<li class="nsug-li" data-val="'+s.replace(/"/g,'&quot;')+'">'+s.replace(re,'<mark>$1</mark>')+'</li>';
+          }).join('');
+          list.classList.add('show');
+          list.querySelectorAll('.nsug-li').forEach(function(li){
+            li.addEventListener('mousedown',function(e){
+              e.preventDefault();
+              inp.value=li.dataset.val;
+              list.classList.remove('show');
+              window.location.href='/?keyword='+encodeURIComponent(li.dataset.val);
+            });
+          });
+        }).catch(function(){list.classList.remove('show');});
+    },220);
   });
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.addEventListener('click',function(e){
+    if(!inp.contains(e.target)&&!list.contains(e.target))list.classList.remove('show');
+  });
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      list.classList.remove('show');
+      var kw=inp.value.trim();
+      if(kw)window.location.href='/?keyword='+encodeURIComponent(kw);
+    }
+  });
+})();
+
+function filterSite(site,btn){
+  document.querySelectorAll('#products-grid .product-card').forEach(function(c){
+    c.style.display=(site==='all'||c.dataset.site===site)?'':'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
 }
 
-/* Cart modal */
-function openModal(state, title, desc) {
-  document.getElementById('modal-spinner').style.display = state==='loading'?'block':'none';
-  document.getElementById('modal-check').style.display   = state==='success'?'block':'none';
-  document.getElementById('modal-error').style.display   = state==='error'  ?'block':'none';
-  if(title) document.getElementById('modal-title').textContent=title;
-  if(desc)  document.getElementById('modal-desc').textContent=desc;
-  document.getElementById('modal-title').style.color = state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
+function openModal(state,title,desc){
+  document.getElementById('modal-spinner').style.display=state==='loading'?'block':'none';
+  document.getElementById('modal-check').style.display=state==='success'?'block':'none';
+  document.getElementById('modal-error').style.display=state==='error'?'block':'none';
+  if(title)document.getElementById('modal-title').textContent=title;
+  if(desc)document.getElementById('modal-desc').textContent=desc;
+  document.getElementById('modal-title').style.color=state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
   document.getElementById('cart-modal-overlay').classList.add('active');
 }
-function closeModal(){ document.getElementById('cart-modal-overlay').classList.remove('active'); }
+function closeModal(){document.getElementById('cart-modal-overlay').classList.remove('active');}
 
-function addToCart(btn) {
+function addToCart(btn){
   var s=btn.closest('.card-body').querySelector('.product-data');
-  openModal('loading'); var start=Date.now();
+  openModal('loading');var start=Date.now();
   fetch('/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
   .then(function(r){return r.json();})
@@ -377,20 +472,18 @@ function addToCart(btn) {
         openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
         var el=document.getElementById('cart-count');
         if(el&&res.count!==undefined){el.textContent=res.count;el.style.transform='scale(1.5)';setTimeout(function(){el.style.transform='scale(1)';},200);}
-      } else openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
+      }else openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
       setTimeout(closeModal,1500);
     },Math.max(0,700-(Date.now()-start)));
   }).catch(function(){openModal('error','Lỗi mạng','Không thể kết nối.');setTimeout(closeModal,2000);});
 }
-
-function saveFav(btn) {
+function saveFav(btn){
   var s=btn.closest('.card-body').querySelector('.product-data');
   fetch('/favorites/add',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
   .then(function(){openModal('success','Đã thích!','Đã lưu vào mục yêu thích.');setTimeout(closeModal,1500);});
 }
 
-/* AI image upload */
 function handleImageSelect(e){var f=e.target.files[0];if(f)showPreview(f);}
 function handleDrop(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f)showPreview(f);}
 function showPreview(file){
@@ -427,7 +520,7 @@ function runAISearch(){
       if(d.success){
         msg.innerHTML='<div class="ai-result-msg ai-success">✅ Nhận diện: <strong>'+d.keyword+'</strong> — Đang chuyển...</div>';
         setTimeout(function(){window.location.href=d.redirect;},800);
-      } else {
+      }else{
         msg.innerHTML='<div class="ai-result-msg ai-error">❌ '+d.error+'</div>';
         if(btn){btn.disabled=false;btn.textContent='🤖 Thử lại';}
       }

@@ -2634,3 +2634,113 @@ h3 {
   transform: translateY(0) scale(1) !important;
   pointer-events: auto !important;
 }
+/* ================================================================
+   NAVBAR PATCH v2 — thêm vào CUỐI file static/css/style.css
+   - Logo trái, search giữa, auth phải
+   - Bỏ row-reverse cũ
+   - Fix badge site tiếng Việt
+================================================================ */
+
+/* Reset các override cũ */
+.navbar {
+  flex-direction: row !important;
+}
+.navbar .nav-links {
+  flex-direction: row !important;
+  margin-right: 0 !important;
+}
+
+/* ── Site badges với tên tiếng Việt ── */
+/* Thêm fallback cho tên có dấu */
+[class*="site-Di"][class*="ng3A"],
+[class*="site-DiDong3A"] {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+[class*="site-Smart"][class*="Vi"],
+[class*="site-SmartViet"] {
+  background: #16a34a !important;
+  color: #fff !important;
+}
+[class*="site-Bach"][class*="Long"],
+[class*="site-BachLong"] {
+  background: #9333ea !important;
+  color: #fff !important;
+}
+[class*="site-Tien"][class*="Tr"],
+[class*="site-TienTran"] {
+  background: #0891b2 !important;
+  color: #fff !important;
+}
+
+/* Generic fallback cho badge không khớp class */
+.card-site-badge:not([class*="site-Clickbuy"]):not(
+    [class*="site-CellphoneS"]
+  ):not([class*="site-DiD"]):not([class*="site-Smart"]):not(
+    [class*="site-Bach"]
+  ):not([class*="site-Tien"]) {
+  background: #6366f1;
+  color: #fff;
+}
+
+/* Fix card image loading placeholder */
+.card-img-wrap img[src=""],
+.card-img-wrap img:not([src]) {
+  content: url("https://via.placeholder.com/200x200/1a1a24/555?text=No+Image");
+}
+/* ================================================================
+   PATCH — Thêm vào CUỐI file CDIO/static/css/style.css
+   Fix: navbar row-reverse cũ, hover submenu, sort-btn as button
+================================================================ */
+
+/* Reset navbar row-reverse cũ */
+.navbar {
+  flex-direction: row !important;
+}
+.navbar .nav-links {
+  flex-direction: row !important;
+  margin-right: 0 !important;
+}
+
+/* sort-btn hoạt động đúng khi dùng <button> thay <a> */
+.sort-btn {
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+}
+
+/* Hover submenu — đảm bảo luôn hiện */
+.cat-item.has-sub:hover > .cat-submenu {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateX(0) scale(1) !important;
+}
+.cat-dropdown {
+  z-index: 9999 !important;
+}
+.cat-submenu {
+  z-index: 10000 !important;
+}
+
+/* Site badges cho tên tiếng Việt có dấu — dùng inline style trong template
+   nhưng giữ class cũ làm fallback */
+.site-DiĐộng3A,
+[class*="site-Di"][class*="ng3A"] {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+.site-SmartViệt,
+[class*="site-Smart"] {
+  background: #16a34a !important;
+  color: #fff !important;
+}
+.site-BạchLongStore,
+[class*="site-Bach"] {
+  background: #9333ea !important;
+  color: #fff !important;
+}
+.site-TiếnTrầnMobile,
+[class*="site-Tien"] {
+  background: #0891b2 !important;
+  color: #fff !important;
+}
