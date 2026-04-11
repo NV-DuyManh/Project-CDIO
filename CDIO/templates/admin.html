@@ -1,364 +1,1557 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard — PriceHunt</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/dropdown.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — PriceHunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/dropdown.css" />
     <style>
-        .bot-terminal {
-            background: #0a0a0f;
-            border: 1px solid #1a1a24;
-            border-radius: 12px;
-            padding: 20px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            height: 450px;
-            overflow-y: auto;
-            box-shadow: inset 0 0 20px rgba(0,0,0,.8);
-            color: #d1d1e0;
-        }
-        .log-entry {
-            margin-bottom: 6px;
-            font-size: .85rem;
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid rgba(255,255,255,.02);
-            padding-bottom: 4px;
-        }
-        .log-time    { color: #f5a623; opacity: .8; }
-        .log-success { color: #2ecc71; }
-        .log-error   { color: #e74c3c; }
-        .log-info    { color: #3498db; }
-        .bot-pulse {
-            width: 10px; height: 10px;
-            background: #2ecc71; border-radius: 50%;
-            display: inline-block; margin-right: 8px;
-            box-shadow: 0 0 8px #2ecc71;
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0%   { transform: scale(.95); box-shadow: 0 0 0 0 rgba(46,204,113,.7); }
-            70%  { transform: scale(1);   box-shadow: 0 0 0 10px rgba(46,204,113,0); }
-            100% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(46,204,113,0); }
-        }
-    </style>
-</head>
+      /* ══ NAVBAR OVERRIDE ══ */
+      .navbar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        padding: 0 1.5rem !important;
+        gap: 0 !important;
+      }
+      .nav-logo {
+        flex-shrink: 0;
+        margin-right: 0.75rem;
+      }
+      .nav-spacer {
+        flex: 1;
+      }
+      .nav-auth-right {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-shrink: 0;
+      }
+      .cat-item.has-sub:hover > .cat-submenu {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translateX(0) scale(1) !important;
+      }
 
-<body>
+      /* ══ ANALYTICS ══ */
+      .an-grid4 {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 1.25rem;
+      }
+      .an-grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 1.25rem;
+      }
+      .an-2col {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+        margin-bottom: 1.25rem;
+      }
+      .an-kpi {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.9rem 1rem;
+        position: relative;
+      }
+      .an-kpi-label {
+        font-size: 12px;
+        color: var(--text2);
+        margin-bottom: 0.3rem;
+      }
+      .an-kpi-val {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        line-height: 1.1;
+      }
+      .an-kpi-sub {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 0.3rem;
+      }
+      .an-kpi-dot {
+        position: absolute;
+        top: 0.9rem;
+        right: 0.9rem;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .dot-g {
+        background: #22c55e;
+        box-shadow: 0 0 6px #22c55e88;
+      }
+      .dot-a {
+        background: #f5a623;
+      }
+      .dot-r {
+        background: #ef4444;
+      }
+      .an-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-top: 0.4rem;
+      }
+      .bg {
+        background: rgba(34, 197, 94, 0.12);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+      }
+      .ba {
+        background: rgba(245, 166, 35, 0.12);
+        color: #f5a623;
+        border: 1px solid rgba(245, 166, 35, 0.25);
+      }
+      .br {
+        background: rgba(239, 68, 68, 0.12);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+      }
+
+      .an-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+      .an-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.85rem;
+        font-family: "Syne", sans-serif;
+      }
+      .an-chart-wrap {
+        position: relative;
+        width: 100%;
+      }
+
+      .sc-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .sc-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .sc-name {
+        font-size: 12px;
+        color: var(--text2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+      }
+      .sc-sub {
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .sc-cnt {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .leg-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .leg-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .leg-name {
+        flex: 1.2;
+        color: var(--text2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 11px;
+      }
+      .leg-bw {
+        flex: 1.5;
+        height: 4px;
+        background: var(--surface2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .leg-bf {
+        height: 100%;
+        border-radius: 2px;
+      }
+      .leg-val {
+        min-width: 34px;
+        text-align: right;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 11px;
+      }
+
+      .sec-lbl {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin: 0.25rem 0 0.7rem;
+      }
+
+      /* ══ BOT TERMINAL ══ */
+      .bot-term {
+        background: #0a0a0f;
+        border: 1px solid #1a1a24;
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        height: 220px;
+        overflow-y: auto;
+        font-family: "Fira Code", "Courier New", monospace;
+        color: #d1d1e0;
+      }
+      .bot-line {
+        display: flex;
+        gap: 8px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        margin-bottom: 4px;
+        font-size: 0.82rem;
+      }
+      .bot-line:last-child {
+        border-bottom: none;
+      }
+      .bl-t {
+        color: #f5a623;
+        opacity: 0.7;
+        flex-shrink: 0;
+      }
+      .bl-ok {
+        color: #2ecc71;
+      }
+      .bl-err {
+        color: #e74c3c;
+      }
+      .bl-info {
+        color: #3498db;
+      }
+
+      /* ══ DATABASE VIEWER ══ */
+      .db-layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 14px;
+        min-height: 500px;
+      }
+      .db-sidebar {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .db-tbl-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        color: var(--text2);
+        font-size: 0.85rem;
+        transition: all 0.15s;
+        border-left: 2px solid transparent;
+      }
+      .db-tbl-item:hover {
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .db-tbl-item.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: rgba(245, 166, 35, 0.06);
+      }
+      .db-tbl-badge {
+        background: var(--surface2);
+        color: var(--text3);
+        font-size: 0.7rem;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+      .db-tbl-item.active .db-tbl-badge {
+        background: rgba(245, 166, 35, 0.15);
+        color: var(--accent);
+      }
+      .db-content {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .db-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .db-search {
+        flex: 1;
+        min-width: 180px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.4rem 0.8rem;
+        color: var(--text);
+        font-size: 0.85rem;
+        font-family: "DM Sans", sans-serif;
+        outline: none;
+      }
+      .db-search:focus {
+        border-color: rgba(245, 166, 35, 0.4);
+      }
+      .db-info {
+        font-size: 0.8rem;
+        color: var(--text3);
+      }
+      .db-table-wrap {
+        overflow-x: auto;
+        flex: 1;
+      }
+      .db-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      .db-table th {
+        padding: 0.55rem 0.75rem;
+        text-align: left;
+        color: var(--text3);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface2);
+        white-space: nowrap;
+      }
+      .db-table td {
+        padding: 0.5rem 0.75rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .db-table tr:last-child td {
+        border-bottom: none;
+      }
+      .db-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .db-null {
+        color: var(--text3);
+        font-style: italic;
+        font-size: 0.75rem;
+      }
+      .db-pgn {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .db-pgn-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text2);
+        padding: 0.3rem 0.7rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+        transition: all 0.15s;
+      }
+      .db-pgn-btn:hover {
+        border-color: var(--border-hover);
+        color: var(--text);
+      }
+      .db-pgn-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #000;
+        font-weight: 600;
+      }
+      .db-pgn-btn:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      .db-empty {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text3);
+        font-size: 0.9rem;
+      }
+
+      /* ══ SECTION LABEL ══ */
+      .bot-pulse {
+        width: 10px;
+        height: 10px;
+        background: #2ecc71;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+        box-shadow: 0 0 8px #2ecc71;
+        animation: pulse-g 2s infinite;
+      }
+      @keyframes pulse-g {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+        }
+        70% {
+          transform: scale(1);
+          box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .an-grid4 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .an-grid3 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .an-2col {
+          grid-template-columns: 1fr;
+        }
+        .db-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 560px) {
+        .an-grid4 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ══ NAVBAR ══ -->
     <nav class="navbar">
- 
-  <!-- BÊN PHẢI: Logo + tên trang -->
-  <a href="/" class="nav-logo">
-    <span class="logo-icon">⚡</span>
-    <span class="logo-text">PriceHunt</span>
-  </a>
- 
-  <!-- BÊN TRÁI: tất cả nav links + dropdown danh mục -->
-  <div class="nav-links" id="nav-links">
- 
-    <a href="/"        class="nav-link">Tìm Kiếm</a>
-    <a href="/history" class="nav-link">Lịch Sử</a>
- 
-    <!-- ── Dropdown Danh mục ──────────────────────────── -->
-    <div class="nav-category-wrap" id="cat-wrap">
-      <button class="nav-category-btn" id="cat-btn"
-              aria-haspopup="true" aria-expanded="false"
-              onclick="toggleCatDropdown(event)">
-        Danh mục <span class="caret">▼</span>
-      </button>
- 
-      <div class="cat-dropdown" id="cat-dropdown" role="menu">
- 
-        <!-- iPhone -->
-        <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
-          <span>📱 iPhone</span><span class="sub-arrow">▶</span>
-          <div class="cat-submenu">
-            <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/iphone"      class="cat-sub-item">Tất cả iPhone</a>
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">PriceHunt</span>
+      </a>
+
+      <div
+        style="display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0"
+      >
+        <a href="/" class="nav-link">Tìm Kiếm</a>
+        <div class="nav-category-wrap" id="cat-wrap">
+          <button
+            class="nav-category-btn"
+            id="cat-btn"
+            aria-haspopup="true"
+            aria-expanded="false"
+            onclick="toggleCatDropdown(event)"
+          >
+            Danh mục <span class="caret">▼</span>
+          </button>
+          <div class="cat-dropdown" id="cat-dropdown" role="menu">
+            <a
+              href="/category/brand/iphone"
+              class="cat-item has-sub"
+              tabindex="0"
+              ><span>📱 iPhone</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng SP</span
+                ><a href="/category/brand/iphone" class="cat-sub-item"
+                  >Tất cả iPhone</a
+                >
+                <div class="cat-divider"></div>
+                <a href="/category/series/iphone-17" class="cat-sub-item"
+                  >iPhone 17</a
+                ><a href="/category/series/iphone-16" class="cat-sub-item"
+                  >iPhone 16</a
+                ><a href="/category/series/iphone-15" class="cat-sub-item"
+                  >iPhone 15</a
+                ><a href="/category/series/iphone-14" class="cat-sub-item"
+                  >iPhone 14</a
+                >
+              </div></a
+            >
+            <a
+              href="/category/brand/samsung"
+              class="cat-item has-sub"
+              tabindex="0"
+              ><span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng SP</span
+                ><a href="/category/brand/samsung" class="cat-sub-item"
+                  >Tất cả Samsung</a
+                >
+                <div class="cat-divider"></div>
+                <a href="/category/series/samsung-s25" class="cat-sub-item"
+                  >Galaxy S25</a
+                ><a href="/category/series/samsung-s24" class="cat-sub-item"
+                  >Galaxy S24</a
+                ><a href="/category/series/samsung-a" class="cat-sub-item"
+                  >Galaxy A</a
+                ><a href="/category/series/samsung-z" class="cat-sub-item"
+                  >Galaxy Z</a
+                >
+              </div></a
+            >
             <div class="cat-divider"></div>
-            <a href="/category/series/iphone-17"  class="cat-sub-item">iPhone 17 Series</a>
-            <a href="/category/series/iphone-16"  class="cat-sub-item">iPhone 16 Series</a>
-            <a href="/category/series/iphone-15"  class="cat-sub-item">iPhone 15 Series</a>
-            <a href="/category/series/iphone-14"  class="cat-sub-item">iPhone 14 Series</a>
+            <a href="/category/brand/other" class="cat-item"
+              ><span>📦 Thương hiệu khác</span></a
+            >
           </div>
-        </a>
- 
-        <!-- Samsung -->
-        <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
-          <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
-          <div class="cat-submenu">
-            <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
-            <div class="cat-divider"></div>
-            <span class="cat-sub-label">Galaxy S</span>
-            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
-            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
-            <div class="cat-divider"></div>
-            <span class="cat-sub-label">Galaxy A / Z</span>
-            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
-            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
-          </div>
-        </a>
- 
-        <div class="cat-divider"></div>
-        <a href="/category/brand/other" class="cat-item">
-          <span>📦 Thương hiệu khác</span>
-        </a>
+        </div>
       </div>
-    </div>
-    <!-- ── /Dropdown ───────────────────────────────────── -->
- 
-    <!-- Auth links — Jinja2 block, copy vào từng template -->
-    {% if session.get('user_id') %}
-      <a href="/cart"    class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
-      <a href="/orders"  class="nav-link">Đơn hàng</a>
-      <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
-      <a href="/logout"  class="nav-btn btn-ghost">Đăng xuất</a>
-    {% else %}
-      <a href="/login"    class="nav-btn btn-ghost">Đăng nhập</a>
-      <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
-    {% endif %}
-  </div>
- 
-  <!-- Mobile hamburger -->
-  <button class="nav-toggle"
-          onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
-</nav>
+
+      <div style="flex: 1"></div>
+
+      <div class="nav-auth-right">
+        {% if session.get('user_id') %}
+        <a href="/cart" class="nav-link cart-link"
+          >🛒 <span class="cart-count" id="cart-count">0</span></a
+        >
+        <a href="/orders" class="nav-link">Đơn hàng</a>
+        <a href="/profile" class="nav-link nav-profile"
+          >{{ session.get('username') }}</a
+        >
+        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+        <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
+      </div>
+      <button
+        class="nav-toggle"
+        onclick="document.getElementById('nav-links').classList.toggle('open')"
+      >
+        ☰
+      </button>
+    </nav>
 
     <div class="page-container">
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">🛡️ Admin Dashboard</h1>
-                <p class="page-sub">Quản lý toàn bộ hệ thống PriceHunt</p>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">🛡️ Admin Dashboard</h1>
+          <p class="page-sub">Quản lý hệ thống PriceHunt</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <span class="bot-pulse"></span>
+          <span style="font-size: 0.85rem; color: var(--text2)"
+            >Bot đang chạy</span
+          >
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="admin-stats-grid" style="margin-bottom: 1.5rem">
+        <div class="admin-stat-card">
+          <span class="admin-stat-icon">👤</span>
+          <div><strong>{{ stats.users }}</strong><span>Người dùng</span></div>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-icon">📦</span>
+          <div><strong>{{ stats.orders }}</strong><span>Đơn hàng</span></div>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-icon">💬</span>
+          <div><strong>{{ stats.comments }}</strong><span>Bình luận</span></div>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-icon">🛍️</span>
+          <div>
+            <strong>{{ stats.products }}</strong><span>Sản phẩm cào</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="showTab('analytics', this)">
+          📊 Phân tích
+        </button>
+        <button class="admin-tab" onclick="showTab('database', this)">
+          🗄️ Cơ sở dữ liệu
+        </button>
+        <button class="admin-tab" onclick="showTab('users', this)">
+          👤 Người dùng
+        </button>
+        <button class="admin-tab" onclick="showTab('orders', this)">
+          📦 Đơn hàng
+        </button>
+        <button class="admin-tab" onclick="showTab('comments', this)">
+          💬 Bình luận
+        </button>
+        <button class="admin-tab" onclick="showTab('products', this)">
+          🛍️ Sản phẩm
+        </button>
+        <button class="admin-tab" onclick="showTab('bot', this)">
+          🤖 Bot Activity
+        </button>
+      </div>
+
+      <!-- ══ TAB: ANALYTICS ══ -->
+      <div id="tab-analytics" class="admin-tab-content active">
+        <div class="sec-lbl">Trạng thái hệ thống</div>
+        <div class="an-grid4">
+          <div class="an-kpi">
+            <div class="an-kpi-dot dot-g"></div>
+            <div class="an-kpi-label">Crawler Engine</div>
+            <div class="an-kpi-val">Online</div>
+            <div class="an-kpi-sub">
+              Uptime <span id="an-uptime">00:00:00</span>
             </div>
+            <span class="an-badge bg">Hoạt động</span>
+          </div>
+          <div class="an-kpi">
+            <div class="an-kpi-label">Sản phẩm hôm nay</div>
+            <div class="an-kpi-val" id="an-today">—</div>
+            <div class="an-kpi-sub">Tổng DB: <span id="an-total">—</span></div>
+            <span class="an-badge bg">Live</span>
+          </div>
+          <div class="an-kpi">
+            <div class="an-kpi-label">Tỷ lệ lỗi</div>
+            <div class="an-kpi-val" id="an-err">—</div>
+            <div class="an-kpi-sub">Dựa trên phân bổ 24h</div>
+            <span class="an-badge" id="an-err-bdg">—</span>
+          </div>
+          <div class="an-kpi">
+            <div class="an-kpi-label">Lần cào cuối</div>
+            <div class="an-kpi-val" id="an-last" style="font-size: 16px">—</div>
+            <div class="an-kpi-sub">
+              Users: <span id="an-users">—</span> | Orders:
+              <span id="an-orders">—</span>
+            </div>
+            <span class="an-badge bg">Tự động</span>
+          </div>
         </div>
 
-        <div class="admin-stats-grid">
-            <div class="admin-stat-card">
-                <span class="admin-stat-icon">👤</span>
-                <div><strong>{{ stats.users }}</strong><span>Người dùng</span></div>
-            </div>
-            <div class="admin-stat-card">
-                <span class="admin-stat-icon">📦</span>
-                <div><strong>{{ stats.orders }}</strong><span>Đơn hàng</span></div>
-            </div>
-            <div class="admin-stat-card">
-                <span class="admin-stat-icon">🛍️</span>
-                <div><strong>{{ stats.products }}</strong><span>Sản phẩm cào</span></div>
-            </div>
-            <div class="admin-stat-card" style="border:1px solid rgba(245,166,35,.2)">
-                <div style="display:flex;align-items:center;">
-                    <span class="bot-pulse"></span>
-                    <strong>Hoạt động</strong>
-                </div>
-                <span>Bot cào ngầm</span>
-            </div>
+        <div class="sec-lbl">Trạng thái scraper (24h)</div>
+        <div class="an-grid3" id="an-sc-grid">
+          <div style="color: var(--text3); font-size: 13px; padding: 0.5rem">
+            Đang tải...
+          </div>
         </div>
 
-        <div class="admin-tabs">
-            <button class="admin-tab active" onclick="showTab('users',   this)">👤 Người dùng</button>
-            <button class="admin-tab"        onclick="showTab('orders',  this)">📦 Đơn hàng</button>
-            <button class="admin-tab"        onclick="showTab('comments',this)">💬 Bình luận</button>
-            <button class="admin-tab"        onclick="showTab('products',this)">🛍️ Sản phẩm</button>
-            <button class="admin-tab"        onclick="showTab('bot',     this)">🤖 Bot Activity</button>
+        <div class="an-card">
+          <div class="an-card-title">Xu hướng cào theo ngày (7 ngày)</div>
+          <div class="an-chart-wrap" style="height: 190px">
+            <canvas
+              id="an-trend"
+              role="img"
+              aria-label="Biểu đồ đường sản phẩm cào 7 ngày"
+              >Số sản phẩm cào mỗi ngày trong tuần qua.</canvas
+            >
+          </div>
         </div>
 
-        <!-- ── Users ──────────────────────────────────────────── -->
-        <div id="tab-users" class="admin-tab-content active">
-            <div class="table-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th><th>Username</th><th>Email</th>
-                            <th>Ngày tạo</th><th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td><code>{{ user.id }}</code></td>
-                            <td><strong>{{ user.username }}</strong></td>
-                            <td>{{ user.email }}</td>
-                            <td class="date-cell">{{ user.created_at }}</td>
-                            <td>
-                                {% if not user.is_admin %}
-                                <form action="/admin/delete/user/{{ user.id }}" method="POST"
-                                      style="display:inline"
-                                      onsubmit="return confirm('Xóa người dùng này?')">
-                                    <button type="submit" class="btn-delete">Xóa</button>
-                                </form>
-                                {% else %}
-                                <span class="admin-badge">Admin</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="an-2col">
+          <div class="an-card">
+            <div class="an-card-title">Top từ khóa tìm kiếm</div>
+            <div class="an-chart-wrap" style="height: 260px">
+              <canvas
+                id="an-kw"
+                role="img"
+                aria-label="Biểu đồ cột ngang top từ khóa"
+                >Top từ khóa tìm kiếm nhiều nhất.</canvas
+              >
             </div>
+          </div>
+          <div class="an-card">
+            <div class="an-card-title">Phân bổ theo sàn</div>
+            <div style="display: flex; gap: 12px; align-items: flex-start">
+              <div
+                class="an-chart-wrap"
+                style="height: 180px; max-width: 180px; flex-shrink: 0"
+              >
+                <canvas
+                  id="an-donut"
+                  role="img"
+                  aria-label="Biểu đồ tròn phân bổ theo cửa hàng"
+                  >Phân bổ sản phẩm theo từng cửa hàng.</canvas
+                >
+              </div>
+              <div
+                id="an-legend"
+                style="flex: 1; min-width: 0; padding-top: 0.25rem"
+              ></div>
+            </div>
+          </div>
         </div>
 
-        <!-- ── Orders ─────────────────────────────────────────── -->
-        <div id="tab-orders" class="admin-tab-content">
-            <div class="table-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th><th>User</th><th>Sản phẩm</th><th>Giá</th>
-                            <th>Trạng thái</th><th>Ngày</th><th>Xóa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in all_orders %}
-                        <tr>
-                            <td><code>#{{ order.id }}</code></td>
-                            <td>{{ order.username or order.user_id }}</td>
-                            <td class="title-cell">{{ order.product_name[:40] }}...</td>
-                            <td class="price-cell">{{ order.price }}</td>
-                            <td>
-                                <span class="status-badge status-{{ order.status }}">
-                                    {{ order.status }}
-                                </span>
-                            </td>
-                            <td class="date-cell">{{ order.created_at }}</td>
-                            <td>
-                                <form action="/admin/delete/order/{{ order.id }}" method="POST"
-                                      onsubmit="return confirm('Xóa?')">
-                                    <button type="submit" class="btn-delete">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="an-card">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.75rem;
+            "
+          >
+            <div class="an-card-title" style="margin: 0">
+              >_ Nhật ký hoạt động
             </div>
+            <span id="an-sync" style="font-size: 0.75rem; color: var(--text3)"
+              >Đang kết nối...</span
+            >
+          </div>
+          <div class="bot-term" id="an-log">
+            <div style="color: #888; font-size: 0.82rem">Đang tải...</div>
+          </div>
         </div>
+      </div>
 
-        <!-- ── Comments ───────────────────────────────────────── -->
-        <div id="tab-comments" class="admin-tab-content">
-            <div class="table-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th><th>User</th><th>Sản phẩm</th>
-                            <th>Rating</th><th>Nội dung</th><th>Ngày</th><th>Xóa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for comment in all_comments %}
-                        <tr>
-                            <td><code>{{ comment.id }}</code></td>
-                            <td>{{ comment.username or comment.user_id }}</td>
-                            <td class="title-cell">{{ comment.product_title[:30] }}...</td>
-                            <td>{{ '⭐' * (comment.rating or 0) }}</td>
-                            <td>{{ comment.content[:50] }}...</td>
-                            <td class="date-cell">{{ comment.created_at }}</td>
-                            <td>
-                                <form action="/admin/delete/comment/{{ comment.id }}" method="POST"
-                                      onsubmit="return confirm('Xóa?')">
-                                    <button type="submit" class="btn-delete">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+      <!-- ══ TAB: DATABASE VIEWER ══ -->
+      <div id="tab-database" class="admin-tab-content">
+        <div class="db-layout">
+          <!-- Sidebar: danh sách bảng -->
+          <div class="db-sidebar">
+            <div
+              style="
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.78rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: var(--text3);
+              "
+            >
+              Bảng dữ liệu
             </div>
-        </div>
+            <div id="db-tbl-list">
+              <div
+                style="padding: 1rem; color: var(--text3); font-size: 0.85rem"
+              >
+                Đang tải...
+              </div>
+            </div>
+          </div>
 
-        <!-- ── Products ───────────────────────────────────────── -->
-        <div id="tab-products" class="admin-tab-content">
-            <div class="table-card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Keyword</th><th>Sàn</th><th>Tên</th>
-                            <th>Giá</th><th>Thời gian</th><th>Xóa</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in all_products %}
-                        <tr>
-                            <td><strong>{{ p.keyword }}</strong></td>
-                            <td>
-                                <span class="site-pill site-{{ p.site | replace(' ','') }}">
-                                    {{ p.site }}
-                                </span>
-                            </td>
-                            <td class="title-cell">{{ p.title[:40] }}...</td>
-                            <td class="price-cell">{{ p.price_str }}</td>
-                            <td class="date-cell">{{ p.created_at }}</td>
-                            <td>
-                                <form action="/admin/delete/product/{{ p.id }}" method="POST"
-                                      onsubmit="return confirm('Xóa?')">
-                                    <button type="submit" class="btn-delete">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+          <!-- Content: dữ liệu bảng -->
+          <div class="db-content" id="db-content">
+            <div class="db-empty">
+              <div
+                style="font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.3"
+              >
+                🗄️
+              </div>
+              <p>Chọn một bảng để xem dữ liệu</p>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- ── Bot Activity ───────────────────────────────────── -->
-        <div id="tab-bot" class="admin-tab-content">
-            <div class="table-card" style="padding:25px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-                    <h3 style="margin:0">>_ Nhật ký Robot (Live Feed)</h3>
-                    <span id="bot-last-sync" style="font-size:.8rem;opacity:.5">
-                        Cập nhật: Đang kết nối...
-                    </span>
-                </div>
-                <div class="bot-terminal" id="bot-logs-container">
-                    <div class="log-entry log-info">
-                        <span>[SYSTEM]</span> Đang khởi tạo kết nối tới Background Scheduler...
-                    </div>
-                </div>
-            </div>
+      <!-- ══ TAB: USERS ══ -->
+      <div id="tab-users" class="admin-tab-content">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Admin</th>
+                <th>Ngày tạo</th>
+                <th>Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td><code>{{ u.id }}</code></td>
+                <td><strong>{{ u.username }}</strong></td>
+                <td>{{ u.email }}</td>
+                <td>
+                  {% if u.is_admin %}<span class="admin-badge">Admin</span>{%
+                  else %}—{% endif %}
+                </td>
+                <td class="date-cell">{{ u.created_at }}</td>
+                <td>
+                  {% if not u.is_admin %}
+                  <form
+                    action="/admin/delete/user/{{ u.id }}"
+                    method="POST"
+                    style="display: inline"
+                    onsubmit="return confirm('Xóa user này?');"
+                  >
+                    <button type="submit" class="btn-delete">Xóa</button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="empty-row">Không có dữ liệu</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      <!-- ══ TAB: ORDERS ══ -->
+      <div id="tab-orders" class="admin-tab-content">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>SL</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày</th>
+                <th>Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in all_orders %}
+              <tr>
+                <td><code>#{{ o.id }}</code></td>
+                <td>{{ o.username or o.user_id }}</td>
+                <td class="title-cell">
+                  {{ (o.product_name or '')[:35] }}{% if (o.product_name or
+                  '')|length > 35 %}...{% endif %}
+                </td>
+                <td class="price-cell">{{ o.price }}</td>
+                <td>{{ o.quantity or 1 }}</td>
+                <td>{{ o.payment_method or '—' }}</td>
+                <td>
+                  <span class="status-badge status-{{ o.status }}"
+                    >{{ o.status }}</span
+                  >
+                </td>
+                <td class="date-cell">{{ o.created_at }}</td>
+                <td>
+                  <form
+                    action="/admin/delete/order/{{ o.id }}"
+                    method="POST"
+                    onsubmit="return confirm('Xóa?');"
+                  >
+                    <button type="submit" class="btn-delete">Xóa</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="9" class="empty-row">Không có đơn hàng</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ TAB: COMMENTS ══ -->
+      <div id="tab-comments" class="admin-tab-content">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Sản phẩm</th>
+                <th>Rating</th>
+                <th>Nội dung</th>
+                <th>Ngày</th>
+                <th>Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in all_comments %}
+              <tr>
+                <td><code>{{ c.id }}</code></td>
+                <td>{{ c.username or c.user_id }}</td>
+                <td class="title-cell">{{ (c.product_title or '')[:30] }}</td>
+                <td>{{ '⭐' * (c.rating|int if c.rating else 0) }}</td>
+                <td>{{ (c.content or '')[:50] }}</td>
+                <td class="date-cell">{{ c.created_at }}</td>
+                <td>
+                  <form
+                    action="/admin/delete/comment/{{ c.id }}"
+                    method="POST"
+                    onsubmit="return confirm('Xóa?');"
+                  >
+                    <button type="submit" class="btn-delete">Xóa</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="empty-row">Không có bình luận</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ TAB: PRODUCTS ══ -->
+      <div id="tab-products" class="admin-tab-content">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Keyword</th>
+                <th>Sàn</th>
+                <th>Tên</th>
+                <th>Giá</th>
+                <th>Thời gian</th>
+                <th>Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in all_products %}
+              <tr>
+                <td><strong>{{ p.keyword }}</strong></td>
+                <td>
+                  <span class="site-pill site-{{ p.site|replace(' ','') }}"
+                    >{{ p.site }}</span
+                  >
+                </td>
+                <td class="title-cell">{{ (p.title or '')[:40] }}</td>
+                <td class="price-cell">{{ p.price_str }}</td>
+                <td class="date-cell">{{ p.created_at }}</td>
+                <td>
+                  <form
+                    action="/admin/delete/product/{{ p.id }}"
+                    method="POST"
+                    onsubmit="return confirm('Xóa?');"
+                  >
+                    <button type="submit" class="btn-delete">Xóa</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="empty-row">Không có sản phẩm</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ TAB: BOT ══ -->
+      <div id="tab-bot" class="admin-tab-content">
+        <div class="table-card" style="padding: 25px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 16px;
+            "
+          >
+            <h3 style="margin: 0; font-family: &quot;Syne&quot;, sans-serif">
+              >_ Nhật ký Robot (Live)
+            </h3>
+            <span id="bot-sync" style="font-size: 0.8rem; opacity: 0.5"
+              >Đang kết nối...</span
+            >
+          </div>
+          <div class="bot-term" id="bot-term">
+            <div class="bot-line">
+              <span class="bl-info">[SYSTEM] Đang khởi tạo...</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer class="footer"><p>© 2025 PriceHunt</p></footer>
+
     <script src="/static/js/main.js"></script>
     <script src="/static/js/dropdown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     <script>
-        function showTab(name, btn) {
-            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + name).classList.add('active');
-            btn.classList.add('active');
+      /* ═══════════════════════════════════════════════════════
+   TAB SWITCHER
+═══════════════════════════════════════════════════════ */
+      function showTab(name, btn) {
+        document.querySelectorAll(".admin-tab-content").forEach(function (t) {
+          t.classList.remove("active");
+        });
+        document.querySelectorAll(".admin-tab").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        document.getElementById("tab-" + name).classList.add("active");
+        btn.classList.add("active");
+        if (name === "database" && !window._dbInited) {
+          window._dbInited = true;
+          initDBViewer();
         }
+      }
 
-        function updateBotLogs() {
-            fetch('/api/bot-logs')
-                .then(res => res.json())
-                .then(data => {
-                    const container = document.getElementById('bot-logs-container');
-                    const syncLabel = document.getElementById('bot-last-sync');
-                    if (!data.length) return;
-                    container.innerHTML = data.map(log => {
-                        let statusClass = 'log-info';
-                        if (log.includes('✅')) statusClass = 'log-success';
-                        if (log.includes('❌')) statusClass = 'log-error';
-                        const timeMatch = log.match(/\[(.*?)\]/);
-                        const timeStr   = timeMatch ? timeMatch[0] : '';
-                        const message   = log.replace(timeStr, '');
-                        return `<div class="log-entry ${statusClass}">
-                                    <span class="log-time">${timeStr}</span> ${message}
-                                </div>`;
-                    }).join('');
-                    syncLabel.innerText = 'Cập nhật: ' + new Date().toLocaleTimeString();
+      /* ═══════════════════════════════════════════════════════
+   ANALYTICS
+═══════════════════════════════════════════════════════ */
+      var _charts = {};
+      var _startTime = Date.now();
+      var SITE_COLORS = {
+        CellphoneS: "#3266ad",
+        Clickbuy: "#BA7517",
+        "Di Động 3A": "#185FA5",
+        "Smart Việt": "#3B6D11",
+        "Bạch Long Store": "#7F77DD",
+        "Tiến Trần Mobile": "#D85A30",
+      };
+      var FB_COLORS = [
+        "#3266ad",
+        "#BA7517",
+        "#3B6D11",
+        "#7F77DD",
+        "#D85A30",
+        "#185FA5",
+      ];
+      function sc(name, i) {
+        return SITE_COLORS[name] || FB_COLORS[i % FB_COLORS.length];
+      }
+
+      function api(url, cb) {
+        fetch(url)
+          .then(function (r) {
+            return r.json();
+          })
+          .then(cb)
+          .catch(function (e) {
+            console.warn(url, e);
+          });
+      }
+      function setText(id, v) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = v;
+      }
+      function pad(n) {
+        return String(n).padStart(2, "0");
+      }
+
+      function tickUptime() {
+        var e = Date.now() - _startTime;
+        setText(
+          "an-uptime",
+          pad(Math.floor(e / 3600000)) +
+            ":" +
+            pad(Math.floor((e % 3600000) / 60000)) +
+            ":" +
+            pad(Math.floor((e % 60000) / 1000)),
+        );
+      }
+
+      function refreshSummary() {
+        api("/api/analytics/summary", function (d) {
+          setText("an-today", (d.today_count || 0).toLocaleString("vi-VN"));
+          setText("an-total", (d.total_count || 0).toLocaleString("vi-VN"));
+          setText("an-users", d.user_count || 0);
+          setText("an-orders", d.order_count || 0);
+          setText("an-last", d.last_crawl || "—");
+          setText("an-err", (d.error_rate || 0) + "%");
+          var bdg = document.getElementById("an-err-bdg");
+          if (bdg) {
+            if (d.error_rate === 0) {
+              bdg.textContent = "Ổn định";
+              bdg.className = "an-badge bg";
+            } else if (d.error_rate < 20) {
+              bdg.textContent = "Cảnh báo";
+              bdg.className = "an-badge ba";
+            } else {
+              bdg.textContent = "Có vấn đề";
+              bdg.className = "an-badge br";
+            }
+          }
+        });
+      }
+
+      function refreshScrapers() {
+        api("/api/analytics/scraper-status", function (data) {
+          var el = document.getElementById("an-sc-grid");
+          if (!el) return;
+          el.innerHTML = data
+            .map(function (s) {
+              var dot = s.online ? "#22c55e" : "#ef4444";
+              var lbl = s.online ? "Online" : "Offline";
+              return (
+                '<div class="sc-card"><div class="sc-dot" style="background:' +
+                dot +
+                '"></div><div style="flex:1;min-width:0"><div class="sc-name">' +
+                s.name +
+                '</div><div class="sc-sub">' +
+                lbl +
+                '</div></div><div style="text-align:right"><div class="sc-cnt">' +
+                s.count +
+                '</div><div class="sc-sub">24h</div></div></div>'
+              );
+            })
+            .join("");
+        });
+      }
+
+      function buildTrend(data) {
+        var c = document.getElementById("an-trend");
+        if (!c || !window.Chart) return;
+        if (_charts.trend) _charts.trend.destroy();
+        _charts.trend = new Chart(c, {
+          type: "line",
+          data: {
+            labels: data.map(function (d) {
+              return d.day ? d.day.slice(5) : "";
+            }),
+            datasets: [
+              {
+                label: "Sản phẩm",
+                data: data.map(function (d) {
+                  return d.count;
+                }),
+                borderColor: "#185FA5",
+                backgroundColor: "rgba(24,95,165,.08)",
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: "#185FA5",
+                tension: 0.35,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#888", font: { size: 11 } },
+              },
+              y: {
+                grid: { color: "rgba(128,128,128,.12)" },
+                ticks: { color: "#888", font: { size: 11 } },
+              },
+            },
+          },
+        });
+      }
+
+      function buildKeywords(data) {
+        var c = document.getElementById("an-kw");
+        if (!c || !window.Chart) return;
+        if (_charts.kw) _charts.kw.destroy();
+        _charts.kw = new Chart(c, {
+          type: "bar",
+          data: {
+            labels: data.map(function (d) {
+              return d.keyword;
+            }),
+            datasets: [
+              {
+                label: "Lượt tìm",
+                data: data.map(function (d) {
+                  return d.count;
+                }),
+                backgroundColor: "#185FA5",
+                borderRadius: 4,
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { color: "rgba(128,128,128,.12)" },
+                ticks: { color: "#888", font: { size: 11 } },
+              },
+              y: {
+                grid: { display: false },
+                ticks: { color: "#555", font: { size: 11 }, autoSkip: false },
+              },
+            },
+          },
+        });
+      }
+
+      function buildDonut(data) {
+        var c = document.getElementById("an-donut");
+        if (!c || !window.Chart) return;
+        if (_charts.donut) _charts.donut.destroy();
+        var colors = data.map(function (d, i) {
+          return sc(d.site, i);
+        });
+        _charts.donut = new Chart(c, {
+          type: "doughnut",
+          data: {
+            labels: data.map(function (d) {
+              return d.site;
+            }),
+            datasets: [
+              {
+                data: data.map(function (d) {
+                  return d.percent;
+                }),
+                backgroundColor: colors,
+                borderWidth: 0,
+                hoverOffset: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "68%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    return " " + ctx.label + ": " + ctx.raw + "%";
+                  },
+                },
+              },
+            },
+          },
+        });
+        var leg = document.getElementById("an-legend");
+        if (!leg) return;
+        leg.innerHTML = data
+          .map(function (d, i) {
+            return (
+              '<div class="leg-row"><div class="leg-dot" style="background:' +
+              colors[i] +
+              '"></div><span class="leg-name">' +
+              d.site +
+              '</span><div class="leg-bw"><div class="leg-bf" style="width:' +
+              d.percent +
+              "%;background:" +
+              colors[i] +
+              '"></div></div><span class="leg-val">' +
+              d.percent +
+              "%</span></div>"
+            );
+          })
+          .join("");
+      }
+
+      function refreshLog() {
+        api("/api/bot-logs", function (logs) {
+          var el = document.getElementById("an-log");
+          if (!el || !logs.length) return;
+          el.innerHTML = logs
+            .map(function (l) {
+              var cls = l.includes("✅")
+                ? "bl-ok"
+                : l.includes("❌")
+                  ? "bl-err"
+                  : "bl-info";
+              var m = l.match(/^\[([^\]]+)\]/);
+              var t = m ? '<span class="bl-t">' + m[0] + "</span> " : "";
+              var msg = m ? l.replace(m[0], "").trim() : l;
+              return (
+                '<div class="bot-line">' +
+                t +
+                '<span class="' +
+                cls +
+                '">' +
+                msg +
+                "</span></div>"
+              );
+            })
+            .join("");
+          el.scrollTop = 0;
+          setText(
+            "an-sync",
+            "Cập nhật: " + new Date().toLocaleTimeString("vi-VN"),
+          );
+        });
+      }
+
+      function botRefresh() {
+        api("/api/bot-logs", function (logs) {
+          var el = document.getElementById("bot-term");
+          if (!el || !logs.length) return;
+          el.innerHTML = logs
+            .map(function (l) {
+              var cls = l.includes("✅")
+                ? "bl-ok"
+                : l.includes("❌")
+                  ? "bl-err"
+                  : "bl-info";
+              return (
+                '<div class="bot-line"><span class="' +
+                cls +
+                '">' +
+                l +
+                "</span></div>"
+              );
+            })
+            .join("");
+          setText(
+            "bot-sync",
+            "Cập nhật: " + new Date().toLocaleTimeString("vi-VN"),
+          );
+        });
+      }
+
+      /* Init analytics */
+      refreshSummary();
+      refreshScrapers();
+      api("/api/analytics/crawl-trend", buildTrend);
+      api("/api/analytics/top-keywords", buildKeywords);
+      api("/api/analytics/site-distribution", buildDonut);
+      refreshLog();
+
+      setInterval(refreshSummary, 15000);
+      setInterval(refreshScrapers, 8000);
+      setInterval(refreshLog, 5000);
+      setInterval(botRefresh, 3000);
+      setInterval(tickUptime, 1000);
+      botRefresh();
+
+      /* ═══════════════════════════════════════════════════════
+   DATABASE VIEWER
+═══════════════════════════════════════════════════════ */
+      var _dbState = { table: null, page: 1, search: "", timer: null };
+
+      function initDBViewer() {
+        api("/api/admin/tables", function (tables) {
+          var list = document.getElementById("db-tbl-list");
+          if (!list) return;
+          list.innerHTML = tables
+            .map(function (t) {
+              return (
+                '<div class="db-tbl-item" onclick="loadTable(\'' +
+                t.name +
+                '\')" id="dbtbl-' +
+                t.name +
+                '">' +
+                t.name +
+                '<span class="db-tbl-badge">' +
+                t.rows +
+                "</span></div>"
+              );
+            })
+            .join("");
+        });
+      }
+
+      function loadTable(name) {
+        _dbState.table = name;
+        _dbState.page = 1;
+        _dbState.search = "";
+
+        document.querySelectorAll(".db-tbl-item").forEach(function (el) {
+          el.classList.remove("active");
+        });
+        var el = document.getElementById("dbtbl-" + name);
+        if (el) el.classList.add("active");
+
+        renderDBContent();
+      }
+
+      function renderDBContent() {
+        var content = document.getElementById("db-content");
+        if (!content || !_dbState.table) return;
+        content.innerHTML =
+          '<div class="db-empty"><div style="font-size:1.5rem;opacity:.4;margin-bottom:.5rem">⏳</div><p>Đang tải dữ liệu...</p></div>';
+
+        var url =
+          "/api/admin/table/" +
+          _dbState.table +
+          "?page=" +
+          _dbState.page +
+          "&per_page=20&search=" +
+          encodeURIComponent(_dbState.search);
+        fetch(url)
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (d.error) {
+              content.innerHTML =
+                '<div class="db-empty">❌ Lỗi: ' + d.error + "</div>";
+              return;
+            }
+            renderDBTable(d);
+          })
+          .catch(function (e) {
+            content.innerHTML =
+              '<div class="db-empty">❌ Không thể tải dữ liệu.</div>';
+          });
+      }
+
+      function renderDBTable(d) {
+        var content = document.getElementById("db-content");
+        if (!content) return;
+
+        /* Toolbar */
+        var toolbar =
+          '<div class="db-toolbar">' +
+          "<span style=\"font-size:13px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif\">" +
+          _dbState.table +
+          "</span>" +
+          '<input class="db-search" id="db-search-inp" placeholder="Tìm kiếm..." value="' +
+          (_dbState.search || "") +
+          '">' +
+          '<span class="db-info">' +
+          d.total.toLocaleString("vi-VN") +
+          " dòng</span>" +
+          "</div>";
+
+        /* Table */
+        var thead =
+          "<thead><tr>" +
+          d.columns
+            .map(function (c) {
+              return "<th>" + c + "</th>";
+            })
+            .join("") +
+          "</tr></thead>";
+        var tbody = "<tbody>";
+        if (!d.rows.length) {
+          tbody +=
+            '<tr><td colspan="' +
+            d.columns.length +
+            '" style="text-align:center;padding:2rem;color:var(--text3)">Không có dữ liệu</td></tr>';
+        } else {
+          d.rows.forEach(function (row) {
+            tbody +=
+              "<tr>" +
+              d.columns
+                .map(function (col) {
+                  var v = row[col];
+                  if (v === null || v === undefined)
+                    return '<td><span class="db-null">NULL</span></td>';
+                  var s = String(v);
+                  var short = s.length > 40 ? s.slice(0, 40) + "…" : s;
+                  return (
+                    '<td title="' +
+                    s.replace(/"/g, "&quot;") +
+                    '">' +
+                    short +
+                    "</td>"
+                  );
                 })
-                .catch(err => console.error('Lỗi lấy log bot:', err));
+                .join("") +
+              "</tr>";
+          });
         }
+        tbody += "</tbody>";
 
-        setInterval(updateBotLogs, 3000);
-        updateBotLogs();
+        /* Pagination */
+        var pgn = '<div class="db-pgn">';
+        pgn +=
+          '<button class="db-pgn-btn" onclick="dbPage(' +
+          (d.page - 1) +
+          ')" ' +
+          (d.page <= 1 ? "disabled" : "") +
+          ">‹</button>";
+        var start = Math.max(1, d.page - 2),
+          end = Math.min(d.total_pages, d.page + 2);
+        for (var p = start; p <= end; p++) {
+          pgn +=
+            '<button class="db-pgn-btn' +
+            (p === d.page ? " active" : "") +
+            '" onclick="dbPage(' +
+            p +
+            ')">' +
+            p +
+            "</button>";
+        }
+        pgn +=
+          '<button class="db-pgn-btn" onclick="dbPage(' +
+          (d.page + 1) +
+          ')" ' +
+          (d.page >= d.total_pages ? "disabled" : "") +
+          ">›</button>";
+        pgn +=
+          '<span class="db-info" style="margin-left:.5rem">Trang ' +
+          d.page +
+          "/" +
+          d.total_pages +
+          "</span>";
+        pgn += "</div>";
+
+        content.innerHTML =
+          toolbar +
+          '<div class="db-table-wrap"><table class="db-table">' +
+          thead +
+          tbody +
+          "</table></div>" +
+          pgn;
+
+        /* Search listener */
+        var inp = document.getElementById("db-search-inp");
+        if (inp) {
+          inp.addEventListener("input", function () {
+            clearTimeout(_dbState.timer);
+            var q = inp.value;
+            _dbState.timer = setTimeout(function () {
+              _dbState.search = q;
+              _dbState.page = 1;
+              renderDBContent();
+            }, 350);
+          });
+        }
+      }
+
+      function dbPage(p) {
+        if (p < 1) return;
+        _dbState.page = p;
+        renderDBContent();
+      }
+
+      /* Cart count */
+      fetch("/cart/count")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          var el = document.getElementById("cart-count");
+          if (el) el.textContent = d.count || 0;
+        })
+        .catch(function () {});
     </script>
-</body>
+  </body>
 </html>

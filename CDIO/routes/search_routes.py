@@ -126,26 +126,6 @@ def scrape():
 # ════════════════════════════════════════════════════════════════════
 # LỊCH SỬ
 # ════════════════════════════════════════════════════════════════════
-@search_bp.route("/history")
-def history():
-    user_id = session.get('user_id')
-    if not user_id:
-        return render_template("history.html", products=[], msg="Vui lòng đăng nhập để xem lịch sử")
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        cursor.execute(
-            "SELECT * FROM search_history WHERE user_id = %s ORDER BY created_at DESC LIMIT 100",
-            (user_id,)
-        )
-        data = cursor.fetchall()
-    except Exception as e:
-        print(f"Lỗi lấy lịch sử: {e}")
-        data = []
-    finally:
-        if 'conn' in locals() and conn:
-            conn.close()
-    return render_template("history.html", products=data)
 
 
 # ════════════════════════════════════════════════════════════════════

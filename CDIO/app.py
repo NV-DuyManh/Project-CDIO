@@ -16,6 +16,7 @@ from routes.auth_routes    import auth_bp
 from routes.cart_routes    import cart_bp
 from routes.admin_routes   import admin_bp
 from routes.category_routes import category_bp 
+from routes.analytics_routes import analytics_bp
 
 # ════════════════════════════════════════════════════════════════════
 # CONFIG LỊCH TRÌNH CÀO NGẦM (PRE-WARM CACHE)
@@ -93,6 +94,7 @@ def create_app():
     app.register_blueprint(cart_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(category_bp)
+    app.register_blueprint(analytics_bp)
 
     return app
 

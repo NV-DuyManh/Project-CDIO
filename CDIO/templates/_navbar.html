@@ -1,0 +1,392 @@
+{# ============================================================ _navbar.html —
+dùng chung cho mọi trang Cách dùng trong template: {% include '_navbar.html' %}
+Nếu trang cần search bar ở giữa, đặt trước include: {% set show_search = true %}
+============================================================ #}
+<style>
+  .navbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 0 1.5rem !important;
+    gap: 0 !important;
+  }
+  .nav-logo {
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+  .logo-icon {
+    font-size: 1.4rem;
+    color: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent));
+  }
+  .logo-text {
+    font-family: "Syne", sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .nav-body {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+  .nav-spacer {
+    flex: 1;
+  }
+  .nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.4rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+  }
+
+  /* Search bar (chỉ hiện khi show_search=true) */
+  .nav-search-zone {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0 1.5rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .nav-sf-wrap {
+    position: relative;
+    width: 100%;
+  }
+  .nav-sbar {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 0.32rem 0.32rem 0.32rem 1.1rem;
+    gap: 0.5rem;
+    width: 100%;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .nav-sbar:focus-within {
+    border-color: rgba(245, 166, 35, 0.45);
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.08);
+  }
+  .nav-sbar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.88rem;
+    font-family: "DM Sans", sans-serif;
+    min-width: 0;
+  }
+  .nav-sbar input::placeholder {
+    color: var(--text3);
+  }
+  .nav-sbar button {
+    background: var(--accent);
+    border: none;
+    border-radius: 99px;
+    color: #000;
+    font-size: 0.82rem;
+    cursor: pointer;
+    padding: 0.4rem 1.1rem;
+    font-weight: 600;
+    font-family: "DM Sans", sans-serif;
+    white-space: nowrap;
+    transition: background 0.18s;
+  }
+  .nav-sbar button:hover {
+    background: #ffc04a;
+  }
+  .nav-sug-drop {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    z-index: 9000;
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    display: none;
+    overflow: hidden;
+  }
+  .nav-sug-drop.show {
+    display: block;
+  }
+  .nsug-li {
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 0.85rem;
+    transition: all 0.15s;
+  }
+  .nsug-li:hover {
+    background: var(--surface2);
+    color: var(--accent);
+  }
+  .nsug-li mark {
+    background: none;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Submenu fix */
+  .cat-dropdown {
+    z-index: 9999 !important;
+  }
+  .cat-submenu {
+    z-index: 10000 !important;
+  }
+  .cat-item.has-sub:hover > .cat-submenu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(0) scale(1) !important;
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      flex-wrap: wrap;
+      height: auto;
+      padding: 0.5rem 1rem !important;
+    }
+    .nav-body {
+      order: 2;
+    }
+    .nav-auth {
+      order: 3;
+      margin-left: auto;
+    }
+    .nav-toggle {
+      display: block;
+      order: 4;
+    }
+    .nav-search-zone {
+      order: 5;
+      flex: 0 0 100%;
+      padding: 0.5rem 0 0;
+      max-width: 100%;
+      margin: 0;
+    }
+    .nav-body.mob-open {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      order: 6;
+      padding: 0.5rem 0;
+    }
+  }
+</style>
+
+<nav class="navbar">
+  <a href="/" class="nav-logo">
+    <span class="logo-icon">⚡</span>
+    <span class="logo-text">PriceHunt</span>
+  </a>
+
+  <div class="nav-body" id="nb-body">
+    <a href="/" class="nav-link">Tìm Kiếm</a>
+
+    <div class="nav-category-wrap" id="cat-wrap">
+      <button
+        class="nav-category-btn"
+        id="cat-btn"
+        aria-haspopup="true"
+        aria-expanded="false"
+        onclick="toggleCatDropdown(event)"
+      >
+        Danh mục <span class="caret">▼</span>
+      </button>
+      <div class="cat-dropdown" id="cat-dropdown" role="menu">
+        <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+          <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+          <div class="cat-submenu">
+            <span class="cat-sub-label">Dòng sản phẩm</span>
+            <a href="/category/brand/iphone" class="cat-sub-item"
+              >Tất cả iPhone</a
+            >
+            <div class="cat-divider"></div>
+            <a href="/category/series/iphone-17" class="cat-sub-item"
+              >iPhone 17 Series</a
+            >
+            <a href="/category/series/iphone-16" class="cat-sub-item"
+              >iPhone 16 Series</a
+            >
+            <a href="/category/series/iphone-15" class="cat-sub-item"
+              >iPhone 15 Series</a
+            >
+            <a href="/category/series/iphone-14" class="cat-sub-item"
+              >iPhone 14 Series</a
+            >
+          </div>
+        </a>
+
+        <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+          <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+          <div class="cat-submenu">
+            <span class="cat-sub-label">Dòng sản phẩm</span>
+            <a href="/category/brand/samsung" class="cat-sub-item"
+              >Tất cả Samsung</a
+            >
+            <div class="cat-divider"></div>
+            <span class="cat-sub-label">Galaxy S</span>
+            <a href="/category/series/samsung-s25" class="cat-sub-item"
+              >Galaxy S25 Series</a
+            >
+            <a href="/category/series/samsung-s24" class="cat-sub-item"
+              >Galaxy S24 Series</a
+            >
+            <div class="cat-divider"></div>
+            <span class="cat-sub-label">Galaxy A / Z</span>
+            <a href="/category/series/samsung-a" class="cat-sub-item"
+              >Galaxy A Series</a
+            >
+            <a href="/category/series/samsung-z" class="cat-sub-item"
+              >Galaxy Z Series</a
+            >
+          </div>
+        </a>
+
+        <div class="cat-divider"></div>
+        <a href="/category/brand/other" class="cat-item"
+          ><span>📦 Thương hiệu khác</span></a
+        >
+      </div>
+    </div>
+  </div>
+
+  {% if show_search is defined and show_search %}
+  <div class="nav-search-zone">
+    <div class="nav-sf-wrap">
+      <form id="nav-sf" action="/" method="GET" autocomplete="off">
+        <div class="nav-sbar">
+          <input
+            type="text"
+            id="nav-si"
+            name="keyword"
+            value="{{ keyword or '' }}"
+            placeholder="Tìm sản phẩm, ví dụ: iPhone 16 Pro..."
+            autocomplete="off"
+          />
+          <button type="submit">Tìm kiếm</button>
+        </div>
+      </form>
+      <ul class="nav-sug-drop" id="nav-sl"></ul>
+    </div>
+  </div>
+  {% else %}
+  <div class="nav-spacer"></div>
+  {% endif %}
+
+  <div class="nav-auth">
+    {% if session.get('user_id') %}
+    <a href="/cart" class="nav-link cart-link"
+      >🛒 <span class="cart-count" id="cart-count">0</span></a
+    >
+    <a href="/orders" class="nav-link">Đơn hàng</a>
+    <a href="/profile" class="nav-link nav-profile"
+      >{{ session.get('username') }}</a
+    >
+    <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+    {% else %}
+    <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+    <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+    {% endif %}
+  </div>
+
+  <button
+    class="nav-toggle"
+    onclick="document.getElementById('nb-body').classList.toggle('mob-open')"
+  >
+    ☰
+  </button>
+</nav>
+
+<script>
+  (function () {
+    var inp = document.getElementById("nav-si");
+    var list = document.getElementById("nav-sl");
+    if (!inp || !list) return;
+    var timer;
+    inp.addEventListener("input", function () {
+      clearTimeout(timer);
+      var q = inp.value.trim();
+      if (q.length < 2) {
+        list.classList.remove("show");
+        return;
+      }
+      timer = setTimeout(function () {
+        fetch("/api/suggestions?q=" + encodeURIComponent(q))
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (!data.length) {
+              list.classList.remove("show");
+              return;
+            }
+            list.innerHTML = data
+              .slice(0, 8)
+              .map(function (s) {
+                var re = new RegExp(
+                  "(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
+                  "gi",
+                );
+                return (
+                  '<li class="nsug-li" data-val="' +
+                  s.replace(/"/g, "&quot;") +
+                  '">' +
+                  s.replace(re, "<mark>$1</mark>") +
+                  "</li>"
+                );
+              })
+              .join("");
+            list.classList.add("show");
+            list.querySelectorAll(".nsug-li").forEach(function (li) {
+              li.addEventListener("mousedown", function (e) {
+                e.preventDefault();
+                inp.value = li.dataset.val;
+                list.classList.remove("show");
+                window.location.href =
+                  "/?keyword=" + encodeURIComponent(li.dataset.val);
+              });
+            });
+          })
+          .catch(function () {
+            list.classList.remove("show");
+          });
+      }, 220);
+    });
+    document.addEventListener("click", function (e) {
+      if (!inp.contains(e.target) && !list.contains(e.target))
+        list.classList.remove("show");
+    });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        list.classList.remove("show");
+        var kw = inp.value.trim();
+        if (kw) window.location.href = "/?keyword=" + encodeURIComponent(kw);
+      }
+    });
+  })();
+</script>
