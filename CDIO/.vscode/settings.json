@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "templates/*.html": "jinja-html"
+  },
+  "emmet.excludeLanguages": ["jinja-html"],
+  "[jinja-html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": false
+  }
+}

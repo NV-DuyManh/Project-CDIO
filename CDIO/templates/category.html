@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if view == 'model' %}{{ model_label }}
+        {% elif view == 'series' %}{{ series.label }}
+        {% else %}{{ brand.label }}
+        {% endif %} — PriceHunt
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* ══ CATEGORY NAV BAR (dải ngang dưới navbar chính) ══════════ */
+        .cat-topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 64px;
+            z-index: 90;
+        }
+        .cat-topbar-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+        .cat-brand-tab {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .7rem 1.4rem;
+            color: var(--text2);
+            text-decoration: none;
+            font-size: .88rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all .18s;
+            white-space: nowrap;
+        }
+        .cat-brand-tab:hover  { color: var(--text); background: var(--surface2); }
+        .cat-brand-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* ══ BREADCRUMB ══════════════════════════════════════════════ */
+        .breadcrumb {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem .25rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .8rem;
+            color: var(--text3);
+        }
+        .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .15s; }
+        .breadcrumb a:hover { color: var(--accent); }
+        .breadcrumb span { color: var(--text3); }
+
+        /* ══ MAIN LAYOUT ═════════════════════════════════════════════ */
+        .cat-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem 4rem;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 1.75rem;
+            align-items: start;
+        }
+
+        /* ══ SIDEBAR ═════════════════════════════════════════════════ */
+        .cat-sidebar {
+            position: sticky;
+            top: calc(64px + 41px + 1.25rem);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .sidebar-section { border-bottom: 1px solid var(--border); }
+        .sidebar-section:last-child { border-bottom: none; }
+        .sidebar-series-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .75rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: .82rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            text-align: left;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            transition: all .15s;
+        }
+        .sidebar-series-btn:hover,
+        .sidebar-series-btn.open { color: var(--text); background: var(--surface2); }
+        .sidebar-series-btn .chevron { font-size: .65rem; transition: transform .2s; }
+        .sidebar-series-btn.open .chevron { transform: rotate(180deg); }
+        .sidebar-models { display: none; }
+        .sidebar-models.open { display: block; }
+        .sidebar-model-link {
+            display: block;
+            padding: .55rem 1rem .55rem 1.5rem;
+            color: var(--text2);
+            text-decoration: none;
+            font-size: .82rem;
+            border-left: 2px solid transparent;
+            transition: all .15s;
+        }
+        .sidebar-model-link:hover  { color: var(--text); background: rgba(255,255,255,.03); }
+        .sidebar-model-link.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(245,166,35,.06);
+        }
+
+        /* ══ RIGHT CONTENT ═══════════════════════════════════════════ */
+        .cat-content {}
+
+        /* Page title bar */
+        .cat-title-bar {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .cat-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.02em;
+        }
+        .cat-count {
+            font-size: .82rem;
+            color: var(--text3);
+            margin-top: .2rem;
+        }
+        .cat-count strong { color: var(--accent); }
+
+        /* ══ SERIES GRID (brand / series view) ═══════════════════════ */
+        .series-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .series-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1.25rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            transition: all .22s;
+        }
+        .series-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,.3);
+        }
+        .series-card-label {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+        }
+        .series-card-count {
+            font-size: .78rem;
+            color: var(--text3);
+        }
+        .series-card-arrow {
+            margin-top: auto;
+            color: var(--accent);
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        /* ══ MODEL CARDS (series view) ═══════════════════════════════ */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: .85rem;
+        }
+        .model-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+            transition: all .2s;
+        }
+        .model-card:hover {
+            border-color: rgba(245,166,35,.4);
+            background: rgba(245,166,35,.04);
+            transform: translateY(-2px);
+        }
+        .model-card-label {
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .model-card-sub {
+            font-size: .75rem;
+            color: var(--text3);
+        }
+        .model-card-cta {
+            margin-top: .5rem;
+            font-size: .75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ══ PRODUCT GRID (model view) ═══════════════════════════════ */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .product-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all .22s;
+            animation: fadeInCard .35s ease both;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 32px rgba(0,0,0,.35);
+        }
+        .product-card.best-price {
+            border-color: rgba(245,166,35,.45);
+            background: linear-gradient(145deg,#111118,#1a160a);
+        }
+        .best-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: linear-gradient(135deg,var(--accent),var(--accent2));
+            color: #000; font-size: .68rem; font-weight: 700;
+            padding: 3px 9px; border-radius: 99px; z-index: 2;
+        }
+        .card-site-badge {
+            position: absolute; top: 10px; left: 10px;
+            font-size: .62rem; font-weight: 700;
+            padding: 3px 7px; border-radius: 4px; z-index: 2;
+            letter-spacing: .05em; text-transform: uppercase;
+        }
+        .site-Clickbuy    { background:#ff4757;color:#fff; }
+        .site-CellphoneS  { background:#eccc68;color:#333; }
+        .site-DiĐộng3A,
+        .site-DiDong3A    { background:#2563eb;color:#fff; }
+        .site-SmartViệt,
+        .site-SmartViet   { background:#16a34a;color:#fff; }
+        .site-BạchLongStore,
+        .site-BachLongStore { background:#9333ea;color:#fff; }
+        .site-TiếnTrầnMobile,
+        .site-TienTranMobile { background:#0891b2;color:#fff; }
+
+        .card-img-wrap {
+            width: 100%; aspect-ratio: 1;
+            background: var(--surface2);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .card-img-wrap img {
+            width: 78%; height: 78%; object-fit: contain;
+            transition: transform .3s;
+        }
+        .product-card:hover .card-img-wrap img { transform: scale(1.06); }
+        .card-body {
+            padding: .9rem; display: flex; flex-direction: column;
+            gap: .5rem; flex: 1;
+        }
+        .card-title {
+            font-size: .82rem; color: var(--text); line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .card-price {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem; font-weight: 700; color: var(--accent);
+        }
+        .card-actions {
+            display: flex; gap: .45rem; margin-top: .2rem;
+        }
+        .btn-store {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            gap: .25rem; padding: .5rem .45rem;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); text-decoration: none;
+            font-size: .78rem; font-weight: 500; transition: all .18s;
+        }
+        .btn-store:hover { background: var(--surface3); border-color: var(--border-hover); }
+        .btn-cart, .btn-fav {
+            width: 34px; height: 34px; flex-shrink: 0;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text2); font-size: .9rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: all .18s;
+        }
+        .btn-cart:hover { background: rgba(245,166,35,.15); border-color: var(--accent); color: var(--accent); }
+        .btn-fav:hover  { background: rgba(239,68,68,.15);  border-color: var(--red);    color: var(--red); }
+
+        /* ══ FILTER BAR ══════════════════════════════════════════════ */
+        .filter-bar {
+            display: flex; align-items: center; gap: .5rem;
+            margin-bottom: 1rem; flex-wrap: wrap;
+        }
+        .filter-label { font-size: .78rem; color: var(--text3); }
+        .filter-btn {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text2); padding: .3rem .8rem; border-radius: 6px;
+            font-size: .78rem; cursor: pointer; transition: all .15s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent); color: #000; border-color: var(--accent);
+        }
+
+        /* ══ EMPTY STATE ═════════════════════════════════════════════ */
+        .cat-empty {
+            text-align: center; padding: 4rem 2rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .cat-empty-icon { font-size: 3rem; opacity: .3; margin-bottom: 1rem; }
+        .cat-empty h3 {
+            font-family: 'Syne', sans-serif; font-size: 1.1rem;
+            color: var(--text); margin-bottom: .5rem;
+        }
+        .cat-empty p { color: var(--text3); font-size: .85rem; }
+        .cat-empty a {
+            display: inline-block; margin-top: 1.25rem;
+            background: var(--accent); color: #000;
+            padding: .55rem 1.25rem; border-radius: 8px;
+            font-weight: 600; font-size: .85rem; text-decoration: none;
+            transition: all .18s;
+        }
+        .cat-empty a:hover { background: #ffc04a; }
+
+        /* ══ CART MODAL ══════════════════════════════════════════════ */
+        #cart-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.75); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000; opacity: 0; visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+        #cart-modal-overlay.active { opacity: 1; visibility: visible; }
+        .cart-modal {
+            background: #1a1a24; border: 1px solid rgba(255,255,255,.1);
+            border-radius: 20px; padding: 40px; text-align: center;
+            width: 320px; transform: scale(.8);
+            transition: transform .4s cubic-bezier(.175,.885,.32,1.275);
+            box-shadow: 0 20px 50px rgba(0,0,0,.5);
+        }
+        #cart-modal-overlay.active .cart-modal { transform: scale(1); }
+        .modal-icon-container {
+            width: 80px; height: 80px; margin: 0 auto 20px;
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-spinner {
+            width: 65px; height: 65px;
+            border: 4px solid rgba(245,166,35,.2); border-top-color: #f5a623;
+            border-radius: 50%; animation: spin .8s linear infinite;
+            position: absolute; display: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .modal-check, .modal-error { width: 75px; height: 75px; display: none; position: absolute; }
+        .modal-check-circle { stroke: #22c55e; stroke-width: 4; stroke-dasharray: 166; stroke-dashoffset: 166; animation: stroke .5s cubic-bezier(.65,0,.45,1) forwards; }
+        .modal-error-circle { stroke: #ef4444; stroke-width: 4; stroke-dasharray: 166; stroke-dashoffset: 166; animation: stroke .5s cubic-bezier(.65,0,.45,1) forwards; }
+        .modal-check-path, .modal-error-path { stroke-width: 4; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-linecap: round; stroke-linejoin: round; animation: stroke .3s cubic-bezier(.65,0,.45,1) .5s forwards; }
+        .modal-check-path { stroke: #22c55e; }
+        .modal-error-path { stroke: #ef4444; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        .modal-title { font-family: 'Syne',sans-serif; font-size: 22px; color: #fff; margin-bottom: 8px; font-weight: 700; }
+        .modal-desc  { font-size: 14px; color: #aaa; margin: 0; }
+
+        /* ══ ANIMATIONS ══════════════════════════════════════════════ */
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══ RESPONSIVE ══════════════════════════════════════════════ */
+        @media (max-width: 900px) {
+            .cat-main { grid-template-columns: 1fr; padding: 1rem 1rem 3rem; }
+            .cat-sidebar { position: static; top: auto; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); }
+        }
+        @media (max-width: 560px) {
+            .products-grid { grid-template-columns: repeat(2,1fr); gap: .6rem; }
+            .series-grid   { grid-template-columns: repeat(2,1fr); }
+            .model-grid    { grid-template-columns: repeat(2,1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     NAVBAR CHÍNH
+═══════════════════════════════════════════════════════════════════ -->
+<nav class="navbar">
+    <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">PriceHunt</span>
+    </a>
+    <div class="nav-links">
+        <a href="/" class="nav-link">Tìm Kiếm</a>
+        <a href="/history" class="nav-link">Lịch Sử</a>
+        {% if session.get('user_id') %}
+        <a href="/cart" class="nav-link cart-link">
+            Giỏ hàng <span class="cart-count" id="cart-count">0</span>
+        </a>
+        <a href="/orders" class="nav-link">Đơn hàng</a>
+        <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
+        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+        <a href="/login"    class="nav-btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
+    </div>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DANH MỤC TOPBAR (dải brand tabs)
+═══════════════════════════════════════════════════════════════════ -->
+<div class="cat-topbar">
+    <div class="cat-topbar-inner">
+        {% for slug, cat in all_categories.items() %}
+        <a href="/category/{{ slug }}"
+           class="cat-brand-tab {% if slug == brand_key %}active{% endif %}">
+            {{ cat.label }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BREADCRUMB
+═══════════════════════════════════════════════════════════════════ -->
+<div class="breadcrumb">
+    <a href="/">Trang chủ</a>
+    <span>/</span>
+    <a href="/category/{{ brand_key }}">{{ brand.label }}</a>
+    {% if series %}
+    <span>/</span>
+    <a href="/category/{{ brand_key }}/{{ series_key }}">{{ series.label }}</a>
+    {% endif %}
+    {% if view == 'model' %}
+    <span>/</span>
+    <span style="color:var(--text2);">{{ model_label }}</span>
+    {% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MAIN: SIDEBAR + CONTENT
+═══════════════════════════════════════════════════════════════════ -->
+<div class="cat-main">
+
+    <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+    <aside class="cat-sidebar">
+        {% for slug, cat in all_categories.items() %}
+        <div class="sidebar-section">
+            <button class="sidebar-series-btn {% if slug == brand_key %}open{% endif %}"
+                    onclick="toggleSidebar('sb-{{ slug }}', this)">
+                {{ cat.label }}
+                <span class="chevron">▼</span>
+            </button>
+            <div class="sidebar-models {% if slug == brand_key %}open{% endif %}" id="sb-{{ slug }}">
+                {% for ser_key, ser in cat.series.items() %}
+                <div style="padding:.3rem 0 .2rem 1rem;
+                            font-size:.7rem;font-weight:700;
+                            text-transform:uppercase;letter-spacing:.07em;
+                            color:var(--text3);">
+                    {{ ser.label }}
+                </div>
+                {% for model in ser.models %}
+                {% set url_kw = model.keyword | replace(' ', '-') %}
+                <a href="/category/{{ slug }}/{{ ser_key }}/{{ url_kw }}"
+                   class="sidebar-model-link
+                   {% if view == 'model' and model.keyword == model_keyword %}active{% endif %}">
+                    {{ model.label }}
+                </a>
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </aside>
+
+    <!-- ── CONTENT ─────────────────────────────────────────────────── -->
+    <div class="cat-content">
+
+        <!-- ════════════════════════════════════════════════════════
+             VIEW: BRAND — hiện danh sách series
+        ═══════════════════════════════════════════════════════════ -->
+        {% if view == 'brand' %}
+        <div class="cat-title-bar">
+            <div>
+                <h1 class="cat-title">{{ brand.label }}</h1>
+                <p class="cat-count">{{ brand.series | length }} dòng sản phẩm</p>
+            </div>
+        </div>
+        <div class="series-grid">
+            {% for ser_key, ser in brand.series.items() %}
+            <a href="/category/{{ brand_key }}/{{ ser_key }}" class="series-card">
+                <div class="series-card-label">{{ ser.label }}</div>
+                <div class="series-card-count">{{ ser.models | length }} model</div>
+                <div class="series-card-arrow">Xem tất cả →</div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════
+             VIEW: SERIES — hiện danh sách model
+        ═══════════════════════════════════════════════════════════ -->
+        {% elif view == 'series' %}
+        <div class="cat-title-bar">
+            <div>
+                <h1 class="cat-title">{{ series.label }}</h1>
+                <p class="cat-count">{{ series.models | length }} model</p>
+            </div>
+        </div>
+        <div class="model-grid">
+            {% for model in series.models %}
+            {% set url_kw = model.keyword | replace(' ', '-') %}
+            <a href="/category/{{ brand_key }}/{{ series_key }}/{{ url_kw }}" class="model-card">
+                <div class="model-card-label">{{ model.label }}</div>
+                <div class="model-card-sub">{{ brand.label }}</div>
+                <div class="model-card-cta">So sánh giá →</div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════
+             VIEW: MODEL — hiện sản phẩm từ DB
+        ═══════════════════════════════════════════════════════════ -->
+        {% elif view == 'model' %}
+        <div class="cat-title-bar">
+            <div>
+                <h1 class="cat-title">{{ model_label }}</h1>
+                <p class="cat-count">
+                    {% if products %}
+                    Tìm thấy <strong>{{ products | length }}</strong> sản phẩm từ {{ products | map(attribute='site') | unique | list | length }} cửa hàng
+                    {% else %}
+                    Chưa có dữ liệu trong hệ thống
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if products %}
+        <!-- Filter bar -->
+        <div class="filter-bar">
+            <span class="filter-label">Lọc sàn:</span>
+            <button class="filter-btn active" onclick="filterSite('all',this)">Tất cả</button>
+            {% for site in products | map(attribute='site') | unique %}
+            <button class="filter-btn" onclick="filterSite('{{ site }}',this)">{{ site }}</button>
+            {% endfor %}
+        </div>
+
+        <!-- Products -->
+        <div class="products-grid" id="products-grid">
+            {% for product in products %}
+            <div class="product-card {% if loop.index == 1 %}best-price{% endif %}"
+                 data-site="{{ product.site }}"
+                 style="animation-delay: {{ loop.index0 * 0.04 }}s">
+
+                {% if loop.index == 1 %}<div class="best-badge">Giá tốt nhất</div>{% endif %}
+                <div class="card-site-badge site-{{ product.site | replace(' ','') }}">{{ product.site }}</div>
+
+                <div class="card-img-wrap">
+                    <img src="{{ product.img }}" alt="{{ product.title }}" loading="lazy"
+                         onerror="this.src='https://via.placeholder.com/200x200/1a1a24/555?text=No+Image'">
+                </div>
+
+                <div class="card-body">
+                    <h3 class="card-title">{{ product.title }}</h3>
+                    <div class="card-price">{{ product.price_str }}</div>
+
+                    <div class="card-actions">
+                        <a href="{{ product.link }}" target="_blank" class="btn-store">
+                            Xem tại {{ product.site }} ↗
+                        </a>
+                        {% if session.get('user_id') %}
+                        <button class="btn-cart" onclick="addToCart(this)" title="Thêm vào giỏ">🛒</button>
+                        <button class="btn-fav"  onclick="saveFavorite(this)" title="Yêu thích">♡</button>
+                        {% else %}
+                        <a href="/login" class="btn-cart" title="Đăng nhập để thêm vào giỏ">🛒</a>
+                        {% endif %}
+                    </div>
+
+                    <span class="product-data" style="display:none"
+                          data-title="{{ product.title | replace('"','') }}"
+                          data-price="{{ product.price_str }}"
+                          data-img="{{ product.img }}"
+                          data-link="{{ product.link }}"
+                          data-site="{{ product.site }}">
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="cat-empty">
+            <div class="cat-empty-icon">📦</div>
+            <h3>Chưa có dữ liệu</h3>
+            <p>
+                Hệ thống chưa có giá <strong>{{ model_label }}</strong> trong database.<br>
+                Hãy tìm kiếm để cập nhật dữ liệu.
+            </p>
+            <a href="/?keyword={{ model_keyword | urlencode }}">
+                Tìm kiếm "{{ model_label }}" ngay
+            </a>
+        </div>
+        {% endif %}
+        {% endif %}
+
+    </div><!-- /cat-content -->
+</div><!-- /cat-main -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     CART MODAL
+═══════════════════════════════════════════════════════════════════ -->
+<div id="cart-modal-overlay">
+    <div class="cart-modal">
+        <div class="modal-icon-container">
+            <div class="modal-spinner" id="modal-spinner"></div>
+            <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
+                <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none"/>
+                <path   class="modal-check-path"   fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
+                <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none"/>
+                <path   class="modal-error-path"   fill="none" d="M16 16 36 36 M36 16 16 36"/>
+            </svg>
+        </div>
+        <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
+        <p  class="modal-desc"  id="modal-desc">Vui lòng đợi trong giây lát</p>
+    </div>
+</div>
+
+<footer class="footer"><p>© 2025 PriceHunt — So sánh giá thông minh</p></footer>
+
+<script src="/static/js/main.js"></script>
+<script>
+    /* ── Sidebar accordion ───────────────────────────────────────── */
+    function toggleSidebar(id, btn) {
+        const el = document.getElementById(id);
+        el.classList.toggle('open');
+        btn.classList.toggle('open');
+    }
+
+    /* ── Store filter ────────────────────────────────────────────── */
+    function filterSite(site, btn) {
+        document.querySelectorAll('.product-card').forEach(c => {
+            c.style.display = (site === 'all' || c.dataset.site === site) ? '' : 'none';
+        });
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    /* ── Cart count ──────────────────────────────────────────────── */
+    {% if session.get('user_id') %}
+    fetch('/cart/count').then(r=>r.json()).then(d=>{
+        const el = document.getElementById('cart-count');
+        if (el) el.textContent = d.count || 0;
+    });
+    {% endif %}
+
+    /* ── Modal helpers ───────────────────────────────────────────── */
+    function openModal(state, title, desc) {
+        document.getElementById('modal-spinner').style.display = state==='loading' ? 'block':'none';
+        document.getElementById('modal-check').style.display   = state==='success' ? 'block':'none';
+        document.getElementById('modal-error').style.display   = state==='error'   ? 'block':'none';
+        if (title) document.getElementById('modal-title').textContent = title;
+        if (desc)  document.getElementById('modal-desc').textContent  = desc;
+        document.getElementById('modal-title').style.color =
+            state==='success' ? '#22c55e' : state==='error' ? '#ef4444' : '#fff';
+        document.getElementById('cart-modal-overlay').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('cart-modal-overlay').classList.remove('active');
+    }
+
+    /* ── Add to cart ─────────────────────────────────────────────── */
+    function addToCart(btn) {
+        const s = btn.closest('.card-body').querySelector('.product-data');
+        openModal('loading');
+        const start = Date.now();
+        fetch('/cart/add', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                title: s.dataset.title, price_str: s.dataset.price,
+                img: s.dataset.img, link: s.dataset.link, site: s.dataset.site
+            })
+        })
+        .then(r=>r.json())
+        .then(res => {
+            setTimeout(() => {
+                if (res.ok || res.count !== undefined) {
+                    openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
+                    const el = document.getElementById('cart-count');
+                    if (el && res.count !== undefined) {
+                        el.textContent = res.count;
+                        el.style.transform = 'scale(1.5)';
+                        setTimeout(()=> el.style.transform='scale(1)', 200);
+                    }
+                } else {
+                    openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
+                }
+                setTimeout(closeModal, 1500);
+            }, Math.max(0, 700-(Date.now()-start)));
+        })
+        .catch(()=>{
+            setTimeout(()=>{
+                openModal('error','Lỗi mạng','Không thể kết nối đến máy chủ.');
+                setTimeout(closeModal,1500);
+            }, Math.max(0, 700-(Date.now()-start)));
+        });
+    }
+
+    /* ── Save favourite ──────────────────────────────────────────── */
+    function saveFavorite(btn) {
+        const s = btn.closest('.card-body').querySelector('.product-data');
+        fetch('/favorites/add', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                title:s.dataset.title, price_str:s.dataset.price,
+                img:s.dataset.img, link:s.dataset.link, site:s.dataset.site
+            })
+        }).then(()=>{
+            openModal('success','Đã thích!','Sản phẩm đã được lưu vào mục yêu thích.');
+            setTimeout(closeModal,1500);
+        });
+    }
+</script>
+</body>
+</html>

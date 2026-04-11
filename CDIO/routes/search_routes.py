@@ -5,7 +5,7 @@ from services.search_service import search_all_stores
 from database.db import get_db_connection, save_to_db, get_data_from_db
 from config.config import STORES
 import pymysql.cursors
-
+from config.categories import CATEGORIES
 search_bp = Blueprint('search', __name__)
 
 # ════════════════════════════════════════════════════════════════════
@@ -96,12 +96,15 @@ def home():
             if all_products and not is_fast_load:
                 save_to_db(keyword, all_products, user_id=user_id)
 
-    return render_template("index.html",
-                           products=all_products,
-                           keyword=keyword,
-                           is_fast_load=is_fast_load,
-                           is_background_updating=is_background_updating,
-                           store_count=len(STORES))
+    return render_template(
+        "index.html",
+        all_categories=CATEGORIES,
+        products=all_products,
+        keyword=keyword,
+        is_fast_load=is_fast_load,
+        is_background_updating=is_background_updating,
+        store_count=len(STORES)
+    )
 
 # ════════════════════════════════════════════════════════════════════
 # LỊCH SỬ CÀO
