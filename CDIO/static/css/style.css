@@ -201,9 +201,11 @@ body {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle,
-      rgba(245, 166, 35, 0.12) 0%,
-      transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(245, 166, 35, 0.12) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -256,9 +258,7 @@ body {
 /* Search Form */
 .search-form {
   animation: fadeInUp 0.6s ease 0.3s both;
-
 }
-
 
 .search-wrap {
   display: flex;
@@ -684,7 +684,6 @@ body {
 }
 
 @keyframes pulse-badge {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5);
@@ -1129,12 +1128,16 @@ td {
   bottom: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 20% 50%,
+    radial-gradient(
+      circle at 20% 50%,
       rgba(245, 166, 35, 0.05) 0%,
-      transparent 50%),
-    radial-gradient(circle at 80% 20%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
       rgba(255, 107, 53, 0.05) 0%,
-      transparent 50%);
+      transparent 50%
+    );
   z-index: -1;
 }
 
@@ -2121,7 +2124,6 @@ td {
    RESPONSIVE
    ================================================ */
 @media (max-width: 1024px) {
-
   .cart-layout,
   .checkout-layout {
     grid-template-columns: 1fr;
@@ -2490,12 +2492,11 @@ h1.page-title,
 h1,
 h2,
 h3 {
-  font-family: 'DM Sans', sans-serif !important;
+  font-family: "DM Sans", sans-serif !important;
   font-weight: 700 !important;
   letter-spacing: normal !important;
   transform: none !important;
 }
-
 
 .nav-logo {
   display: flex;
@@ -2505,7 +2506,7 @@ h3 {
 }
 
 .logo-text {
-  font-family: 'Syne', sans-serif !important;
+  font-family: "Syne", sans-serif !important;
   font-size: 24px;
   font-weight: 700;
   /* Độ đậm vừa phải, sắc nét */
@@ -2564,4 +2565,72 @@ h3 {
 
 .suggestion-item strong {
   color: var(--text);
+}
+.navbar {
+  flex-direction: row-reverse;
+}
+.navbar .nav-links {
+  flex-direction: row;
+  margin-right: auto;
+}
+/* ================================================================
+   NAVBAR PATCH — thêm vào cuối style.css
+   Mục tiêu:
+     • Logo / tên trang → BÊN PHẢI
+     • Nav links + Danh mục → BÊN TRÁI
+     • Fix dropdown submenu bị trùm bởi navbar sticky
+   ================================================================ */
+
+/* ── Đảo chiều navbar ────────────────────────────────────────── */
+.navbar {
+  flex-direction: row-reverse;
+}
+
+/* Nav-links giữ nguyên hướng hàng ngang trên desktop */
+.navbar .nav-links {
+  flex-direction: row;
+  /* Đẩy về phía bên trái (vì navbar đã row-reverse) */
+  margin-right: auto;
+}
+
+/* Hamburger vẫn ở cạnh logo (bên phải màn hình mobile) */
+.nav-toggle {
+  order: -1; /* đặt trước logo trong row-reverse → thực ra hiện bên trái logo */
+}
+
+/* ── Mobile ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: row-reverse; /* giữ: logo phải, hamburger trái */
+  }
+  .navbar .nav-links {
+    flex-direction: column;
+    margin-right: 0;
+  }
+}
+
+/* ── Fix dropdown bị cắt bởi navbar sticky ───────────────────── */
+/*
+   Khi navbar position:sticky + z-index:100, dropdown cần z-index cao hơn.
+   dropdown.css đã có z-index:200 — đảm bảo không bị override.
+*/
+.cat-dropdown {
+  z-index: 9999 !important;
+}
+.cat-submenu {
+  z-index: 10000 !important;
+}
+
+/* ── Fix: script load trước DOM (category/category_new templates) ──
+   Lỗi gốc: <script src="dropdown.js"> đặt TRƯỚC <body>.
+   Solution: luôn đặt script ở cuối <body> — xem hướng dẫn bên dưới.
+   CSS này không fix được JS order, chỉ fix visual.
+   ─────────────────────────────────────────────────────────────── */
+
+/* ── Dropdown open state đảm bảo hiển thị ───────────────────── */
+.cat-dropdown.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
 }

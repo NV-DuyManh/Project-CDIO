@@ -20,16 +20,18 @@
          Chỉ phần <nav> này thay đổi, mọi thứ bên dưới giữ nguyên.
     ════════════════════════════════════════════════════════════ -->
     <nav class="navbar">
+      <!-- BÊN PHẢI: Logo + tên trang -->
       <a href="/" class="nav-logo">
         <span class="logo-icon">⚡</span>
         <span class="logo-text">PriceHunt</span>
       </a>
 
+      <!-- BÊN TRÁI: tất cả nav links + dropdown danh mục -->
       <div class="nav-links" id="nav-links">
         <a href="/" class="nav-link">Tìm Kiếm</a>
         <a href="/history" class="nav-link">Lịch Sử</a>
 
-        <!-- ── Danh mục dropdown ── -->
+        <!-- ── Dropdown Danh mục ──────────────────────────── -->
         <div class="nav-category-wrap" id="cat-wrap">
           <button
             class="nav-category-btn"
@@ -48,8 +50,7 @@
               class="cat-item has-sub"
               tabindex="0"
             >
-              <span>📱 iPhone</span>
-              <span class="sub-arrow">▶</span>
+              <span>📱 iPhone</span><span class="sub-arrow">▶</span>
               <div class="cat-submenu">
                 <span class="cat-sub-label">Dòng sản phẩm</span>
                 <a href="/category/brand/iphone" class="cat-sub-item"
@@ -77,8 +78,7 @@
               class="cat-item has-sub"
               tabindex="0"
             >
-              <span>🌐 Samsung</span>
-              <span class="sub-arrow">▶</span>
+              <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
               <div class="cat-submenu">
                 <span class="cat-sub-label">Dòng sản phẩm</span>
                 <a href="/category/brand/samsung" class="cat-sub-item"
@@ -104,23 +104,30 @@
             </a>
 
             <div class="cat-divider"></div>
-
-            <!-- Khác -->
             <a href="/category/brand/other" class="cat-item">
               <span>📦 Thương hiệu khác</span>
             </a>
           </div>
         </div>
-        <!-- ── /Danh mục dropdown ── -->
+        <!-- ── /Dropdown ───────────────────────────────────── -->
 
-        <a href="/cart" class="nav-link active cart-link">
-          🛒 Giỏ hàng <span class="cart-count" id="cart-count">0</span>
-        </a>
+        <!-- Auth links — Jinja2 block, copy vào từng template -->
+        {% if session.get('user_id') %}
+        <a href="/cart" class="nav-link cart-link"
+          >🛒 <span class="cart-count" id="cart-count">0</span></a
+        >
         <a href="/orders" class="nav-link">Đơn hàng</a>
-        <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
+        <a href="/profile" class="nav-link nav-profile"
+          >{{ session.get('username') }}</a
+        >
         <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+        <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
       </div>
 
+      <!-- Mobile hamburger -->
       <button
         class="nav-toggle"
         onclick="document.getElementById('nav-links').classList.toggle('open')"

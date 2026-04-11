@@ -1,61 +1,179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng Nhập — PriceHunt</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/dropdown.css">
-</head>
-<body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/dropdown.css" />
+  </head>
+  <body>
     <!-- Navbar tối giản cho trang auth — không cần dropdown -->
     <nav class="navbar">
-        <a href="/" class="nav-logo">
-            <span class="logo-icon">⚡</span>
-            <span class="logo-text">PriceHunt</span>
-        </a>
-        <div class="nav-links" id="nav-links">
-            <a href="/"         class="nav-link">Trang chủ</a>
-            <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+      <!-- BÊN PHẢI: Logo + tên trang -->
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">PriceHunt</span>
+      </a>
+
+      <!-- BÊN TRÁI: tất cả nav links + dropdown danh mục -->
+      <div class="nav-links" id="nav-links">
+        <a href="/" class="nav-link">Tìm Kiếm</a>
+        <a href="/history" class="nav-link">Lịch Sử</a>
+
+        <!-- ── Dropdown Danh mục ──────────────────────────── -->
+        <div class="nav-category-wrap" id="cat-wrap">
+          <button
+            class="nav-category-btn"
+            id="cat-btn"
+            aria-haspopup="true"
+            aria-expanded="false"
+            onclick="toggleCatDropdown(event)"
+          >
+            Danh mục <span class="caret">▼</span>
+          </button>
+
+          <div class="cat-dropdown" id="cat-dropdown" role="menu">
+            <!-- iPhone -->
+            <a
+              href="/category/brand/iphone"
+              class="cat-item has-sub"
+              tabindex="0"
+            >
+              <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng sản phẩm</span>
+                <a href="/category/brand/iphone" class="cat-sub-item"
+                  >Tất cả iPhone</a
+                >
+                <div class="cat-divider"></div>
+                <a href="/category/series/iphone-17" class="cat-sub-item"
+                  >iPhone 17 Series</a
+                >
+                <a href="/category/series/iphone-16" class="cat-sub-item"
+                  >iPhone 16 Series</a
+                >
+                <a href="/category/series/iphone-15" class="cat-sub-item"
+                  >iPhone 15 Series</a
+                >
+                <a href="/category/series/iphone-14" class="cat-sub-item"
+                  >iPhone 14 Series</a
+                >
+              </div>
+            </a>
+
+            <!-- Samsung -->
+            <a
+              href="/category/brand/samsung"
+              class="cat-item has-sub"
+              tabindex="0"
+            >
+              <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng sản phẩm</span>
+                <a href="/category/brand/samsung" class="cat-sub-item"
+                  >Tất cả Samsung</a
+                >
+                <div class="cat-divider"></div>
+                <span class="cat-sub-label">Galaxy S</span>
+                <a href="/category/series/samsung-s25" class="cat-sub-item"
+                  >Galaxy S25 Series</a
+                >
+                <a href="/category/series/samsung-s24" class="cat-sub-item"
+                  >Galaxy S24 Series</a
+                >
+                <div class="cat-divider"></div>
+                <span class="cat-sub-label">Galaxy A / Z</span>
+                <a href="/category/series/samsung-a" class="cat-sub-item"
+                  >Galaxy A Series</a
+                >
+                <a href="/category/series/samsung-z" class="cat-sub-item"
+                  >Galaxy Z Series</a
+                >
+              </div>
+            </a>
+
+            <div class="cat-divider"></div>
+            <a href="/category/brand/other" class="cat-item">
+              <span>📦 Thương hiệu khác</span>
+            </a>
+          </div>
         </div>
-        <button class="nav-toggle"
-                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+        <!-- ── /Dropdown ───────────────────────────────────── -->
+
+        <!-- Auth links — Jinja2 block, copy vào từng template -->
+        {% if session.get('user_id') %}
+        <a href="/cart" class="nav-link cart-link"
+          >🛒 <span class="cart-count" id="cart-count">0</span></a
+        >
+        <a href="/orders" class="nav-link">Đơn hàng</a>
+        <a href="/profile" class="nav-link nav-profile"
+          >{{ session.get('username') }}</a
+        >
+        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+        <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button
+        class="nav-toggle"
+        onclick="document.getElementById('nav-links').classList.toggle('open')"
+      >
+        ☰
+      </button>
     </nav>
 
     <div class="auth-page">
-        <div class="auth-card">
-            <div class="auth-header">
-                <span class="auth-icon">⚡</span>
-                <h1>Đăng nhập</h1>
-                <p>Chào mừng trở lại PriceHunt</p>
-            </div>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for cat, msg in messages %}
-                    <div class="alert alert-{{ cat }}">{{ msg }}</div>
-                {% endfor %}
-            {% endwith %}
-
-            <form action="/login" method="POST" class="auth-form">
-                <div class="form-group">
-                    <label>Tên đăng nhập</label>
-                    <input type="text" name="username" placeholder="username" required>
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" name="password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="auth-submit">Đăng nhập →</button>
-            </form>
-
-            <p class="auth-switch">Chưa có tài khoản? <a href="/register">Đăng ký ngay</a></p>
+      <div class="auth-card">
+        <div class="auth-header">
+          <span class="auth-icon">⚡</span>
+          <h1>Đăng nhập</h1>
+          <p>Chào mừng trở lại PriceHunt</p>
         </div>
-        <div class="auth-bg-art"></div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %} {% for
+        cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %} {% endwith %}
+
+        <form action="/login" method="POST" class="auth-form">
+          <div class="form-group">
+            <label>Tên đăng nhập</label>
+            <input
+              type="text"
+              name="username"
+              placeholder="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button type="submit" class="auth-submit">Đăng nhập →</button>
+        </form>
+
+        <p class="auth-switch">
+          Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+        </p>
+      </div>
+      <div class="auth-bg-art"></div>
     </div>
 
     <script src="/static/js/main.js"></script>
     <script src="/static/js/dropdown.js"></script>
-</body>
+  </body>
 </html>

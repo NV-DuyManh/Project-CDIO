@@ -9,23 +9,24 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/dropdown.css">
 </head>
-<script src="/static/js/dropdown.js"></script>
 <body>
 
 <!-- ══════════════════════════════════════════════════════════════
-     NAVBAR
+     NAVBAR — logo phải, links trái, auth + search trên cùng phải
 ══════════════════════════════════════════════════════════════ -->
 <nav class="navbar">
+  <!-- Logo BÊN PHẢI -->
   <a href="/" class="nav-logo">
     <span class="logo-icon">⚡</span>
     <span class="logo-text">PriceHunt</span>
   </a>
 
+  <!-- Links BÊN TRÁI -->
   <div class="nav-links" id="nav-links">
     <a href="/"        class="nav-link active">Tìm Kiếm</a>
     <a href="/history" class="nav-link">Lịch Sử</a>
 
-    <!-- ══ DANH MỤC ══ -->
+    <!-- Danh mục dropdown -->
     <div class="nav-category-wrap" id="cat-wrap">
       <button class="nav-category-btn" id="cat-btn"
               aria-haspopup="true" aria-expanded="false"
@@ -33,24 +34,25 @@
         Danh mục <span class="caret">▼</span>
       </button>
       <div class="cat-dropdown" id="cat-dropdown" role="menu">
-        <a href="/category/brand/iphone"  class="cat-item has-sub" tabindex="0">
-          <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+
+        <!-- iPhone -->
+        <div class="cat-item has-sub">
+          <span>📱 iPhone</span>
+          <span class="sub-arrow">▶</span>
           <div class="cat-submenu">
             <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
-            <div class="cat-divider"></div>
-            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
-            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
-            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
-            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
+            <a href="/category/series/iphone-17"  class="cat-sub-item">iPhone 17 Series</a>
+            <a href="/category/series/iphone-16"  class="cat-sub-item">iPhone 16 Series</a>
+            <a href="/category/series/iphone-15"  class="cat-sub-item">iPhone 15 Series</a>
+            <a href="/category/series/iphone-14"  class="cat-sub-item">iPhone 14 Series</a>
           </div>
-        </a>
-        <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
-          <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+        </div>
+
+        <!-- Samsung -->
+        <div class="cat-item has-sub">
+          <span>🌐 Samsung</span>
+          <span class="sub-arrow">▶</span>
           <div class="cat-submenu">
-            <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
-            <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy S</span>
             <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
             <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
@@ -59,15 +61,28 @@
             <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
             <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
           </div>
-        </a>
+        </div>
+
         <div class="cat-divider"></div>
         <a href="/category/brand/other" class="cat-item">
           <span>📦 Thương hiệu khác</span>
         </a>
       </div>
     </div>
-    <!-- ══════════════ -->
 
+    <!-- Navbar search (mini) -->
+    <div style="position:relative;">
+      <form id="nav-search-form" action="/" method="GET" autocomplete="off">
+        <div class="nav-search-wrap">
+          <input type="text" id="nav-search-input" name="keyword"
+                 placeholder="Tìm sản phẩm..." autocomplete="off">
+          <button type="submit" class="nav-search-btn">Tìm</button>
+        </div>
+      </form>
+      <ul class="nav-suggestions" id="nav-suggestions"></ul>
+    </div>
+
+    <!-- Auth links -->
     {% if session.get('user_id') %}
       <a href="/cart"    class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
       <a href="/orders"  class="nav-link">Đơn hàng</a>
@@ -78,13 +93,12 @@
       <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
     {% endif %}
   </div>
+
   <button class="nav-toggle"
           onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════════════
-     LOADING OVERLAY
-══════════════════════════════════════════════════════════════ -->
+<!-- Loading overlay -->
 <div id="loading-overlay">
   <div class="loading-inner">
     <div class="loading-rings"><span></span><span></span><span></span></div>
@@ -113,7 +127,6 @@
                placeholder="Nhập tên sản phẩm, ví dụ: iPhone 16 Pro..."
                autocomplete="off"
                oninput="fetchSuggestions(this.value)">
-        <!-- Giữ sort khi submit -->
         <input type="hidden" name="sort" value="{{ sort or 'asc' }}">
         <button type="submit" id="search-btn">
           <span>Tìm kiếm</span>
@@ -122,7 +135,7 @@
       <ul class="suggestions-list" id="suggestions-list"></ul>
     </form>
 
-    <!-- ── AI Image Upload ──────────────────────────────────────── -->
+    <!-- AI Image Upload -->
     <div class="search-divider"><span>hoặc tìm bằng ảnh</span></div>
     <div class="image-upload-area">
       <div class="upload-drop-zone" id="drop-zone"
@@ -155,7 +168,6 @@
 {% if keyword %}
 <section class="results-section">
 
-  <!-- ── DB Miss Banner ─────────────────────────────────────── -->
   {% if db_miss %}
   <div class="db-miss-banner">
     <div class="db-miss-text">
@@ -169,31 +181,22 @@
   {% endif %}
 
   {% if products %}
-  <!-- ── Header + Sort ─────────────────────────────────────── -->
   <div class="results-header">
     <div>
       <h2 class="results-title">
         Kết quả cho <span class="keyword-highlight">"{{ keyword }}"</span>
       </h2>
-      <p class="results-count">
-        Tìm thấy <strong>{{ total }}</strong> sản phẩm
-      </p>
+      <p class="results-count">Tìm thấy <strong>{{ total }}</strong> sản phẩm</p>
     </div>
-
     <div class="sort-bar">
       <span class="sort-label">Sắp xếp:</span>
       <a href="?keyword={{ keyword | urlencode }}&sort=asc&page=1"
-         class="sort-btn {% if sort == 'asc' %}active{% endif %}">
-        ↑ Giá thấp → cao
-      </a>
+         class="sort-btn {% if sort == 'asc' %}active{% endif %}">↑ Giá thấp → cao</a>
       <a href="?keyword={{ keyword | urlencode }}&sort=desc&page=1"
-         class="sort-btn {% if sort == 'desc' %}active{% endif %}">
-        ↓ Giá cao → thấp
-      </a>
+         class="sort-btn {% if sort == 'desc' %}active{% endif %}">↓ Giá cao → thấp</a>
     </div>
   </div>
 
-  <!-- ── Store filter ─────────────────────────────────────── -->
   <div class="results-filters" style="margin-bottom:1.25rem">
     <span class="filter-label">Cửa hàng:</span>
     <button class="filter-btn active" onclick="filterSite('all',this)">Tất cả</button>
@@ -202,32 +205,22 @@
     {% endfor %}
   </div>
 
-  <!-- ── Grid ─────────────────────────────────────────────── -->
   <div class="products-grid" id="products-grid">
     {% for product in products %}
     <div class="product-card {% if loop.index == 1 and sort == 'asc' %}best-price{% endif %}"
          data-site="{{ product.site }}"
          style="animation-delay: {{ [loop.index0 * 0.04, 0.3] | min }}s">
-
-      {% if loop.index == 1 and sort == 'asc' %}
-        <div class="best-badge">Giá tốt nhất</div>
-      {% endif %}
+      {% if loop.index == 1 and sort == 'asc' %}<div class="best-badge">Giá tốt nhất</div>{% endif %}
       <div class="card-site-badge site-{{ product.site | replace(' ','') }}">{{ product.site }}</div>
-
       <div class="card-img-wrap">
         <img src="{{ product.img }}" alt="{{ product.title }}" loading="lazy"
              onerror="this.src='https://via.placeholder.com/200x200/1a1a24/555?text=No+Image'">
       </div>
-
       <div class="card-body">
         <h3 class="card-title">{{ product.title }}</h3>
-        <div class="card-price-wrap">
-          <span class="card-price">{{ product.price_str }}</span>
-        </div>
+        <div class="card-price-wrap"><span class="card-price">{{ product.price_str }}</span></div>
         <div class="card-actions">
-          <a href="{{ product.link }}" target="_blank" class="btn-store">
-            Xem tại {{ product.site }} ↗
-          </a>
+          <a href="{{ product.link }}" target="_blank" class="btn-store">Xem tại {{ product.site }} ↗</a>
           {% if session.get('user_id') %}
             <button class="btn-cart" onclick="addToCart(this)" title="Thêm vào giỏ">🛒</button>
             <button class="btn-fav"  onclick="saveFav(this)"   title="Yêu thích">♡</button>
@@ -246,7 +239,6 @@
     {% endfor %}
   </div>
 
-  <!-- ── Pagination ───────────────────────────────────────── -->
   {% set total_pages = total_pages | default(1) %}
   {% if total_pages > 1 %}
   <nav class="pagination" style="margin-top:2rem">
@@ -264,12 +256,11 @@
        class="page-btn {% if page==total_pages %}disabled{% endif %}">›</a>
   </nav>
   {% endif %}
+  {% endif %}
 
-  {% endif %} {# /if products #}
 </section>
 
 {% else %}
-<!-- ── Features (trang chủ) ──────────────────────────────── -->
 <section class="features-section">
   <div class="features-grid">
     <div class="feature-card">
@@ -296,9 +287,7 @@
 </section>
 {% endif %}
 
-<!-- ══════════════════════════════════════════════════════════════
-     CART MODAL
-══════════════════════════════════════════════════════════════ -->
+<!-- Cart Modal -->
 <div id="cart-modal-overlay">
   <div class="cart-modal">
     <div class="modal-icon-container">
@@ -320,172 +309,130 @@
 <div id="toast" class="toast"></div>
 <footer class="footer"><p>© 2025 PriceHunt — So sánh giá thông minh</p></footer>
 
+<!-- Scripts CUỐI body -->
 <script src="/static/js/main.js"></script>
 <script src="/static/js/dropdown.js"></script>
 <script>
-/* ── Loading overlay ─────────────────────────────────────────── */
 function showLoading() {
-  const kw = document.getElementById('search-input').value.trim();
+  var kw = document.getElementById('search-input').value.trim();
   if (!kw) return;
   document.getElementById('loading-overlay').classList.add('active');
 }
 
-/* ── Suggestions ─────────────────────────────────────────────── */
+/* Hero suggestions */
 function fetchSuggestions(q) {
-  const list = document.getElementById('suggestions-list');
-  if (!q || q.length < 2) { list.style.display = 'none'; return; }
+  var list = document.getElementById('suggestions-list');
+  if (!q || q.length < 2) { list.style.display='none'; return; }
   fetch('/api/suggestions?q=' + encodeURIComponent(q))
     .then(function(r){ return r.json(); })
     .then(function(data) {
-      if (!data.length) { list.style.display = 'none'; return; }
+      if (!data.length) { list.style.display='none'; return; }
       list.innerHTML = data.map(function(s) {
-        var hi = s.replace(new RegExp('('+q+')', 'gi'), '<strong>$1</strong>');
-        return '<li class="suggestion-item" onclick="selectSuggestion(\''+s.replace(/'/g,"\\'")+'\')">' + hi + '</li>';
+        var hi = s.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<strong>$1</strong>');
+        return '<li class="suggestion-item" onclick="selectSug(\''+s.replace(/'/g,"\\'")+'\')">' + hi + '</li>';
       }).join('');
-      list.style.display = 'block';
-    })
-    .catch(function(){ list.style.display = 'none'; });
+      list.style.display='block';
+    }).catch(function(){ list.style.display='none'; });
 }
-
-function selectSuggestion(val) {
+function selectSug(val) {
   document.getElementById('search-input').value = val;
-  document.getElementById('suggestions-list').style.display = 'none';
+  document.getElementById('suggestions-list').style.display='none';
   document.getElementById('search-form').submit();
 }
-
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.search-form'))
-    document.getElementById('suggestions-list').style.display = 'none';
+    document.getElementById('suggestions-list').style.display='none';
 });
 
-/* ── Store filter ────────────────────────────────────────────── */
+/* Store filter */
 function filterSite(site, btn) {
   document.querySelectorAll('#products-grid .product-card').forEach(function(c) {
-    c.style.display = (site === 'all' || c.dataset.site === site) ? '' : 'none';
+    c.style.display = (site==='all' || c.dataset.site===site) ? '' : 'none';
   });
-  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
 }
 
-/* ── Modal ───────────────────────────────────────────────────── */
+/* Cart modal */
 function openModal(state, title, desc) {
   document.getElementById('modal-spinner').style.display = state==='loading'?'block':'none';
   document.getElementById('modal-check').style.display   = state==='success'?'block':'none';
   document.getElementById('modal-error').style.display   = state==='error'  ?'block':'none';
-  if(title) document.getElementById('modal-title').textContent = title;
-  if(desc)  document.getElementById('modal-desc').textContent  = desc;
-  document.getElementById('modal-title').style.color =
-    state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
+  if(title) document.getElementById('modal-title').textContent=title;
+  if(desc)  document.getElementById('modal-desc').textContent=desc;
+  document.getElementById('modal-title').style.color = state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
   document.getElementById('cart-modal-overlay').classList.add('active');
 }
 function closeModal(){ document.getElementById('cart-modal-overlay').classList.remove('active'); }
 
 function addToCart(btn) {
-  var s = btn.closest('.card-body').querySelector('.product-data');
-  openModal('loading');
-  var start = Date.now();
-  fetch('/cart/add', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      title:s.dataset.title, price_str:s.dataset.price,
-      img:s.dataset.img, link:s.dataset.link, site:s.dataset.site
-    })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(res) {
-    var delay = Math.max(0, 700-(Date.now()-start));
-    setTimeout(function() {
-      if (res.ok || res.count !== undefined) {
-        openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
-        var el = document.getElementById('cart-count');
-        if (el && res.count !== undefined) {
-          el.textContent = res.count;
-          el.style.transform = 'scale(1.5)';
-          setTimeout(function(){ el.style.transform = 'scale(1)'; }, 200);
-        }
-      } else {
-        openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
-      }
-      setTimeout(closeModal, 1500);
-    }, delay);
-  })
-  .catch(function() {
+  var s=btn.closest('.card-body').querySelector('.product-data');
+  openModal('loading'); var start=Date.now();
+  fetch('/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
+  .then(function(r){return r.json();})
+  .then(function(res){
     setTimeout(function(){
-      openModal('error','Lỗi mạng','Không thể kết nối đến máy chủ.');
+      if(res.ok||res.count!==undefined){
+        openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
+        var el=document.getElementById('cart-count');
+        if(el&&res.count!==undefined){el.textContent=res.count;el.style.transform='scale(1.5)';setTimeout(function(){el.style.transform='scale(1)';},200);}
+      } else openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
       setTimeout(closeModal,1500);
-    }, Math.max(0, 700-(Date.now()-start)));
-  });
+    },Math.max(0,700-(Date.now()-start)));
+  }).catch(function(){openModal('error','Lỗi mạng','Không thể kết nối.');setTimeout(closeModal,2000);});
 }
 
 function saveFav(btn) {
-  var s = btn.closest('.card-body').querySelector('.product-data');
-  fetch('/favorites/add', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      title:s.dataset.title, price_str:s.dataset.price,
-      img:s.dataset.img, link:s.dataset.link, site:s.dataset.site
-    })
-  }).then(function(){
-    openModal('success','Đã thích!','Sản phẩm đã được lưu vào mục yêu thích.');
-    setTimeout(closeModal,1500);
-  });
+  var s=btn.closest('.card-body').querySelector('.product-data');
+  fetch('/favorites/add',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
+  .then(function(){openModal('success','Đã thích!','Đã lưu vào mục yêu thích.');setTimeout(closeModal,1500);});
 }
 
-/* ── Image upload (AI) ───────────────────────────────────────── */
-function handleImageSelect(e) {
-  var file = e.target.files[0];
-  if (file) showPreview(file);
-}
-function handleDrop(e) {
-  e.preventDefault();
-  var file = e.dataTransfer.files[0];
-  if (file) showPreview(file);
-}
-function showPreview(file) {
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    document.getElementById('drop-zone').style.display = 'none';
-    document.getElementById('upload-preview').style.display = 'block';
-    document.getElementById('upload-preview').innerHTML =
-      '<div class="upload-preview">' +
-      '<img src="'+ev.target.result+'" alt="preview">' +
-      '<div class="preview-info">' +
-      '<p class="preview-name">'+file.name+'</p>' +
-      '<div class="preview-actions">' +
-      '<button class="btn-ai-search" id="ai-btn" onclick="runAISearch(\''+file.name+'\')">🤖 Nhận diện ngay</button>' +
-      '<button class="btn-cancel-upload" onclick="cancelUpload()">Hủy</button>' +
+/* AI image upload */
+function handleImageSelect(e){var f=e.target.files[0];if(f)showPreview(f);}
+function handleDrop(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f)showPreview(f);}
+function showPreview(file){
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    document.getElementById('drop-zone').style.display='none';
+    document.getElementById('upload-preview').style.display='block';
+    document.getElementById('upload-preview').innerHTML=
+      '<div class="upload-preview"><img src="'+ev.target.result+'" alt="preview">'+
+      '<div class="preview-info"><p class="preview-name">'+file.name+'</p>'+
+      '<div class="preview-actions">'+
+      '<button class="btn-ai-search" id="ai-btn" onclick="runAISearch()">🤖 Nhận diện ngay</button>'+
+      '<button class="btn-cancel-upload" onclick="cancelUpload()">Hủy</button>'+
       '</div></div></div>';
   };
   reader.readAsDataURL(file);
-  window._uploadFile = file;
+  window._uploadFile=file;
 }
-function cancelUpload() {
-  document.getElementById('drop-zone').style.display = '';
-  document.getElementById('upload-preview').style.display = 'none';
-  document.getElementById('ai-result-msg').innerHTML = '';
-  window._uploadFile = null;
+function cancelUpload(){
+  document.getElementById('drop-zone').style.display='';
+  document.getElementById('upload-preview').style.display='none';
+  document.getElementById('ai-result-msg').innerHTML='';
+  window._uploadFile=null;
 }
-function runAISearch() {
-  if (!window._uploadFile) return;
-  var btn = document.getElementById('ai-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang nhận diện...'; }
-  var fd = new FormData();
-  fd.append('image', window._uploadFile);
-  fetch('/upload-image', { method: 'POST', body: fd })
-    .then(function(r){ return r.json(); })
-    .then(function(d) {
-      var msg = document.getElementById('ai-result-msg');
-      if (d.success) {
-        msg.innerHTML = '<div class="ai-result-msg ai-success">✅ Nhận diện: <strong>'+d.keyword+'</strong> — Đang chuyển...</div>';
-        setTimeout(function(){ window.location.href = d.redirect; }, 800);
+function runAISearch(){
+  if(!window._uploadFile)return;
+  var btn=document.getElementById('ai-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Đang nhận diện...';}
+  var fd=new FormData();fd.append('image',window._uploadFile);
+  fetch('/upload-image',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var msg=document.getElementById('ai-result-msg');
+      if(d.success){
+        msg.innerHTML='<div class="ai-result-msg ai-success">✅ Nhận diện: <strong>'+d.keyword+'</strong> — Đang chuyển...</div>';
+        setTimeout(function(){window.location.href=d.redirect;},800);
       } else {
-        msg.innerHTML = '<div class="ai-result-msg ai-error">❌ '+d.error+'</div>';
-        if (btn) { btn.disabled = false; btn.textContent = '🤖 Thử lại'; }
+        msg.innerHTML='<div class="ai-result-msg ai-error">❌ '+d.error+'</div>';
+        if(btn){btn.disabled=false;btn.textContent='🤖 Thử lại';}
       }
-    })
-    .catch(function(){
-      document.getElementById('ai-result-msg').innerHTML =
-        '<div class="ai-result-msg ai-error">❌ Lỗi kết nối máy chủ.</div>';
+    }).catch(function(){
+      document.getElementById('ai-result-msg').innerHTML='<div class="ai-result-msg ai-error">❌ Lỗi kết nối máy chủ.</div>';
     });
 }
 </script>

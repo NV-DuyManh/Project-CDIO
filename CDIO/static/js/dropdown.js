@@ -1,42 +1,16 @@
 /**
- * PriceHunt — Category Dropdown JS
- * Lưu tại: static/js/dropdown.js
- *
- * Hành vi:
- *   Desktop: Click nút "Danh mục" → mở/đóng L1.
- *            Hover vào item có sub-menu → L2 mở tự động qua CSS.
- *            Click ra ngoài → đóng L1.
- *   Mobile:  Click nút "Danh mục" → mở L1.
- *            Click item has-sub → toggle L2 (không dùng hover).
+ * PriceHunt — Dropdown JS (fixed)
+ * - Không đặt script trước <body>
+ * - Tất cả logic trong DOMContentLoaded
+ * - Toggle L1 bằng click, L2 bằng CSS hover (desktop) / JS click (mobile)
  */
-
 (function () {
   "use strict";
 
-  const MOBILE_BP = 768;
-
+  var MOBILE_BP = 768;
   function isMobile() {
     return window.innerWidth <= MOBILE_BP;
   }
-
-  // ── Toggle L1 ───────────────────────────────────────────────────
-  window.toggleCatDropdown = function (e) {
-    e.stopPropagation();
-    const btn = document.getElementById("cat-btn");
-    const dropdown = document.getElementById("cat-dropdown");
-    if (!btn || !dropdown) return;
-
-    const isOpen = dropdown.classList.contains("open");
-
-    // Đóng tất cả dropdown toàn trang trước
-    closeAllDropdowns();
-
-    if (!isOpen) {
-      dropdown.classList.add("open");
-      btn.classList.add("open");
-      btn.setAttribute("aria-expanded", "true");
-    }
-  };
 
   function closeAllDropdowns() {
     document.querySelectorAll(".cat-dropdown.open").forEach(function (d) {
@@ -48,55 +22,142 @@
     });
   }
 
-  // ── Click ra ngoài → đóng ───────────────────────────────────────
-  document.addEventListener("click", function (e) {
-    const wrap = document.getElementById("cat-wrap");
-    if (wrap && !wrap.contains(e.target)) {
-      closeAllDropdowns();
+  /* Toggle L1 — gọi từ onclick="toggleCatDropdown(event)" */
+  window.toggleCatDropdown = function (e) {
+    e.stopPropagation();
+    var btn = document.getElementById("cat-btn");
+    var dd = document.getElementById("cat-dropdown");
+    if (!btn || !dd) return;
+    var isOpen = dd.classList.contains("open");
+    closeAllDropdowns();
+    if (!isOpen) {
+      dd.classList.add("open");
+      btn.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
     }
-  });
+  };
 
-  // ── Escape key ──────────────────────────────────────────────────
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeAllDropdowns();
-  });
-
-  // ── Mobile: click has-sub → toggle L2 ───────────────────────────
   document.addEventListener("DOMContentLoaded", function () {
+    /* Click ngoài → đóng */
+    document.addEventListener("click", function (e) {
+      var wrap = document.getElementById("cat-wrap");
+      if (wrap && !wrap.contains(e.target)) closeAllDropdowns();
+    });
+
+    /* Escape → đóng */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAllDropdowns();
+    });
+
+    /* Mobile: click has-sub → toggle L2 */
     document.querySelectorAll(".cat-item.has-sub").forEach(function (item) {
       item.addEventListener("click", function (e) {
-        if (!isMobile()) return; // Desktop dùng CSS :hover
-
-        // Nếu click vào link con (cat-sub-item) thì cho navigate
-        if (e.target.closest(".cat-submenu")) return;
-
+        if (!isMobile()) return;
+        if (e.target.closest(".cat-submenu a"))
+          return; /* cho phép click link con */
         e.preventDefault();
         e.stopPropagation();
-
-        const wasOpen = item.classList.contains("mob-open");
-        // Đóng tất cả L2 đang mở
+        var wasOpen = item.classList.contains("mob-open");
         document
           .querySelectorAll(".cat-item.has-sub.mob-open")
           .forEach(function (i) {
             i.classList.remove("mob-open");
           });
-        if (!wasOpen) {
-          item.classList.add("mob-open");
-        }
+        if (!wasOpen) item.classList.add("mob-open");
       });
     });
 
-    // Cập nhật cart count
-    if (document.getElementById("cart-count")) {
+    /* Cart count */
+    var cartEl = document.getElementById("cart-count");
+    if (cartEl) {
       fetch("/cart/count")
         .then(function (r) {
           return r.json();
         })
         .then(function (d) {
-          const el = document.getElementById("cart-count");
-          if (el) el.textContent = d.count || 0;
+          cartEl.textContent = d.count || 0;
         })
         .catch(function () {});
+    }
+
+    /* ── Navbar search (mini) ── */
+    var navInput = document.getElementById("nav-search-input");
+    var navList = document.getElementById("nav-suggestions");
+    if (navInput && navList) {
+      var debounceTimer;
+      navInput.addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        var q = navInput.value.trim();
+        if (q.length < 2) {
+          navList.classList.remove("show");
+          return;
+        }
+        debounceTimer = setTimeout(function () {
+          fetch("/api/suggestions?q=" + encodeURIComponent(q))
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data.length) {
+                navList.classList.remove("show");
+                return;
+              }
+              navList.innerHTML = data
+                .slice(0, 8)
+                .map(function (s) {
+                  var hi = s.replace(
+                    new RegExp(
+                      "(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
+                      "gi",
+                    ),
+                    "<mark>$1</mark>",
+                  );
+                  return (
+                    '<li class="nav-sug-item" data-val="' +
+                    s.replace(/"/g, "&quot;") +
+                    '">' +
+                    hi +
+                    "</li>"
+                  );
+                })
+                .join("");
+              navList.classList.add("show");
+              navList.querySelectorAll(".nav-sug-item").forEach(function (li) {
+                li.addEventListener("mousedown", function (e) {
+                  e.preventDefault();
+                  navInput.value = li.dataset.val;
+                  navList.classList.remove("show");
+                  /* submit form hoặc redirect */
+                  var form = document.getElementById("nav-search-form");
+                  if (form) form.submit();
+                  else
+                    window.location.href =
+                      "/?keyword=" + encodeURIComponent(li.dataset.val);
+                });
+              });
+            })
+            .catch(function () {
+              navList.classList.remove("show");
+            });
+        }, 220);
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!navInput.contains(e.target) && !navList.contains(e.target))
+          navList.classList.remove("show");
+      });
+
+      /* Enter submit */
+      navInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          navList.classList.remove("show");
+          var form = document.getElementById("nav-search-form");
+          if (form) form.submit();
+          else
+            window.location.href =
+              "/?keyword=" + encodeURIComponent(navInput.value.trim());
+        }
+      });
     }
   });
 })();

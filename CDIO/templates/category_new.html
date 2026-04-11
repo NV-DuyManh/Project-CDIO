@@ -12,13 +12,70 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/dropdown.css">
+  <style>
+    /* ── Series tab bar (như ảnh 5) ── */
+    .series-tab-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      flex-wrap: wrap; margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .series-tab {
+      display: inline-flex; align-items: center;
+      padding: 0.45rem 1.1rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text2);
+      text-decoration: none; font-size: 0.82rem; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      transition: all 0.18s; white-space: nowrap;
+    }
+    .series-tab:hover { border-color: var(--border-hover); color: var(--text); }
+    .series-tab.active {
+      background: var(--accent); border-color: var(--accent);
+      color: #000;
+    }
+
+    /* ── Cart modal ── */
+    #cart-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(5px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10000; opacity: 0; visibility: hidden;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+    #cart-modal-overlay.active { opacity: 1; visibility: visible; }
+    .cart-modal {
+      background: #1a1a24; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px; padding: 40px; text-align: center;
+      width: 320px; transform: scale(.8);
+      transition: transform .4s cubic-bezier(.175,.885,.32,1.275);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5);
+    }
+    #cart-modal-overlay.active .cart-modal { transform: scale(1); }
+    .modal-icon-container {
+      width:80px;height:80px;margin:0 auto 20px;
+      position:relative;display:flex;align-items:center;justify-content:center;
+    }
+    .modal-spinner {
+      width:65px;height:65px;
+      border:4px solid rgba(245,166,35,.2);border-top-color:#f5a623;
+      border-radius:50%;animation:spin .8s linear infinite;
+      position:absolute;display:none;
+    }
+    @keyframes spin{100%{transform:rotate(360deg);}}
+    .modal-check,.modal-error{width:75px;height:75px;display:none;position:absolute;}
+    .modal-check-circle{stroke:#22c55e;stroke-width:4;stroke-dasharray:166;stroke-dashoffset:166;animation:stroke .5s cubic-bezier(.65,0,.45,1) forwards;fill:none;}
+    .modal-check-path{stroke:#22c55e;stroke-width:4;stroke-dasharray:48;stroke-dashoffset:48;stroke-linecap:round;stroke-linejoin:round;animation:stroke .3s cubic-bezier(.65,0,.45,1) .5s forwards;fill:none;}
+    .modal-error-circle{stroke:#ef4444;stroke-width:4;stroke-dasharray:166;stroke-dashoffset:166;animation:stroke .5s cubic-bezier(.65,0,.45,1) forwards;fill:none;}
+    .modal-error-path{stroke:#ef4444;stroke-width:4;stroke-dasharray:48;stroke-dashoffset:48;stroke-linecap:round;stroke-linejoin:round;animation:stroke .3s cubic-bezier(.65,0,.45,1) .5s forwards;fill:none;}
+    @keyframes stroke{100%{stroke-dashoffset:0;}}
+    .modal-title{font-family:'Syne',sans-serif;font-size:22px;color:#fff;margin-bottom:8px;font-weight:700;}
+    .modal-desc{font-size:14px;color:#aaa;margin:0;}
+  </style>
 </head>
-<script src="/static/js/dropdown.js"></script>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════
-     NAVBAR
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ NAVBAR ══ -->
 <nav class="navbar">
   <a href="/" class="nav-logo">
     <span class="logo-icon">⚡</span>
@@ -30,44 +87,52 @@
     <a href="/history" class="nav-link">Lịch Sử</a>
 
     <div class="nav-category-wrap" id="cat-wrap">
-      <button class="nav-category-btn open" id="cat-btn"
+      <button class="nav-category-btn" id="cat-btn"
               aria-haspopup="true" aria-expanded="false"
               onclick="toggleCatDropdown(event)">
         Danh mục <span class="caret">▼</span>
       </button>
       <div class="cat-dropdown" id="cat-dropdown" role="menu">
-        <a href="/category/brand/iphone"  class="cat-item has-sub" tabindex="0">
+
+        <div class="cat-item has-sub">
           <span>📱 iPhone</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
             <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/iphone"        class="cat-sub-item">Tất cả iPhone</a>
-            <div class="cat-divider"></div>
-            <a href="/category/series/iphone-17"    class="cat-sub-item">iPhone 17 Series</a>
-            <a href="/category/series/iphone-16"    class="cat-sub-item">iPhone 16 Series</a>
-            <a href="/category/series/iphone-15"    class="cat-sub-item">iPhone 15 Series</a>
-            <a href="/category/series/iphone-14"    class="cat-sub-item">iPhone 14 Series</a>
+            <a href="/category/series/iphone-17"  class="cat-sub-item">iPhone 17 Series</a>
+            <a href="/category/series/iphone-16"  class="cat-sub-item">iPhone 16 Series</a>
+            <a href="/category/series/iphone-15"  class="cat-sub-item">iPhone 15 Series</a>
+            <a href="/category/series/iphone-14"  class="cat-sub-item">iPhone 14 Series</a>
           </div>
-        </a>
-        <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+        </div>
+
+        <div class="cat-item has-sub">
           <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
-            <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/samsung"       class="cat-sub-item">Tất cả Samsung</a>
-            <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy S</span>
-            <a href="/category/series/samsung-s25"  class="cat-sub-item">Galaxy S25 Series</a>
-            <a href="/category/series/samsung-s24"  class="cat-sub-item">Galaxy S24 Series</a>
+            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
             <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy A / Z</span>
-            <a href="/category/series/samsung-a"    class="cat-sub-item">Galaxy A Series</a>
-            <a href="/category/series/samsung-z"    class="cat-sub-item">Galaxy Z Series</a>
+            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
+            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
           </div>
-        </a>
+        </div>
+
         <div class="cat-divider"></div>
-        <a href="/category/brand/other" class="cat-item">
-          <span>📦 Thương hiệu khác</span>
-        </a>
+        <a href="/category/brand/other" class="cat-item"><span>📦 Thương hiệu khác</span></a>
       </div>
+    </div>
+
+    <!-- Navbar search -->
+    <div style="position:relative;">
+      <form id="nav-search-form" action="/" method="GET" autocomplete="off">
+        <div class="nav-search-wrap">
+          <input type="text" id="nav-search-input" name="keyword"
+                 placeholder="Tìm sản phẩm..." autocomplete="off">
+          <button type="submit" class="nav-search-btn">Tìm</button>
+        </div>
+      </form>
+      <ul class="nav-suggestions" id="nav-suggestions"></ul>
     </div>
 
     {% if session.get('user_id') %}
@@ -84,67 +149,72 @@
           onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
 </nav>
 
-<!-- ══════════════════════════════════════════════════════════════
-     BREADCRUMB
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ BREADCRUMB ══ -->
 <div style="max-width:1400px;margin:0 auto;padding:.9rem 2rem .1rem;
             display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text3)">
-  <a href="/"                         style="color:var(--text3);text-decoration:none;">Trang chủ</a>
+  <a href="/" style="color:var(--text3);text-decoration:none;">Trang chủ</a>
   <span>/</span>
-  <a href="/category/brand/{{ brand_key }}"
-     style="color:var(--text3);text-decoration:none;">{{ brand_label }}</a>
   {% if view == 'series' %}
+    <a href="/category/brand/{{ brand_key }}" style="color:var(--text3);text-decoration:none;">{{ brand_label }}</a>
     <span>/</span>
     <span style="color:var(--text2)">{{ series_label }}</span>
+  {% else %}
+    <span style="color:var(--text2)">{{ brand_label }}</span>
   {% endif %}
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     MAIN
-══════════════════════════════════════════════════════════════ -->
+<!-- ══ MAIN ══ -->
 <div class="results-section" style="padding-top:1rem">
 
-  <!-- ── Page header ──────────────────────────────────────────── -->
+  <!-- Series tab bar — chỉ hiện khi đang xem brand iPhone hoặc Samsung -->
+  {% if brand_key == 'iphone' %}
+  <div class="series-tab-bar">
+    <a href="/category/series/iphone-17"
+       class="series-tab {% if series_slug == 'iphone-17' %}active{% endif %}">iPhone 17 Series</a>
+    <a href="/category/series/iphone-16"
+       class="series-tab {% if series_slug == 'iphone-16' %}active{% endif %}">iPhone 16 Series</a>
+    <a href="/category/series/iphone-15"
+       class="series-tab {% if series_slug == 'iphone-15' %}active{% endif %}">iPhone 15 Series</a>
+    <a href="/category/series/iphone-14"
+       class="series-tab {% if series_slug == 'iphone-14' %}active{% endif %}">iPhone 14 Series</a>
+  </div>
+  {% elif brand_key == 'samsung' %}
+  <div class="series-tab-bar">
+    <a href="/category/series/samsung-s25"
+       class="series-tab {% if series_slug == 'samsung-s25' %}active{% endif %}">Galaxy S25 Series</a>
+    <a href="/category/series/samsung-s24"
+       class="series-tab {% if series_slug == 'samsung-s24' %}active{% endif %}">Galaxy S24 Series</a>
+    <a href="/category/series/samsung-a"
+       class="series-tab {% if series_slug == 'samsung-a' %}active{% endif %}">Galaxy A Series</a>
+    <a href="/category/series/samsung-z"
+       class="series-tab {% if series_slug == 'samsung-z' %}active{% endif %}">Galaxy Z Series</a>
+  </div>
+  {% endif %}
+
+  <!-- Page header -->
   <div class="results-header">
     <div>
       <h1 class="results-title">
-        {% if view == 'series' %}
-          {{ series_label }}
-        {% else %}
-          {{ brand_label }}
-        {% endif %}
+        {% if view == 'series' %}{{ series_label }}{% else %}{{ brand_label }}{% endif %}
       </h1>
       <p class="results-count">
         {% if products %}
-          Tìm thấy
-          <strong style="color:var(--accent)">{{ total }}</strong>
-          sản phẩm từ
-          <strong style="color:var(--text)">
-            {{ products | map(attribute='site') | unique | list | length }}
-          </strong>
-          cửa hàng
+          Tìm thấy <strong style="color:var(--accent)">{{ total }}</strong> sản phẩm từ
+          <strong style="color:var(--text)">{{ products | map(attribute='site') | unique | list | length }}</strong> cửa hàng
         {% else %}
           Chưa có dữ liệu trong hệ thống
         {% endif %}
       </p>
     </div>
-
-    <!-- ── Sort bar ────────────────────────────────────────────── -->
     <div class="sort-bar">
       <span class="sort-label">Sắp xếp:</span>
-      <a href="?sort=asc&page=1"
-         class="sort-btn {% if sort == 'asc' %}active{% endif %}">
-        ↑ Giá thấp → cao
-      </a>
-      <a href="?sort=desc&page=1"
-         class="sort-btn {% if sort == 'desc' %}active{% endif %}">
-        ↓ Giá cao → thấp
-      </a>
+      <a href="?sort=asc&page=1"  class="sort-btn {% if sort=='asc'  %}active{% endif %}">↑ Giá thấp → cao</a>
+      <a href="?sort=desc&page=1" class="sort-btn {% if sort=='desc' %}active{% endif %}">↓ Giá cao → thấp</a>
     </div>
   </div>
 
-  <!-- ── Filter by store ──────────────────────────────────────── -->
   {% if products %}
+  <!-- Filter store -->
   <div class="results-filters" style="margin-bottom:1.25rem">
     <span class="filter-label">Cửa hàng:</span>
     <button class="filter-btn active" onclick="filterSite('all',this)">Tất cả</button>
@@ -152,38 +222,24 @@
     <button class="filter-btn" onclick="filterSite('{{ site }}',this)">{{ site }}</button>
     {% endfor %}
   </div>
-  {% endif %}
 
-  <!-- ── Product grid ─────────────────────────────────────────── -->
-  {% if products %}
+  <!-- Products grid -->
   <div class="products-grid" id="products-grid">
     {% for product in products %}
-    <div class="product-card {% if loop.index == 1 and sort == 'asc' %}best-price{% endif %}"
+    <div class="product-card {% if loop.index==1 and sort=='asc' %}best-price{% endif %}"
          data-site="{{ product.site }}"
-         style="animation-delay: {{ [loop.index0 * 0.04, 0.3] | min }}s">
-
-      {% if loop.index == 1 and sort == 'asc' %}
-        <div class="best-badge">Giá tốt nhất</div>
-      {% endif %}
-
-      <div class="card-site-badge site-{{ product.site | replace(' ','') }}">
-        {{ product.site }}
-      </div>
-
+         style="animation-delay:{{ [loop.index0*0.04,0.3]|min }}s">
+      {% if loop.index==1 and sort=='asc' %}<div class="best-badge">Giá tốt nhất</div>{% endif %}
+      <div class="card-site-badge site-{{ product.site|replace(' ','') }}">{{ product.site }}</div>
       <div class="card-img-wrap">
         <img src="{{ product.img }}" alt="{{ product.title }}" loading="lazy"
              onerror="this.src='https://via.placeholder.com/200x200/1a1a24/555?text=No+Image'">
       </div>
-
       <div class="card-body">
         <h3 class="card-title">{{ product.title }}</h3>
-        <div class="card-price-wrap">
-          <span class="card-price">{{ product.price_str }}</span>
-        </div>
+        <div class="card-price-wrap"><span class="card-price">{{ product.price_str }}</span></div>
         <div class="card-actions">
-          <a href="{{ product.link }}" target="_blank" class="btn-store">
-            Xem tại {{ product.site }} ↗
-          </a>
+          <a href="{{ product.link }}" target="_blank" class="btn-store">Xem tại {{ product.site }} ↗</a>
           {% if session.get('user_id') %}
             <button class="btn-cart" onclick="addToCart(this)" title="Thêm vào giỏ">🛒</button>
             <button class="btn-fav"  onclick="saveFav(this)"   title="Yêu thích">♡</button>
@@ -191,9 +247,8 @@
             <a href="/login" class="btn-cart" title="Đăng nhập để mua">🛒</a>
           {% endif %}
         </div>
-        <!-- product data -->
         <span class="product-data" style="display:none"
-              data-title="{{ product.title | replace('"','&quot;') }}"
+              data-title="{{ product.title|replace('"','&quot;') }}"
               data-price="{{ product.price_str }}"
               data-img="{{ product.img }}"
               data-link="{{ product.link }}"
@@ -203,49 +258,42 @@
     {% endfor %}
   </div>
 
-  <!-- ── Pagination ────────────────────────────────────────────── -->
+  <!-- Pagination -->
   {% if total_pages > 1 %}
   <nav class="pagination" aria-label="Phân trang">
-    <a href="?sort={{ sort }}&page={{ [page-1, 1]|max }}"
-       class="page-btn {% if page == 1 %}disabled{% endif %}">‹</a>
-
-    {% for p in range(1, total_pages + 1) %}
-      {% if p == 1 or p == total_pages
-            or (p >= page - 2 and p <= page + 2) %}
+    <a href="?sort={{ sort }}&page={{ [page-1,1]|max }}"
+       class="page-btn {% if page==1 %}disabled{% endif %}">‹</a>
+    {% for p in range(1, total_pages+1) %}
+      {% if p==1 or p==total_pages or (p>=page-2 and p<=page+2) %}
         <a href="?sort={{ sort }}&page={{ p }}"
-           class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
-      {% elif p == page - 3 or p == page + 3 %}
+           class="page-btn {% if p==page %}active{% endif %}">{{ p }}</a>
+      {% elif p==page-3 or p==page+3 %}
         <span class="page-btn disabled">…</span>
       {% endif %}
     {% endfor %}
-
-    <a href="?sort={{ sort }}&page={{ [page+1, total_pages]|min }}"
-       class="page-btn {% if page == total_pages %}disabled{% endif %}">›</a>
+    <a href="?sort={{ sort }}&page={{ [page+1,total_pages]|min }}"
+       class="page-btn {% if page==total_pages %}disabled{% endif %}">›</a>
   </nav>
   {% endif %}
 
   {% else %}
-  <!-- ── Empty state ────────────────────────────────────────────── -->
+  <!-- Empty state — nếu brand (không phải series) thì redirect sang series đầu tiên -->
   <div class="empty-state" style="padding:5rem 1rem">
     <div class="empty-icon">📦</div>
     <h3>Chưa có dữ liệu</h3>
     <p style="margin-bottom:1.25rem">
-      Hệ thống chưa có sản phẩm nào cho
-      <strong>{{ series_label or brand_label }}</strong>.<br>
+      Hệ thống chưa có sản phẩm nào cho <strong>{{ series_label or brand_label }}</strong>.<br>
       Hãy tìm kiếm để cào dữ liệu mới nhất.
     </p>
-    <a href="/?keyword={{ (series_label or brand_label) | urlencode }}"
-       class="nav-btn btn-primary">
+    <a href="/?keyword={{ (series_label or brand_label)|urlencode }}" class="nav-btn btn-primary">
       Tìm kiếm "{{ series_label or brand_label }}"
     </a>
   </div>
   {% endif %}
 
-</div><!-- /results-section -->
+</div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     CART MODAL
-══════════════════════════════════════════════════════════════ -->
+<!-- Cart modal -->
 <div id="cart-modal-overlay">
   <div class="cart-modal">
     <div class="modal-icon-container">
@@ -267,90 +315,50 @@
 <div id="toast" class="toast"></div>
 <footer class="footer"><p>© 2025 PriceHunt — So sánh giá thông minh</p></footer>
 
+<!-- Scripts CUỐI body — KHÔNG đặt trước <body> -->
 <script src="/static/js/main.js"></script>
 <script src="/static/js/dropdown.js"></script>
 <script>
-  /* ── Store filter ──────────────────────────────────────────── */
-  function filterSite(site, btn) {
-    document.querySelectorAll('#products-grid .product-card').forEach(function(c) {
-      c.style.display = (site === 'all' || c.dataset.site === site) ? '' : 'none';
-    });
-    document.querySelectorAll('.filter-btn').forEach(function(b) {
-      b.classList.remove('active');
-    });
-    btn.classList.add('active');
-  }
-
-  /* ── Modal helpers ─────────────────────────────────────────── */
-  function openModal(state, title, desc) {
-    document.getElementById('modal-spinner').style.display = state === 'loading' ? 'block' : 'none';
-    document.getElementById('modal-check').style.display   = state === 'success' ? 'block' : 'none';
-    document.getElementById('modal-error').style.display   = state === 'error'   ? 'block' : 'none';
-    if (title) document.getElementById('modal-title').textContent = title;
-    if (desc)  document.getElementById('modal-desc').textContent  = desc;
-    document.getElementById('modal-title').style.color =
-      state === 'success' ? '#22c55e' : state === 'error' ? '#ef4444' : '#fff';
-    document.getElementById('cart-modal-overlay').classList.add('active');
-  }
-  function closeModal() {
-    document.getElementById('cart-modal-overlay').classList.remove('active');
-  }
-
-  /* ── Add to cart ───────────────────────────────────────────── */
-  function addToCart(btn) {
-    var s = btn.closest('.card-body').querySelector('.product-data');
-    openModal('loading');
-    var start = Date.now();
-    fetch('/cart/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: s.dataset.title, price_str: s.dataset.price,
-        img: s.dataset.img, link: s.dataset.link, site: s.dataset.site
-      })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      var delay = Math.max(0, 700 - (Date.now() - start));
-      setTimeout(function() {
-        if (res.ok || res.count !== undefined) {
-          openModal('success', 'Thành công!', 'Sản phẩm đã nằm trong giỏ hàng.');
-          var el = document.getElementById('cart-count');
-          if (el && res.count !== undefined) {
-            el.textContent = res.count;
-            el.style.transform = 'scale(1.5)';
-            setTimeout(function() { el.style.transform = 'scale(1)'; }, 200);
-          }
-        } else {
-          openModal('error', 'Thất bại', 'Vui lòng đăng nhập để thêm vào giỏ hàng.');
-        }
-        setTimeout(closeModal, 1500);
-      }, delay);
-    })
-    .catch(function() {
-      var delay = Math.max(0, 700 - (Date.now() - start));
-      setTimeout(function() {
-        openModal('error', 'Lỗi mạng', 'Không thể kết nối đến máy chủ.');
-        setTimeout(closeModal, 1500);
-      }, delay);
-    });
-  }
-
-  /* ── Save favourite ────────────────────────────────────────── */
-  function saveFav(btn) {
-    var s = btn.closest('.card-body').querySelector('.product-data');
-    fetch('/favorites/add', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: s.dataset.title, price_str: s.dataset.price,
-        img: s.dataset.img, link: s.dataset.link, site: s.dataset.site
-      })
-    })
-    .then(function() {
-      openModal('success', 'Đã thích!', 'Sản phẩm đã được lưu vào mục yêu thích.');
-      setTimeout(closeModal, 1500);
-    });
-  }
+function filterSite(site,btn){
+  document.querySelectorAll('#products-grid .product-card').forEach(function(c){
+    c.style.display=(site==='all'||c.dataset.site===site)?'':'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function openModal(state,title,desc){
+  document.getElementById('modal-spinner').style.display=state==='loading'?'block':'none';
+  document.getElementById('modal-check').style.display  =state==='success'?'block':'none';
+  document.getElementById('modal-error').style.display  =state==='error'  ?'block':'none';
+  if(title)document.getElementById('modal-title').textContent=title;
+  if(desc) document.getElementById('modal-desc').textContent=desc;
+  document.getElementById('modal-title').style.color=state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
+  document.getElementById('cart-modal-overlay').classList.add('active');
+}
+function closeModal(){document.getElementById('cart-modal-overlay').classList.remove('active');}
+function addToCart(btn){
+  var s=btn.closest('.card-body').querySelector('.product-data');
+  openModal('loading');var start=Date.now();
+  fetch('/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
+  .then(function(r){return r.json();})
+  .then(function(res){
+    setTimeout(function(){
+      if(res.ok||res.count!==undefined){
+        openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
+        var el=document.getElementById('cart-count');
+        if(el&&res.count!==undefined){el.textContent=res.count;el.style.transform='scale(1.5)';setTimeout(function(){el.style.transform='scale(1)';},200);}
+      }else openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
+      setTimeout(closeModal,1500);
+    },Math.max(0,700-(Date.now()-start)));
+  }).catch(function(){openModal('error','Lỗi mạng','Không thể kết nối.');setTimeout(closeModal,2000);});
+}
+function saveFav(btn){
+  var s=btn.closest('.card-body').querySelector('.product-data');
+  fetch('/favorites/add',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
+  .then(function(){openModal('success','Đã thích!','Đã lưu vào mục yêu thích.');setTimeout(closeModal,1500);});
+}
 </script>
 </body>
 </html>

@@ -1,40 +1,82 @@
-// PriceHunt — Main JS
-// Handles: input animations, scroll effects, misc UX
+/**
+ * PriceHunt — Category Dropdown JS (fixed)
+ * Tất cả logic bọc trong DOMContentLoaded để tránh lỗi DOM chưa load.
+ */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Animate elements on scroll
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animationPlayState = 'running';
-            }
-        });
-    }, { threshold: 0.1 });
+(function () {
+  "use strict";
 
-    document.querySelectorAll('.product-card, .feature-card, .admin-stat-card').forEach(el => {
-        el.style.animationPlayState = 'paused';
-        observer.observe(el);
+  const MOBILE_BP = 768;
+  function isMobile() {
+    return window.innerWidth <= MOBILE_BP;
+  }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll(".cat-dropdown.open").forEach(function (d) {
+      d.classList.remove("open");
+    });
+    document.querySelectorAll(".nav-category-btn.open").forEach(function (b) {
+      b.classList.remove("open");
+      b.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  window.toggleCatDropdown = function (e) {
+    e.stopPropagation();
+    var btn = document.getElementById("cat-btn");
+    var dropdown = document.getElementById("cat-dropdown");
+    if (!btn || !dropdown) return;
+
+    var isOpen = dropdown.classList.contains("open");
+    closeAllDropdowns();
+
+    if (!isOpen) {
+      dropdown.classList.add("open");
+      btn.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    /* ── Click ngoài → đóng ────────────────────────────────── */
+    document.addEventListener("click", function (e) {
+      var wrap = document.getElementById("cat-wrap");
+      if (wrap && !wrap.contains(e.target)) closeAllDropdowns();
     });
 
-    // Star rating widget
-    document.querySelectorAll('.star-rating').forEach(widget => {
-        const stars = widget.querySelectorAll('.star');
-        const input = widget.querySelector('input[type=hidden]');
-        stars.forEach((star, i) => {
-            star.addEventListener('mouseenter', () => {
-                stars.forEach((s, j) => s.classList.toggle('hover', j <= i));
-            });
-            star.addEventListener('mouseleave', () => {
-                stars.forEach(s => s.classList.remove('hover'));
-            });
-            star.addEventListener('click', () => {
-                const val = i + 1;
-                if (input) input.value = val;
-                stars.forEach((s, j) => s.classList.toggle('selected', j < val));
-            });
-        });
-        widget.addEventListener('mouseleave', () => {
-            stars.forEach(s => s.classList.remove('hover'));
-        });
+    /* ── Escape → đóng ─────────────────────────────────────── */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAllDropdowns();
     });
-});
+
+    /* ── Mobile: click has-sub → toggle L2 ─────────────────── */
+    document.querySelectorAll(".cat-item.has-sub").forEach(function (item) {
+      item.addEventListener("click", function (e) {
+        if (!isMobile()) return;
+        if (e.target.closest(".cat-submenu")) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var wasOpen = item.classList.contains("mob-open");
+        document
+          .querySelectorAll(".cat-item.has-sub.mob-open")
+          .forEach(function (i) {
+            i.classList.remove("mob-open");
+          });
+        if (!wasOpen) item.classList.add("mob-open");
+      });
+    });
+
+    /* ── Cart count ─────────────────────────────────────────── */
+    var cartEl = document.getElementById("cart-count");
+    if (cartEl) {
+      fetch("/cart/count")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          cartEl.textContent = d.count || 0;
+        })
+        .catch(function () {});
+    }
+  });
+})();

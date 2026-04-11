@@ -1,177 +1,234 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đơn Hàng — PriceHunt</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/dropdown.css">
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/dropdown.css" />
     <style>
-        .qty-badge {
-            display: inline-block;
-            background: rgba(245,166,35,.15);
-            color: #f5a623;
-            border: 1px solid rgba(245,166,35,.3);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: .78rem;
-            font-weight: 600;
-            margin-left: 6px;
-        }
-        .price-total { font-weight: 700; color: #f5a623; }
+      .qty-badge {
+        display: inline-block;
+        background: rgba(245, 166, 35, 0.15);
+        color: #f5a623;
+        border: 1px solid rgba(245, 166, 35, 0.3);
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-left: 6px;
+      }
+      .price-total {
+        font-weight: 700;
+        color: #f5a623;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <nav class="navbar">
-        <a href="/" class="nav-logo">
-            <span class="logo-icon">⚡</span>
-            <span class="logo-text">PriceHunt</span>
-        </a>
-        <div class="nav-links" id="nav-links">
-            <a href="/"        class="nav-link">Tìm Kiếm</a>
-            <a href="/history" class="nav-link">Lịch Sử</a>
+      <!-- BÊN PHẢI: Logo + tên trang -->
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">PriceHunt</span>
+      </a>
 
-            <div class="nav-category-wrap" id="cat-wrap">
-                <button class="nav-category-btn" id="cat-btn"
-                        aria-haspopup="true" aria-expanded="false"
-                        onclick="toggleCatDropdown(event)">
-                    Danh mục <span class="caret">▼</span>
-                </button>
-                <div class="cat-dropdown" id="cat-dropdown" role="menu">
-                    <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
-                        <span>📱 iPhone</span><span class="sub-arrow">▶</span>
-                        <div class="cat-submenu">
-                            <span class="cat-sub-label">Dòng sản phẩm</span>
-                            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
-                            <div class="cat-divider"></div>
-                            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
-                            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
-                            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
-                            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
-                        </div>
-                    </a>
-                    <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
-                        <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
-                        <div class="cat-submenu">
-                            <span class="cat-sub-label">Dòng sản phẩm</span>
-                            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
-                            <div class="cat-divider"></div>
-                            <span class="cat-sub-label">Galaxy S</span>
-                            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
-                            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
-                            <div class="cat-divider"></div>
-                            <span class="cat-sub-label">Galaxy A / Z</span>
-                            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
-                            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
-                        </div>
-                    </a>
-                    <div class="cat-divider"></div>
-                    <a href="/category/brand/other" class="cat-item">
-                        <span>📦 Thương hiệu khác</span>
-                    </a>
-                </div>
-            </div>
+      <!-- BÊN TRÁI: tất cả nav links + dropdown danh mục -->
+      <div class="nav-links" id="nav-links">
+        <a href="/" class="nav-link">Tìm Kiếm</a>
+        <a href="/history" class="nav-link">Lịch Sử</a>
 
-            <a href="/cart"    class="nav-link cart-link">🛒 Giỏ hàng <span class="cart-count" id="cart-count">0</span></a>
-            <a href="/orders"  class="nav-link active">Đơn hàng</a>
-            <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
-            <a href="/logout"  class="nav-btn btn-ghost">Đăng xuất</a>
+        <!-- ── Dropdown Danh mục ──────────────────────────── -->
+        <div class="nav-category-wrap" id="cat-wrap">
+          <button
+            class="nav-category-btn"
+            id="cat-btn"
+            aria-haspopup="true"
+            aria-expanded="false"
+            onclick="toggleCatDropdown(event)"
+          >
+            Danh mục <span class="caret">▼</span>
+          </button>
+
+          <div class="cat-dropdown" id="cat-dropdown" role="menu">
+            <!-- iPhone -->
+            <a
+              href="/category/brand/iphone"
+              class="cat-item has-sub"
+              tabindex="0"
+            >
+              <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng sản phẩm</span>
+                <a href="/category/brand/iphone" class="cat-sub-item"
+                  >Tất cả iPhone</a
+                >
+                <div class="cat-divider"></div>
+                <a href="/category/series/iphone-17" class="cat-sub-item"
+                  >iPhone 17 Series</a
+                >
+                <a href="/category/series/iphone-16" class="cat-sub-item"
+                  >iPhone 16 Series</a
+                >
+                <a href="/category/series/iphone-15" class="cat-sub-item"
+                  >iPhone 15 Series</a
+                >
+                <a href="/category/series/iphone-14" class="cat-sub-item"
+                  >iPhone 14 Series</a
+                >
+              </div>
+            </a>
+
+            <!-- Samsung -->
+            <a
+              href="/category/brand/samsung"
+              class="cat-item has-sub"
+              tabindex="0"
+            >
+              <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+              <div class="cat-submenu">
+                <span class="cat-sub-label">Dòng sản phẩm</span>
+                <a href="/category/brand/samsung" class="cat-sub-item"
+                  >Tất cả Samsung</a
+                >
+                <div class="cat-divider"></div>
+                <span class="cat-sub-label">Galaxy S</span>
+                <a href="/category/series/samsung-s25" class="cat-sub-item"
+                  >Galaxy S25 Series</a
+                >
+                <a href="/category/series/samsung-s24" class="cat-sub-item"
+                  >Galaxy S24 Series</a
+                >
+                <div class="cat-divider"></div>
+                <span class="cat-sub-label">Galaxy A / Z</span>
+                <a href="/category/series/samsung-a" class="cat-sub-item"
+                  >Galaxy A Series</a
+                >
+                <a href="/category/series/samsung-z" class="cat-sub-item"
+                  >Galaxy Z Series</a
+                >
+              </div>
+            </a>
+
+            <div class="cat-divider"></div>
+            <a href="/category/brand/other" class="cat-item">
+              <span>📦 Thương hiệu khác</span>
+            </a>
+          </div>
         </div>
-        <button class="nav-toggle"
-                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+        <!-- ── /Dropdown ───────────────────────────────────── -->
+
+        <!-- Auth links — Jinja2 block, copy vào từng template -->
+        {% if session.get('user_id') %}
+        <a href="/cart" class="nav-link cart-link"
+          >🛒 <span class="cart-count" id="cart-count">0</span></a
+        >
+        <a href="/orders" class="nav-link">Đơn hàng</a>
+        <a href="/profile" class="nav-link nav-profile"
+          >{{ session.get('username') }}</a
+        >
+        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
+        {% else %}
+        <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="nav-btn btn-primary">Đăng ký</a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button
+        class="nav-toggle"
+        onclick="document.getElementById('nav-links').classList.toggle('open')"
+      >
+        ☰
+      </button>
     </nav>
 
     <div class="page-container">
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">📦 Đơn hàng của bạn</h1>
-                <p class="page-sub">Theo dõi toàn bộ lịch sử mua hàng</p>
-            </div>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">📦 Đơn hàng của bạn</h1>
+          <p class="page-sub">Theo dõi toàn bộ lịch sử mua hàng</p>
         </div>
+      </div>
 
-        {% if orders %}
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Mã đơn</th>
-                        <th>Sản phẩm</th>
-                        <th>SL</th>
-                        <th>Đơn giá</th>
-                        <th>Thành tiền</th>
-                        <th>Phương thức TT</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày đặt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    {% set qty   = order.quantity    if order.quantity    else 1 %}
-                    {% set unit  = order.unit_price  if order.unit_price  else 0 %}
-                    {% set total = order.total_price if order.total_price else 0 %}
-                    <tr>
-                        <td><code class="order-id">#{{ order.id }}</code></td>
-                        <td class="title-cell">{{ order.product_name }}</td>
-                        <td style="text-align:center">
-                            <span class="qty-badge">×{{ qty }}</span>
-                        </td>
-                        <td class="price-cell">
-                            {% if unit > 0 %}
-                                {{ "{:,.0f}đ".format(unit).replace(',','.') }}
-                            {% else %}
-                                {{ order.price }}
-                            {% endif %}
-                        </td>
-                        <td class="price-cell price-total">
-                            {% if total > 0 %}
-                                {{ "{:,.0f}đ".format(total).replace(',','.') }}
-                            {% elif unit > 0 %}
-                                {{ "{:,.0f}đ".format(unit * qty).replace(',','.') }}
-                            {% else %}
-                                {{ order.price }}
-                            {% endif %}
-                        </td>
-                        <td>{{ order.payment_method or 'N/A' }}</td>
-                        <td>
-                            <span class="status-badge status-{{ order.status }}">
-                                {% if order.status == 'paid' %}✓ Đã thanh toán
-                                {% elif order.status == 'pending' %}⏳ Chờ xử lý
-                                {% elif order.status == 'failed' %}✕ Thất bại
-                                {% else %}{{ order.status }}{% endif %}
-                            </span>
-                        </td>
-                        <td class="date-cell">{{ order.created_at }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="empty-state" style="padding:5rem 0">
-            <div class="empty-icon">📦</div>
-            <h3>Chưa có đơn hàng nào</h3>
-            <p>Hãy tìm kiếm và mua sắm để đơn hàng xuất hiện ở đây</p>
-            <a href="/" class="nav-btn btn-primary" style="margin-top:1rem">Mua sắm ngay</a>
-        </div>
-        {% endif %}
+      {% if orders %}
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã đơn</th>
+              <th>Sản phẩm</th>
+              <th>SL</th>
+              <th>Đơn giá</th>
+              <th>Thành tiền</th>
+              <th>Phương thức TT</th>
+              <th>Trạng thái</th>
+              <th>Ngày đặt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %} {% set qty = order.quantity if
+            order.quantity else 1 %} {% set unit = order.unit_price if
+            order.unit_price else 0 %} {% set total = order.total_price if
+            order.total_price else 0 %}
+            <tr>
+              <td><code class="order-id">#{{ order.id }}</code></td>
+              <td class="title-cell">{{ order.product_name }}</td>
+              <td style="text-align: center">
+                <span class="qty-badge">×{{ qty }}</span>
+              </td>
+              <td class="price-cell">
+                {% if unit > 0 %} {{ "{:,.0f}đ".format(unit).replace(',','.') }}
+                {% else %} {{ order.price }} {% endif %}
+              </td>
+              <td class="price-cell price-total">
+                {% if total > 0 %} {{ "{:,.0f}đ".format(total).replace(',','.')
+                }} {% elif unit > 0 %} {{ "{:,.0f}đ".format(unit *
+                qty).replace(',','.') }} {% else %} {{ order.price }} {% endif
+                %}
+              </td>
+              <td>{{ order.payment_method or 'N/A' }}</td>
+              <td>
+                <span class="status-badge status-{{ order.status }}">
+                  {% if order.status == 'paid' %}✓ Đã thanh toán {% elif
+                  order.status == 'pending' %}⏳ Chờ xử lý {% elif order.status
+                  == 'failed' %}✕ Thất bại {% else %}{{ order.status }}{% endif
+                  %}
+                </span>
+              </td>
+              <td class="date-cell">{{ order.created_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding: 5rem 0">
+        <div class="empty-icon">📦</div>
+        <h3>Chưa có đơn hàng nào</h3>
+        <p>Hãy tìm kiếm và mua sắm để đơn hàng xuất hiện ở đây</p>
+        <a href="/" class="nav-btn btn-primary" style="margin-top: 1rem"
+          >Mua sắm ngay</a
+        >
+      </div>
+      {% endif %}
     </div>
 
     <footer class="footer"><p>© 2025 PriceHunt</p></footer>
     <script src="/static/js/main.js"></script>
     <script src="/static/js/dropdown.js"></script>
     <script>
-        {% if session.get('user_id') %}
-        fetch('/cart/count').then(r => r.json()).then(d => {
-            const el = document.getElementById('cart-count');
-            if (el) el.textContent = d.count || 0;
-        });
-        {% endif %}
+      {% if session.get('user_id') %}
+      fetch('/cart/count').then(r => r.json()).then(d => {
+          const el = document.getElementById('cart-count');
+          if (el) el.textContent = d.count || 0;
+      });
+      {% endif %}
     </script>
-</body>
+  </body>
 </html>
