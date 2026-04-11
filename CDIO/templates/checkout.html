@@ -7,121 +7,173 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dropdown.css">
 </head>
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/cart" class="nav-btn btn-ghost">← Giỏ hàng</a>
-    </div>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">PriceHunt</span>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="/"        class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link">Lịch Sử</a>
 
-<!-- Payment loading overlay -->
-<div id="payment-overlay">
-    <div class="loading-inner">
-        <div class="loading-rings"><span></span><span></span><span></span></div>
-        <p class="loading-title">Đang xử lý thanh toán</p>
-        <p class="loading-sub">Vui lòng không đóng trang này...</p>
-        <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
-    </div>
-</div>
-
-<div class="page-container">
-    <div class="page-header">
-        <h1 class="page-title">💳 Thanh Toán</h1>
-        <p class="page-sub">Bước cuối cùng để hoàn tất đơn hàng</p>
-    </div>
-
-    <div class="checkout-layout">
-        <!-- Customer Form -->
-        <form class="checkout-form" id="checkout-form" action="/checkout" method="POST" onsubmit="processPayment(event)">
-            <div class="checkout-section">
-                <h3 class="section-heading">📋 Thông tin giao hàng</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Họ và tên *</label>
-                        <input type="text" name="fullname" placeholder="Nguyễn Văn A" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input type="tel" name="phone" placeholder="0901234567" required>
-                    </div>
-                    <div class="form-group" style="grid-column:span 2">
-                        <label>Email *</label>
-                        <input type="email" name="email" placeholder="email@example.com" required>
-                    </div>
-                    <div class="form-group" style="grid-column:span 2">
-                        <label>Địa chỉ giao hàng *</label>
-                        <textarea name="address" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required></textarea>
-                    </div>
+            <div class="nav-category-wrap" id="cat-wrap">
+                <button class="nav-category-btn" id="cat-btn"
+                        aria-haspopup="true" aria-expanded="false"
+                        onclick="toggleCatDropdown(event)">
+                    Danh mục <span class="caret">▼</span>
+                </button>
+                <div class="cat-dropdown" id="cat-dropdown" role="menu">
+                    <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+                        <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
+                            <div class="cat-divider"></div>
+                            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
+                            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
+                            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
+                            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
+                        </div>
+                    </a>
+                    <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+                        <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy S</span>
+                            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+                            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy A / Z</span>
+                            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
+                            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
+                        </div>
+                    </a>
+                    <div class="cat-divider"></div>
+                    <a href="/category/brand/other" class="cat-item">
+                        <span>📦 Thương hiệu khác</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="checkout-section">
-                <h3 class="section-heading">💳 Phương thức thanh toán</h3>
-                <div class="payment-methods">
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="credit_card" checked>
-                        <span class="payment-icon">💳</span>
-                        <span class="payment-label">Thẻ tín dụng / Ghi nợ</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="momo">
-                        <span class="payment-icon">🟣</span>
-                        <span class="payment-label">MoMo</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="vnpay">
-                        <span class="payment-icon">🔵</span>
-                        <span class="payment-label">VNPay</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment_method" value="cod">
-                        <span class="payment-icon">💵</span>
-                        <span class="payment-label">Thanh toán khi nhận hàng</span>
-                    </label>
-                </div>
-            </div>
+            <a href="/cart" class="nav-btn btn-ghost">← Giỏ hàng</a>
+        </div>
+        <button class="nav-toggle"
+                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+    </nav>
 
-            <button type="submit" class="auth-submit pay-btn">
-                <span>Thanh toán ngay</span>
-                <span>→</span>
-            </button>
-        </form>
-
-        <!-- Order Summary -->
-        <div class="cart-summary-card">
-            <h3>📦 Đơn hàng của bạn</h3>
-            {% for item in cart_items %}
-            <div class="checkout-item">
-                <img src="{{ item.img }}" alt="{{ item.title }}"
-                     onerror="this.src='https://via.placeholder.com/50x50/f8f9fa/999?text=?'">
-                <div class="checkout-item-info">
-                    <p class="checkout-item-title">{{ item.title[:35] }}{% if item.title|length > 35 %}...{% endif %}</p>
-                    <p class="checkout-item-qty">x{{ item.quantity }}</p>
-                </div>
-                <span class="checkout-item-price">{{ item.price_str }}</span>
-            </div>
-            {% endfor %}
-            <div class="summary-divider"></div>
-            <div class="summary-row"><span>Tạm tính</span><span>{{ subtotal }}</span></div>
-            <div class="summary-row"><span>Phí vận chuyển</span><span>30.000đ</span></div>
-            <div class="summary-row summary-total"><span>Tổng cộng</span><span>{{ total }}</span></div>
+    <!-- Payment loading overlay -->
+    <div id="payment-overlay">
+        <div class="loading-inner">
+            <div class="loading-rings"><span></span><span></span><span></span></div>
+            <p class="loading-title">Đang xử lý thanh toán</p>
+            <p class="loading-sub">Vui lòng không đóng trang này...</p>
+            <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
         </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-function processPayment(e) {
-    e.preventDefault();
-    document.getElementById('payment-overlay').classList.add('active');
-    // Submit after animation
-    setTimeout(() => {
-        document.getElementById('checkout-form').submit();
-    }, 4000);
-}
-</script>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">💳 Thanh Toán</h1>
+            <p class="page-sub">Bước cuối cùng để hoàn tất đơn hàng</p>
+        </div>
+
+        <div class="checkout-layout">
+            <form class="checkout-form" id="checkout-form"
+                  action="/checkout" method="POST"
+                  onsubmit="processPayment(event)">
+                <div class="checkout-section">
+                    <h3 class="section-heading">📋 Thông tin giao hàng</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Họ và tên *</label>
+                            <input type="text" name="fullname" placeholder="Nguyễn Văn A" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại *</label>
+                            <input type="tel" name="phone" placeholder="0901234567" required>
+                        </div>
+                        <div class="form-group" style="grid-column:span 2">
+                            <label>Email *</label>
+                            <input type="email" name="email" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group" style="grid-column:span 2">
+                            <label>Địa chỉ giao hàng *</label>
+                            <textarea name="address" rows="2"
+                                      placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+                                      required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-section">
+                    <h3 class="section-heading">💳 Phương thức thanh toán</h3>
+                    <div class="payment-methods">
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="credit_card" checked>
+                            <span class="payment-icon">💳</span>
+                            <span class="payment-label">Thẻ tín dụng / Ghi nợ</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="momo">
+                            <span class="payment-icon">🟣</span>
+                            <span class="payment-label">MoMo</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="vnpay">
+                            <span class="payment-icon">🔵</span>
+                            <span class="payment-label">VNPay</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="cod">
+                            <span class="payment-icon">💵</span>
+                            <span class="payment-label">Thanh toán khi nhận hàng</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit pay-btn">
+                    <span>Thanh toán ngay</span>
+                    <span>→</span>
+                </button>
+            </form>
+
+            <div class="cart-summary-card">
+                <h3>📦 Đơn hàng của bạn</h3>
+                {% for item in cart_items %}
+                <div class="checkout-item">
+                    <img src="{{ item.img }}" alt="{{ item.title }}"
+                         onerror="this.src='https://via.placeholder.com/50x50/f8f9fa/999?text=?'">
+                    <div class="checkout-item-info">
+                        <p class="checkout-item-title">
+                            {{ item.title[:35] }}{% if item.title|length > 35 %}...{% endif %}
+                        </p>
+                        <p class="checkout-item-qty">x{{ item.quantity }}</p>
+                    </div>
+                    <span class="checkout-item-price">{{ item.price_str }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-divider"></div>
+                <div class="summary-row"><span>Tạm tính</span><span>{{ subtotal }}</span></div>
+                <div class="summary-row"><span>Phí vận chuyển</span><span>30.000đ</span></div>
+                <div class="summary-row summary-total"><span>Tổng cộng</span><span>{{ total }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer"><p>© 2025 PriceHunt</p></footer>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dropdown.js"></script>
+    <script>
+        function processPayment(e) {
+            e.preventDefault();
+            document.getElementById('payment-overlay').classList.add('active');
+            setTimeout(() => document.getElementById('checkout-form').submit(), 4000);
+        }
+    </script>
 </body>
 </html>

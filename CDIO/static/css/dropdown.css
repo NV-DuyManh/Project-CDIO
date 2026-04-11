@@ -1,0 +1,354 @@
+/* ================================================================
+   NAVBAR CATEGORY DROPDOWN — thêm vào style.css
+   Multi-level: click mở L1, hover mở L2 (submenu)
+   ================================================================ */
+
+/* ── L1: nút "Danh mục" ──────────────────────────────────────── */
+.nav-category-wrap {
+  position: relative;
+}
+
+.nav-category-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text2);
+  background: none;
+  border: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-category-btn:hover,
+.nav-category-btn.open {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.nav-category-btn .caret {
+  font-size: 0.6rem;
+  transition: transform 0.22s;
+  opacity: 0.7;
+}
+
+.nav-category-btn.open .caret {
+  transform: rotate(180deg);
+}
+
+/* ── L1: dropdown panel ──────────────────────────────────────── */
+.cat-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  padding: 0.4rem 0;
+  z-index: 200;
+  /* Hidden state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top left;
+  transition:
+    opacity 0.18s ease,
+    visibility 0.18s,
+    transform 0.18s ease;
+  pointer-events: none;
+}
+
+.cat-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ── L1 item ─────────────────────────────────────────────────── */
+.cat-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: all 0.15s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: "DM Sans", sans-serif;
+  gap: 0.5rem;
+}
+
+.cat-item:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.cat-item.has-sub:hover {
+  color: var(--accent);
+}
+
+.cat-item .sub-arrow {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition:
+    transform 0.15s,
+    opacity 0.15s;
+}
+
+.cat-item.has-sub:hover .sub-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.cat-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.3rem 0;
+}
+
+/* ── L2: submenu panel ───────────────────────────────────────── */
+.cat-submenu {
+  position: absolute;
+  top: -5px;
+  left: calc(100% + 6px);
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  padding: 0.4rem 0;
+  /* Hidden state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px) scale(0.97);
+  transform-origin: top left;
+  transition:
+    opacity 0.16s ease,
+    visibility 0.16s,
+    transform 0.16s ease;
+  pointer-events: none;
+  z-index: 201;
+}
+
+.cat-item.has-sub:hover .cat-submenu,
+.cat-item.has-sub:focus-within .cat-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ── L2 item ─────────────────────────────────────────────────── */
+.cat-sub-item {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.84rem;
+  transition: all 0.14s;
+}
+
+.cat-sub-item:hover {
+  color: var(--accent);
+  background: rgba(245, 166, 35, 0.06);
+  padding-left: 1.25rem;
+}
+
+.cat-sub-label {
+  display: block;
+  padding: 0.35rem 1rem 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text3);
+  pointer-events: none;
+}
+
+/* ── Sort bar ────────────────────────────────────────────────── */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 0.8rem;
+  color: var(--text3);
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.85rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.sort-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.sort-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+
+/* ── DB miss banner ──────────────────────────────────────────── */
+.db-miss-banner {
+  background: rgba(245, 166, 35, 0.07);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.35s ease;
+}
+
+.db-miss-text {
+  font-size: 0.9rem;
+  color: var(--text2);
+}
+.db-miss-text strong {
+  color: var(--accent);
+}
+
+.btn-scrape-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1.1rem;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: "DM Sans", sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-scrape-now:hover {
+  background: #ffc04a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(245, 166, 35, 0.35);
+}
+
+/* ── Pagination ──────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.6rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.83rem;
+  transition: all 0.15s;
+}
+
+.page-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+.page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+.page-btn.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ── Mobile: dropdown full-width ─────────────────────────────── */
+@media (max-width: 768px) {
+  .cat-dropdown {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    min-width: unset;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
+  .cat-submenu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    padding-left: 1rem;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    display: none;
+  }
+
+  .cat-item.has-sub.mob-open .cat-submenu {
+    display: block;
+  }
+
+  .cat-item.has-sub .sub-arrow {
+    transition: transform 0.2s;
+  }
+
+  .cat-item.has-sub.mob-open .sub-arrow {
+    transform: rotate(90deg);
+    opacity: 1;
+  }
+}

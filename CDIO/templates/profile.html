@@ -7,106 +7,159 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dropdown.css">
 </head>
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-    <div class="nav-links">
-        <a href="/" class="nav-link">Tìm Kiếm</a>
-        <a href="/history" class="nav-link">Lịch Sử</a>
-        <a href="/cart" class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
-        <a href="/orders" class="nav-link">Đơn hàng</a>
-        <a href="/profile" class="nav-link active">{{ session.get('username') }}</a>
-        <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
-    </div>
-    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">PriceHunt</span>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="/"        class="nav-link">Tìm Kiếm</a>
+            <a href="/history" class="nav-link">Lịch Sử</a>
 
-<div class="page-container">
-    <div class="profile-layout">
-        <!-- Sidebar -->
-        <div class="profile-sidebar">
-            <div class="profile-avatar">
-                {{ session.get('username', 'U')[0].upper() }}
+            <div class="nav-category-wrap" id="cat-wrap">
+                <button class="nav-category-btn" id="cat-btn"
+                        aria-haspopup="true" aria-expanded="false"
+                        onclick="toggleCatDropdown(event)">
+                    Danh mục <span class="caret">▼</span>
+                </button>
+                <div class="cat-dropdown" id="cat-dropdown" role="menu">
+                    <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+                        <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
+                            <div class="cat-divider"></div>
+                            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
+                            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
+                            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
+                            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
+                        </div>
+                    </a>
+                    <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+                        <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy S</span>
+                            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+                            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy A / Z</span>
+                            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
+                            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
+                        </div>
+                    </a>
+                    <div class="cat-divider"></div>
+                    <a href="/category/brand/other" class="cat-item">
+                        <span>📦 Thương hiệu khác</span>
+                    </a>
+                </div>
             </div>
-            <h2 class="profile-name">{{ session.get('username') }}</h2>
-            <p class="profile-email">{{ user.email if user else '' }}</p>
-            <div class="profile-stats">
-                <div class="pstat"><strong>{{ orders_count }}</strong><span>Đơn hàng</span></div>
-                <div class="pstat"><strong>{{ favorites_count }}</strong><span>Yêu thích</span></div>
-                <div class="pstat"><strong>{{ comments_count }}</strong><span>Đánh giá</span></div>
-            </div>
-            <a href="/logout" class="nav-btn btn-ghost" style="width:100%;text-align:center;margin-top:1rem;">Đăng xuất</a>
+
+            <a href="/cart"    class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
+            <a href="/orders"  class="nav-link">Đơn hàng</a>
+            <a href="/profile" class="nav-link active nav-profile">{{ session.get('username') }}</a>
+            <a href="/logout"  class="nav-btn btn-ghost">Đăng xuất</a>
         </div>
+        <button class="nav-toggle"
+                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+    </nav>
 
-        <!-- Content -->
-        <div class="profile-content">
-            <!-- Favorites -->
-            <div class="profile-section">
-                <h3 class="section-heading">❤️ Sản phẩm yêu thích</h3>
-                {% if favorites %}
-                <div class="mini-products-grid">
-                    {% for fav in favorites %}
-                    <div class="mini-card">
-                        <img src="{{ fav.img }}" alt="{{ fav.title }}"
-                             onerror="this.src='https://via.placeholder.com/80x80/f8f9fa/999?text=?'">
-                        <div class="mini-card-body">
-                            <p class="mini-title">{{ fav.title[:40] }}{% if fav.title|length > 40 %}...{% endif %}</p>
-                            <p class="mini-price">{{ fav.price_str }}</p>
-                            <div class="mini-actions">
-                                <a href="{{ fav.link }}" target="_blank" class="table-link-btn">Xem ↗</a>
-                                <form action="/favorites/remove/{{ fav.id }}" method="POST" style="display:inline">
-                                    <button type="submit" class="btn-remove">✕</button>
-                                </form>
+    <div class="page-container">
+        <div class="profile-layout">
+            <div class="profile-sidebar">
+                <div class="profile-avatar">
+                    {{ session.get('username', 'U')[0].upper() }}
+                </div>
+                <h2 class="profile-name">{{ session.get('username') }}</h2>
+                <p class="profile-email">{{ user.email if user else '' }}</p>
+                <div class="profile-stats">
+                    <div class="pstat"><strong>{{ orders_count }}</strong><span>Đơn hàng</span></div>
+                    <div class="pstat"><strong>{{ favorites_count }}</strong><span>Yêu thích</span></div>
+                    <div class="pstat"><strong>{{ comments_count }}</strong><span>Đánh giá</span></div>
+                </div>
+                <a href="/logout" class="nav-btn btn-ghost"
+                   style="width:100%;text-align:center;margin-top:1rem;">Đăng xuất</a>
+            </div>
+
+            <div class="profile-content">
+                <div class="profile-section">
+                    <h3 class="section-heading">❤️ Sản phẩm yêu thích</h3>
+                    {% if favorites %}
+                    <div class="mini-products-grid">
+                        {% for fav in favorites %}
+                        <div class="mini-card">
+                            <img src="{{ fav.img }}" alt="{{ fav.title }}"
+                                 onerror="this.src='https://via.placeholder.com/80x80/f8f9fa/999?text=?'">
+                            <div class="mini-card-body">
+                                <p class="mini-title">{{ fav.title[:40] }}{% if fav.title|length > 40 %}...{% endif %}</p>
+                                <p class="mini-price">{{ fav.price_str }}</p>
+                                <div class="mini-actions">
+                                    <a href="{{ fav.link }}" target="_blank" class="table-link-btn">Xem ↗</a>
+                                    <form action="/favorites/remove/{{ fav.id }}" method="POST" style="display:inline">
+                                        <button type="submit" class="btn-remove">✕</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="empty-text">Chưa có sản phẩm yêu thích. <a href="/">Tìm kiếm ngay</a></p>
-                {% endif %}
-            </div>
-
-            <!-- Recent orders -->
-            <div class="profile-section">
-                <h3 class="section-heading">📦 Đơn hàng gần đây</h3>
-                {% if orders %}
-                <div class="table-card" style="margin-top:0.5rem">
-                    <table>
-                        <thead>
-                            <tr><th>Mã đơn</th><th>Sản phẩm</th><th>Giá</th><th>Trạng thái</th><th>Ngày</th></tr>
-                        </thead>
-                        <tbody>
-                        {% for order in orders[:5] %}
-                        <tr>
-                            <td><code>#{{ order.id }}</code></td>
-                            <td>{{ order.product_name[:30] }}...</td>
-                            <td class="price-cell">{{ order.price }}</td>
-                            <td>
-                                <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
-                            </td>
-                            <td class="date-cell">{{ order.created_at }}</td>
-                        </tr>
                         {% endfor %}
-                        </tbody>
-                    </table>
+                    </div>
+                    {% else %}
+                    <p class="empty-text">Chưa có sản phẩm yêu thích. <a href="/">Tìm kiếm ngay</a></p>
+                    {% endif %}
                 </div>
-                {% else %}
-                <p class="empty-text">Chưa có đơn hàng. <a href="/">Mua sắm ngay</a></p>
-                {% endif %}
+
+                <div class="profile-section">
+                    <h3 class="section-heading">📦 Đơn hàng gần đây</h3>
+                    {% if orders %}
+                    <div class="table-card" style="margin-top:.5rem">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders[:5] %}
+                                <tr>
+                                    <td><code>#{{ order.id }}</code></td>
+                                    <td>{{ order.product_name[:30] }}...</td>
+                                    <td class="price-cell">{{ order.price }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ order.status }}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td class="date-cell">{{ order.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="empty-text">Chưa có đơn hàng. <a href="/">Mua sắm ngay</a></p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
-<script>
-fetch('/cart/count').then(r=>r.json()).then(d=>{
-    const el = document.getElementById('cart-count');
-    if(el && d.count) el.textContent = d.count;
-});
-</script>
+    <footer class="footer"><p>© 2025 PriceHunt</p></footer>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dropdown.js"></script>
+    <script>
+        fetch('/cart/count').then(r => r.json()).then(d => {
+            const el = document.getElementById('cart-count');
+            if (el && d.count) el.textContent = d.count;
+        });
+    </script>
 </body>
 </html>

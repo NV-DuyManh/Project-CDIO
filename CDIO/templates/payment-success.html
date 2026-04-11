@@ -7,139 +7,174 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dropdown.css">
     <style>
         .order-items-box {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
             border-radius: 12px;
             padding: 1rem 1.25rem;
             margin: 1rem 0;
             text-align: left;
         }
         .order-items-title {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #888;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
+            font-size: .78rem; text-transform: uppercase;
+            letter-spacing: .08em; color: #888;
+            margin-bottom: .75rem; font-weight: 600;
         }
         .order-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.45rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.9rem;
+            display: flex; justify-content: space-between;
+            align-items: center; padding: .45rem 0;
+            border-bottom: 1px solid rgba(255,255,255,.05);
+            font-size: .9rem;
         }
         .order-item-row:last-child { border-bottom: none; }
         .order-item-name {
-            flex: 1;
-            color: #e0e0e0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 60%;
+            flex: 1; color: #e0e0e0; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; max-width: 60%;
         }
         .order-item-right {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-shrink: 0;
+            display: flex; align-items: center;
+            gap: .75rem; flex-shrink: 0;
         }
         .qty-chip {
-            background: rgba(245,166,35,0.15);
-            color: #f5a623;
-            border: 1px solid rgba(245,166,35,0.3);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
+            background: rgba(245,166,35,.15); color: #f5a623;
+            border: 1px solid rgba(245,166,35,.3); border-radius: 6px;
+            padding: 2px 8px; font-size: .78rem; font-weight: 700;
         }
         .item-total {
-            color: #f5a623;
-            font-weight: 600;
-            font-size: 0.85rem;
-            min-width: 90px;
-            text-align: right;
+            color: #f5a623; font-weight: 600;
+            font-size: .85rem; min-width: 90px; text-align: right;
         }
         .total-qty-row {
-            margin-top: 0.6rem;
-            padding-top: 0.6rem;
-            border-top: 1px solid rgba(245,166,35,0.2);
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.82rem;
-            color: #aaa;
+            margin-top: .6rem; padding-top: .6rem;
+            border-top: 1px solid rgba(245,166,35,.2);
+            display: flex; justify-content: space-between;
+            font-size: .82rem; color: #aaa;
         }
         .total-qty-row strong { color: #f5a623; }
     </style>
 </head>
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">PriceHunt</span>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="/" class="nav-link">Trang chủ</a>
 
-<div class="result-page">
-    <div class="result-card result-success">
-        <div class="result-icon-wrap success-anim">✓</div>
-        <h1>Thanh toán thành công!</h1>
-        <p class="result-sub">Đơn hàng của bạn đã được xác nhận</p>
-
-        <div class="order-info-card">
-            <div class="order-info-row">
-                <span>Mã đơn hàng</span>
-                <strong>#{{ order_id }}</strong>
-            </div>
-            <div class="order-info-row">
-                <span>Tổng tiền</span>
-                <strong class="price-cell">{{ total }}</strong>
-            </div>
-            <div class="order-info-row">
-                <span>Phương thức</span>
-                <strong>{{ payment_method }}</strong>
-            </div>
-        </div>
-
-        {% if order_items %}
-        <div class="order-items-box">
-            <div class="order-items-title">🛍 Sản phẩm đã mua</div>
-            {% for item in order_items %}
-            <div class="order-item-row">
-                <span class="order-item-name" title="{{ item.product_name }}">
-                    {{ item.product_name }}
-                </span>
-                <div class="order-item-right">
-                    <span class="qty-chip">×{{ item.quantity }}</span>
-                    <span class="item-total">
-                        {% if item.total_price > 0 %}
-                            {{ "{:,.0f}đ".format(item.total_price).replace(',', '.') }}
-                        {% else %}
-                            {{ item.price_str }}
-                        {% endif %}
-                    </span>
+            <div class="nav-category-wrap" id="cat-wrap">
+                <button class="nav-category-btn" id="cat-btn"
+                        aria-haspopup="true" aria-expanded="false"
+                        onclick="toggleCatDropdown(event)">
+                    Danh mục <span class="caret">▼</span>
+                </button>
+                <div class="cat-dropdown" id="cat-dropdown" role="menu">
+                    <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+                        <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
+                            <div class="cat-divider"></div>
+                            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
+                            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
+                            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
+                            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
+                        </div>
+                    </a>
+                    <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+                        <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy S</span>
+                            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+                            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy A / Z</span>
+                            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
+                            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
+                        </div>
+                    </a>
+                    <div class="cat-divider"></div>
+                    <a href="/category/brand/other" class="cat-item">
+                        <span>📦 Thương hiệu khác</span>
+                    </a>
                 </div>
             </div>
-            {% endfor %}
-            <div class="total-qty-row">
-                <span>Tổng số lượng</span>
-                <strong>{{ total_qty }} sản phẩm</strong>
+
+            {% if session.get('user_id') %}
+                <a href="/orders"  class="nav-link">Đơn hàng</a>
+                <a href="/profile" class="nav-link">{{ session.get('username') }}</a>
+            {% endif %}
+        </div>
+        <button class="nav-toggle"
+                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="result-page">
+        <div class="result-card result-success">
+            <div class="result-icon-wrap success-anim">✓</div>
+            <h1>Thanh toán thành công!</h1>
+            <p class="result-sub">Đơn hàng của bạn đã được xác nhận</p>
+
+            <div class="order-info-card">
+                <div class="order-info-row">
+                    <span>Mã đơn hàng</span>
+                    <strong>#{{ order_id }}</strong>
+                </div>
+                <div class="order-info-row">
+                    <span>Tổng tiền</span>
+                    <strong class="price-cell">{{ total }}</strong>
+                </div>
+                <div class="order-info-row">
+                    <span>Phương thức</span>
+                    <strong>{{ payment_method }}</strong>
+                </div>
+            </div>
+
+            {% if order_items %}
+            <div class="order-items-box">
+                <div class="order-items-title">🛍 Sản phẩm đã mua</div>
+                {% for item in order_items %}
+                <div class="order-item-row">
+                    <span class="order-item-name" title="{{ item.product_name }}">
+                        {{ item.product_name }}
+                    </span>
+                    <div class="order-item-right">
+                        <span class="qty-chip">×{{ item.quantity }}</span>
+                        <span class="item-total">
+                            {% if item.total_price > 0 %}
+                                {{ "{:,.0f}đ".format(item.total_price).replace(',','.') }}
+                            {% else %}
+                                {{ item.price_str }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="total-qty-row">
+                    <span>Tổng số lượng</span>
+                    <strong>{{ total_qty }} sản phẩm</strong>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="delivery-estimate">
+                🚚 Dự kiến giao hàng: <strong>3–5 ngày làm việc</strong>
+            </div>
+
+            <div class="result-actions">
+                <a href="/orders" class="nav-btn btn-primary">Xem đơn hàng</a>
+                <a href="/"       class="nav-btn btn-ghost">Tiếp tục mua sắm</a>
             </div>
         </div>
-        {% endif %}
-
-        <div class="delivery-estimate">
-            🚚 Dự kiến giao hàng: <strong>3–5 ngày làm việc</strong>
-        </div>
-
-        <div class="result-actions">
-            <a href="/orders" class="nav-btn btn-primary">Xem đơn hàng</a>
-            <a href="/" class="nav-btn btn-ghost">Tiếp tục mua sắm</a>
-        </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
+    <footer class="footer"><p>© 2025 PriceHunt</p></footer>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dropdown.js"></script>
 </body>
 </html>

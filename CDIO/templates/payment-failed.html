@@ -7,26 +7,87 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dropdown.css">
 </head>
 <body>
-<nav class="navbar">
-    <a href="/" class="nav-logo"><span class="logo-icon">⚡</span><span class="logo-text">PriceHunt</span></a>
-</nav>
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">PriceHunt</span>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="/" class="nav-link">Trang chủ</a>
 
-<div class="result-page">
-    <div class="result-card result-failed">
-        <div class="result-icon-wrap failed-anim">✕</div>
-        <h1>Thanh toán thất bại</h1>
-        <p class="result-sub">Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.</p>
+            <div class="nav-category-wrap" id="cat-wrap">
+                <button class="nav-category-btn" id="cat-btn"
+                        aria-haspopup="true" aria-expanded="false"
+                        onclick="toggleCatDropdown(event)">
+                    Danh mục <span class="caret">▼</span>
+                </button>
+                <div class="cat-dropdown" id="cat-dropdown" role="menu">
+                    <a href="/category/brand/iphone" class="cat-item has-sub" tabindex="0">
+                        <span>📱 iPhone</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/iphone"       class="cat-sub-item">Tất cả iPhone</a>
+                            <div class="cat-divider"></div>
+                            <a href="/category/series/iphone-17"   class="cat-sub-item">iPhone 17 Series</a>
+                            <a href="/category/series/iphone-16"   class="cat-sub-item">iPhone 16 Series</a>
+                            <a href="/category/series/iphone-15"   class="cat-sub-item">iPhone 15 Series</a>
+                            <a href="/category/series/iphone-14"   class="cat-sub-item">iPhone 14 Series</a>
+                        </div>
+                    </a>
+                    <a href="/category/brand/samsung" class="cat-item has-sub" tabindex="0">
+                        <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
+                        <div class="cat-submenu">
+                            <span class="cat-sub-label">Dòng sản phẩm</span>
+                            <a href="/category/brand/samsung"      class="cat-sub-item">Tất cả Samsung</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy S</span>
+                            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+                            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
+                            <div class="cat-divider"></div>
+                            <span class="cat-sub-label">Galaxy A / Z</span>
+                            <a href="/category/series/samsung-a"   class="cat-sub-item">Galaxy A Series</a>
+                            <a href="/category/series/samsung-z"   class="cat-sub-item">Galaxy Z Series</a>
+                        </div>
+                    </a>
+                    <div class="cat-divider"></div>
+                    <a href="/category/brand/other" class="cat-item">
+                        <span>📦 Thương hiệu khác</span>
+                    </a>
+                </div>
+            </div>
 
-        <div class="result-actions">
-            <a href="/checkout" class="nav-btn btn-primary">Thử lại</a>
-            <a href="/cart" class="nav-btn btn-ghost">Về giỏ hàng</a>
+            <a href="/cart" class="nav-btn btn-ghost">← Giỏ hàng</a>
+        </div>
+        <button class="nav-toggle"
+                onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="result-page">
+        <div class="result-card result-failed">
+            <div class="result-icon-wrap failed-anim">✕</div>
+            <h1>Thanh toán thất bại</h1>
+            <p class="result-sub">Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.</p>
+
+            {% if error %}
+            <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+                        border-radius:8px;padding:.75rem 1rem;margin-bottom:1.5rem;
+                        font-size:.85rem;color:#fca5a5;">
+                Chi tiết: {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="result-actions">
+                <a href="/checkout" class="nav-btn btn-primary">Thử lại</a>
+                <a href="/cart"     class="nav-btn btn-ghost">Về giỏ hàng</a>
+            </div>
         </div>
     </div>
-</div>
 
-<footer class="footer"><p>© 2025 PriceHunt</p></footer>
-<script src="/static/js/main.js"></script>
+    <footer class="footer"><p>© 2025 PriceHunt</p></footer>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/dropdown.js"></script>
 </body>
 </html>
