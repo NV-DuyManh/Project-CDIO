@@ -1,9 +1,12 @@
 /* ================================================
-   PriceHunt — Main Stylesheet
-   Design: Dark luxury with amber accents
+   PriceHunt — Main Stylesheet v3 (Clean Rewrite)
+   Design: Dark luxury · Amber accent · Minimal noise
    Font: Syne (display) + DM Sans (body)
    ================================================ */
 
+/* ================================================
+   CSS VARIABLES
+   ================================================ */
 :root {
   --bg: #0a0a0f;
   --surface: #111118;
@@ -26,14 +29,19 @@
   --glow: 0 0 40px rgba(245, 166, 35, 0.15);
 }
 
-* {
+/* ================================================
+   RESET & BASE
+   ================================================ */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -53,24 +61,29 @@ body {
   top: 0;
   z-index: 100;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 1.5rem;
   height: 64px;
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(10, 10, 15, 0.88);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
+  gap: 0;
 }
 
+/* Logo — bên trái */
 .nav-logo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
 }
 
 .logo-icon {
   font-size: 1.4rem;
+  color: var(--accent);
   filter: drop-shadow(0 0 8px var(--accent));
 }
 
@@ -82,8 +95,10 @@ body {
   letter-spacing: -0.02em;
 }
 
+/* Nav links */
 .nav-links {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.25rem;
 }
@@ -94,13 +109,24 @@ body {
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
-  transition: all 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
+  white-space: nowrap;
 }
 
 .nav-link:hover,
 .nav-link.active {
   color: var(--text);
   background: var(--surface2);
+}
+
+.nav-profile {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  padding: 0.4rem 0.85rem;
 }
 
 .cart-link {
@@ -116,6 +142,7 @@ body {
   border-radius: 99px;
   margin-left: 2px;
   vertical-align: super;
+  transition: transform 0.2s;
 }
 
 .nav-btn {
@@ -130,6 +157,7 @@ body {
   cursor: pointer;
   border: none;
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .btn-ghost {
@@ -156,14 +184,6 @@ body {
   box-shadow: 0 4px 20px rgba(245, 166, 35, 0.35);
 }
 
-.nav-profile {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--accent) !important;
-  padding: 0.4rem 0.85rem;
-}
-
 .nav-toggle {
   display: none;
   background: none;
@@ -171,6 +191,58 @@ body {
   color: var(--text);
   font-size: 1.4rem;
   cursor: pointer;
+}
+
+/* ================================================
+   SITE BADGES (store color pills)
+   ================================================ */
+.site-pill,
+.card-site-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Named store colors */
+.site-Clickbuy {
+  background: #ff4757;
+  color: #fff;
+}
+.site-CellphoneS {
+  background: #eccc68;
+  color: #333;
+}
+.site-DiDong3A,
+.site-Di-Dong-3A {
+  background: #2563eb;
+  color: #fff;
+}
+.site-SmartViet,
+.site-Smart-Viet {
+  background: #16a34a;
+  color: #fff;
+}
+.site-BachLongStore,
+.site-Bach-Long-Store {
+  background: #9333ea;
+  color: #fff;
+}
+.site-TienTranMobile,
+.site-Tien-Tran-Mobile {
+  background: #0891b2;
+  color: #fff;
+}
+
+/* Fallback for any unmatched store */
+.card-site-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
 }
 
 /* ================================================
@@ -255,8 +327,9 @@ body {
   animation: fadeInUp 0.6s ease 0.2s both;
 }
 
-/* Search Form */
+/* ── Search form ── */
 .search-form {
+  position: relative;
   animation: fadeInUp 0.6s ease 0.3s both;
 }
 
@@ -323,28 +396,19 @@ body {
   background: #ffc04a;
   transform: scale(1.03);
 }
-
 #search-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-/* --- Suggestions Dropdown --- */
-.search-form {
-  position: relative;
-}
-
-.search-wrap {
-  position: relative;
-}
-
+/* Suggestions */
 .suggestions-list {
   position: absolute;
   top: 105%;
   left: 40px;
   right: 140px;
-  background-color: var(--surface2);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   z-index: 1000;
@@ -366,7 +430,7 @@ body {
 }
 
 .suggestion-item:hover {
-  background-color: var(--surface3);
+  background: var(--surface3);
   color: var(--accent);
 }
 
@@ -374,13 +438,7 @@ body {
   color: var(--text);
 }
 
-@media (max-width: 768px) {
-  .suggestions-list {
-    left: 10px;
-    right: 10px;
-  }
-}
-
+/* Hero stats */
 .hero-stats {
   display: flex;
   align-items: center;
@@ -394,16 +452,216 @@ body {
   color: var(--text2);
   font-size: 0.85rem;
 }
-
 .stat strong {
   color: var(--text);
   font-weight: 600;
 }
-
 .stat-divider {
   width: 1px;
   height: 20px;
   background: var(--border);
+}
+
+/* ── Image upload ── */
+.search-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 1.25rem auto 0;
+  color: var(--text3);
+  font-size: 0.85rem;
+}
+
+.search-divider::before,
+.search-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.image-upload-area {
+  max-width: 600px;
+  margin: 0.85rem auto 0;
+}
+
+.upload-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.75rem 1.5rem;
+  background: var(--surface2);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+  text-align: center;
+}
+
+.upload-drop-zone:hover,
+.upload-drop-zone.drag-over {
+  border-color: rgba(245, 166, 35, 0.5);
+  background: rgba(245, 166, 35, 0.04);
+}
+
+.upload-icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: rgba(245, 166, 35, 0.1);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+  transition: transform 0.2s;
+}
+
+.upload-drop-zone:hover .upload-icon-wrap {
+  transform: scale(1.08);
+}
+.upload-icon {
+  font-size: 1.5rem;
+}
+
+.upload-title {
+  font-family: "Syne", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.upload-sub {
+  color: var(--text3);
+  font-size: 0.8rem;
+  margin: 0;
+  max-width: 340px;
+}
+
+.upload-formats {
+  font-size: 0.72rem;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  margin-top: 0.25rem;
+  padding: 2px 10px;
+  background: var(--surface3);
+  border-radius: 99px;
+}
+
+.upload-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  animation: fadeInUp 0.3s ease;
+}
+
+.upload-preview img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.preview-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.preview-name {
+  font-size: 0.85rem;
+  color: var(--text2);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-ai-search {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "DM Sans", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-ai-search:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(245, 166, 35, 0.35);
+}
+
+.btn-ai-search:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-cancel-upload {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "DM Sans", sans-serif;
+}
+
+.btn-cancel-upload:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.ai-result-msg {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  animation: fadeInUp 0.3s ease;
+}
+
+.ai-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: #86efac;
+}
+.ai-success strong {
+  color: #4ade80;
+}
+
+.ai-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
 }
 
 /* ================================================
@@ -451,14 +709,12 @@ body {
   border-top-color: var(--accent);
   animation-duration: 1s;
 }
-
 .loading-rings span:nth-child(2) {
   inset: 12px;
   border-right-color: var(--accent2);
   animation-duration: 1.5s;
   animation-direction: reverse;
 }
-
 .loading-rings span:nth-child(3) {
   inset: 24px;
   border-bottom-color: rgba(245, 166, 35, 0.4);
@@ -505,19 +761,15 @@ body {
   0% {
     width: 0%;
   }
-
   20% {
     width: 30%;
   }
-
   50% {
     width: 60%;
   }
-
   80% {
     width: 85%;
   }
-
   100% {
     width: 95%;
   }
@@ -582,6 +834,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .filter-label {
@@ -608,7 +861,7 @@ body {
   border-color: var(--accent);
 }
 
-/* Product Grid */
+/* ── Product Grid ── */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -641,23 +894,18 @@ body {
 .product-card:nth-child(1) {
   animation-delay: 0.05s;
 }
-
 .product-card:nth-child(2) {
   animation-delay: 0.1s;
 }
-
 .product-card:nth-child(3) {
   animation-delay: 0.15s;
 }
-
 .product-card:nth-child(4) {
   animation-delay: 0.2s;
 }
-
 .product-card:nth-child(5) {
   animation-delay: 0.25s;
 }
-
 .product-card:nth-child(n + 6) {
   animation-delay: 0.3s;
 }
@@ -688,33 +936,9 @@ body {
   100% {
     box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5);
   }
-
   50% {
     box-shadow: 0 0 0 6px rgba(245, 166, 35, 0);
   }
-}
-
-.card-site-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  z-index: 2;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.site-Clickbuy {
-  background: #ff4757;
-  color: #fff;
-}
-
-.site-CellphoneS {
-  background: #eccc68;
-  color: #333;
 }
 
 .card-img-wrap {
@@ -821,11 +1045,142 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
-
 .btn-fav:hover {
   background: rgba(239, 68, 68, 0.15);
   border-color: var(--red);
   color: var(--red);
+}
+
+/* DB miss banner */
+.db-miss-banner {
+  background: rgba(245, 166, 35, 0.07);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.db-miss-text {
+  font-size: 0.9rem;
+  color: var(--text2);
+}
+.db-miss-text strong {
+  color: var(--accent);
+}
+
+.btn-scrape-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1.1rem;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: "DM Sans", sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-scrape-now:hover {
+  background: #ffc04a;
+  transform: translateY(-1px);
+}
+
+/* Sort bar */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 0.8rem;
+  color: var(--text3);
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.85rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-family: "DM Sans", sans-serif;
+}
+
+.sort-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.sort-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.6rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: "DM Sans", sans-serif;
+}
+
+.page-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.page-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+
+.page-btn.disabled {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 /* ================================================
@@ -857,7 +1212,6 @@ body {
   transform: translateY(-3px);
   border-color: var(--border-hover);
 }
-
 .feature-icon {
   font-size: 2rem;
   display: block;
@@ -879,7 +1233,7 @@ body {
 }
 
 /* ================================================
-   PAGE CONTAINER (generic pages)
+   PAGE CONTAINER
    ================================================ */
 .page-container {
   max-width: 1200px;
@@ -911,7 +1265,7 @@ body {
 }
 
 /* ================================================
-   HISTORY / TABLE STYLES
+   HISTORY / TABLE
    ================================================ */
 .history-toolbar {
   display: flex;
@@ -952,10 +1306,10 @@ body {
 .search-filter-wrap input::placeholder {
   color: var(--text3);
 }
-
 .site-filters {
   display: flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .table-card {
@@ -998,7 +1352,6 @@ td {
 .table-row:last-child td {
   border-bottom: none;
 }
-
 .table-row:hover td {
   background: rgba(255, 255, 255, 0.02);
 }
@@ -1008,19 +1361,8 @@ td {
   text-decoration: none;
   font-weight: 600;
 }
-
 .keyword-link:hover {
   text-decoration: underline;
-}
-
-.site-pill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .table-img-wrap {
@@ -1088,7 +1430,6 @@ td {
   text-align: center;
   padding: 3rem;
 }
-
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
@@ -1122,10 +1463,7 @@ td {
 
 .auth-bg-art {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   pointer-events: none;
   background:
     radial-gradient(
@@ -1188,7 +1526,6 @@ td {
   flex-direction: column;
   gap: 0.4rem;
 }
-
 .form-group label {
   font-size: 0.85rem;
   color: var(--text2);
@@ -1255,13 +1592,11 @@ td {
   font-size: 0.875rem;
   margin-top: 1.25rem;
 }
-
 .auth-switch a {
   color: var(--accent);
   text-decoration: none;
   font-weight: 600;
 }
-
 .auth-switch a:hover {
   text-decoration: underline;
 }
@@ -1272,19 +1607,16 @@ td {
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
-
 .alert-error {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
 }
-
 .alert-success {
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: #86efac;
 }
-
 .alert-info {
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.3);
@@ -1332,7 +1664,6 @@ td {
   font-weight: 700;
   margin-bottom: 0.25rem;
 }
-
 .profile-email {
   color: var(--text2);
   font-size: 0.85rem;
@@ -1354,14 +1685,12 @@ td {
   align-items: center;
   gap: 0.2rem;
 }
-
 .pstat strong {
   font-family: "Syne", sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text);
 }
-
 .pstat span {
   color: var(--text3);
   font-size: 0.75rem;
@@ -1411,26 +1740,22 @@ td {
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
-
 .mini-card-body {
   flex: 1;
   min-width: 0;
 }
-
 .mini-title {
   font-size: 0.8rem;
   color: var(--text);
   line-height: 1.4;
   margin-bottom: 0.25rem;
 }
-
 .mini-price {
   font-size: 0.85rem;
   color: var(--accent);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
-
 .mini-actions {
   display: flex;
   gap: 0.4rem;
@@ -1450,12 +1775,10 @@ td {
 .btn-remove:hover {
   background: rgba(239, 68, 68, 0.2);
 }
-
 .empty-text {
   color: var(--text2);
   font-size: 0.875rem;
 }
-
 .empty-text a {
   color: var(--accent);
   text-decoration: none;
@@ -1477,13 +1800,11 @@ td {
   color: #4ade80;
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
-
 .status-pending {
   background: rgba(245, 166, 35, 0.15);
   color: var(--accent);
   border: 1px solid rgba(245, 166, 35, 0.3);
 }
-
 .status-failed {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
@@ -1534,14 +1855,12 @@ td {
   flex: 1;
   min-width: 0;
 }
-
 .cart-item-title {
   font-size: 0.9rem;
   color: var(--text);
   margin-bottom: 0.35rem;
   line-height: 1.4;
 }
-
 .cart-item-price {
   font-family: "Syne", sans-serif;
   color: var(--accent);
@@ -1575,7 +1894,6 @@ td {
 .cart-item-qty button:hover {
   background: var(--surface3);
 }
-
 .cart-item-qty span {
   min-width: 24px;
   text-align: center;
@@ -1630,7 +1948,6 @@ td {
   font-size: 0.9rem;
   color: var(--text2);
 }
-
 .summary-total {
   border-top: 1px solid var(--border);
   margin-top: 0.5rem;
@@ -1639,13 +1956,11 @@ td {
   color: var(--text);
   font-weight: 700;
 }
-
 .summary-total span:last-child {
   color: var(--accent);
   font-family: "Syne", sans-serif;
   font-size: 1.15rem;
 }
-
 .summary-divider {
   height: 1px;
   background: var(--border);
@@ -1722,24 +2037,19 @@ td {
   border-color: var(--border-hover);
   background: var(--surface3);
 }
-
 .payment-option input {
   accent-color: var(--accent);
 }
-
 .payment-option:has(input:checked) {
   border-color: rgba(245, 166, 35, 0.4);
   background: rgba(245, 166, 35, 0.05);
 }
-
 .payment-icon {
   font-size: 1.25rem;
 }
-
 .payment-label {
   font-weight: 500;
 }
-
 .pay-btn {
   font-size: 1.05rem;
   padding: 0.85rem;
@@ -1753,11 +2063,9 @@ td {
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--border);
 }
-
 .checkout-item:last-of-type {
   border-bottom: none;
 }
-
 .checkout-item img {
   width: 50px;
   height: 50px;
@@ -1766,24 +2074,20 @@ td {
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
-
 .checkout-item-info {
   flex: 1;
   min-width: 0;
 }
-
 .checkout-item-title {
   font-size: 0.82rem;
   color: var(--text);
   line-height: 1.4;
 }
-
 .checkout-item-qty {
   font-size: 0.75rem;
   color: var(--text3);
   margin-top: 0.2rem;
 }
-
 .checkout-item-price {
   color: var(--accent);
   font-weight: 600;
@@ -1843,11 +2147,9 @@ td {
     transform: scale(0);
     opacity: 0;
   }
-
   70% {
     transform: scale(1.15);
   }
-
   100% {
     transform: scale(1);
     opacity: 1;
@@ -1860,15 +2162,12 @@ td {
   font-weight: 800;
   margin-bottom: 0.5rem;
 }
-
 .result-success h1 {
   color: #4ade80;
 }
-
 .result-failed h1 {
   color: #fca5a5;
 }
-
 .result-sub {
   color: var(--text2);
   font-size: 0.95rem;
@@ -1891,15 +2190,12 @@ td {
   border-bottom: 1px solid var(--border);
   font-size: 0.875rem;
 }
-
 .order-info-row:last-child {
   border-bottom: none;
 }
-
 .order-info-row span {
   color: var(--text2);
 }
-
 .order-info-row strong {
   color: var(--text);
 }
@@ -1944,7 +2240,6 @@ td {
 .admin-stat-icon {
   font-size: 2rem;
 }
-
 .admin-stat-card strong {
   font-family: "Syne", sans-serif;
   font-size: 1.75rem;
@@ -1952,7 +2247,6 @@ td {
   display: block;
   color: var(--text);
 }
-
 .admin-stat-card span {
   color: var(--text2);
   font-size: 0.85rem;
@@ -1988,7 +2282,6 @@ td {
 .admin-tab-content {
   display: none;
 }
-
 .admin-tab-content.active {
   display: block;
   animation: fadeIn 0.25s ease;
@@ -2018,7 +2311,6 @@ td {
 .btn-delete:hover {
   background: rgba(239, 68, 68, 0.2);
 }
-
 .order-id {
   color: var(--text2);
   font-size: 0.85rem;
@@ -2050,17 +2342,6 @@ td {
 }
 
 /* ================================================
-   PAGINATION
-   ================================================ */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 0.4rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
-
-/* ================================================
    FOOTER
    ================================================ */
 .footer {
@@ -2078,7 +2359,6 @@ td {
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -2089,7 +2369,6 @@ td {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2101,7 +2380,6 @@ td {
     opacity: 0;
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2113,7 +2391,6 @@ td {
     opacity: 0;
     transform: translateY(16px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -2125,14 +2402,10 @@ td {
    ================================================ */
 @media (max-width: 1024px) {
   .cart-layout,
-  .checkout-layout {
-    grid-template-columns: 1fr;
-  }
-
+  .checkout-layout,
   .profile-layout {
     grid-template-columns: 1fr;
   }
-
   .profile-sidebar {
     position: static;
   }
@@ -2160,13 +2433,11 @@ td {
   .nav-links.open {
     display: flex;
   }
-
   .nav-link,
   .nav-btn {
     width: 100%;
     text-align: center;
   }
-
   .nav-toggle {
     display: block;
   }
@@ -2174,12 +2445,10 @@ td {
   .hero {
     padding: 4rem 1.5rem 3rem;
   }
-
   .hero-stats {
     flex-direction: column;
     gap: 0.5rem;
   }
-
   .stat-divider {
     display: none;
   }
@@ -2188,40 +2457,42 @@ td {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0.75rem;
   }
-
   .results-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .page-container {
     padding: 1.5rem 1rem 4rem;
   }
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .history-toolbar {
     flex-direction: column;
     align-items: stretch;
   }
-
   .search-filter-wrap {
     max-width: 100%;
   }
-
   .form-grid {
     grid-template-columns: 1fr;
   }
-
-  .form-group[style*="span 2"] {
-    grid-column: span 1;
-  }
-
   .auth-card {
     padding: 2rem 1.5rem;
+  }
+
+  .suggestions-list {
+    left: 10px;
+    right: 10px;
+  }
+
+  .upload-preview {
+    flex-direction: column;
+    text-align: center;
+  }
+  .preview-actions {
+    justify-content: center;
   }
 }
 
@@ -2229,518 +2500,7 @@ td {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .cart-item-card {
     flex-wrap: wrap;
   }
-}
-
-/* ================================================
-   AI IMAGE SEARCH UI
-   ================================================ */
-
-.search-divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  max-width: 600px;
-  margin: 1.25rem auto 0;
-  color: var(--text3);
-  font-size: 0.85rem;
-}
-
-.search-divider::before,
-.search-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.image-upload-area {
-  max-width: 600px;
-  margin: 0.85rem auto 0;
-}
-
-.upload-drop-zone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1.75rem 1.5rem;
-  background: var(--surface2);
-  border: 1.5px dashed var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-  text-align: center;
-}
-
-.upload-drop-zone:hover,
-.upload-drop-zone.drag-over {
-  border-color: rgba(245, 166, 35, 0.5);
-  background: rgba(245, 166, 35, 0.04);
-}
-
-.upload-icon-wrap {
-  width: 52px;
-  height: 52px;
-  background: rgba(245, 166, 35, 0.1);
-  border: 1px solid rgba(245, 166, 35, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.25rem;
-  transition: transform 0.2s;
-}
-
-.upload-drop-zone:hover .upload-icon-wrap {
-  transform: scale(1.08);
-}
-
-.upload-icon {
-  font-size: 1.5rem;
-}
-
-.upload-title {
-  font-family: "Syne", sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text);
-  margin: 0;
-}
-
-.upload-sub {
-  color: var(--text3);
-  font-size: 0.8rem;
-  margin: 0;
-  max-width: 340px;
-}
-
-.upload-formats {
-  font-size: 0.72rem;
-  color: var(--text3);
-  letter-spacing: 0.08em;
-  margin-top: 0.25rem;
-  padding: 2px 10px;
-  background: var(--surface3);
-  border-radius: 99px;
-}
-
-/* Preview */
-.upload-preview {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  animation: fadeInUp 0.3s ease;
-}
-
-.upload-preview img {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-}
-
-.preview-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.preview-name {
-  font-size: 0.85rem;
-  color: var(--text2);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.preview-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.btn-ai-search {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #000;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: "DM Sans", sans-serif;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.btn-ai-search:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(245, 166, 35, 0.35);
-}
-
-.btn-ai-search:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-cancel-upload {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text3);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: "DM Sans", sans-serif;
-}
-
-.btn-cancel-upload:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
-}
-
-/* AI result message */
-.ai-result-msg {
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  animation: fadeInUp 0.3s ease;
-}
-
-.ai-success {
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  color: #86efac;
-}
-
-.ai-error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
-}
-
-.ai-success strong {
-  color: #4ade80;
-}
-
-@media (max-width: 600px) {
-  .upload-preview {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .preview-actions {
-    justify-content: center;
-  }
-}
-
-/* ================================================================
-   THÊM VÀO CUỐI file static/css/style.css
-   Badge màu cho 4 store mới
-================================================================ */
-
-/* Di Động 3A */
-.site-DiĐộng3A,
-.site-DiDong3A {
-  background: #2563eb;
-  color: #fff;
-}
-
-/* Smart Việt */
-.site-SmartViệt,
-.site-SmartViet {
-  background: #16a34a;
-  color: #fff;
-}
-
-/* Bạch Long Store */
-.site-BạchLongStore,
-.site-BachLongStore {
-  background: #9333ea;
-  color: #fff;
-}
-
-/* Tiến Trần Mobile */
-.site-TiếnTrầnMobile,
-.site-TienTranMobile {
-  background: #0891b2;
-  color: #fff;
-}
-
-h1.page-title,
-h1,
-h2,
-h3 {
-  font-family: "DM Sans", sans-serif !important;
-  font-weight: 700 !important;
-  letter-spacing: normal !important;
-  transform: none !important;
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-}
-
-.logo-text {
-  font-family: "Syne", sans-serif !important;
-  font-size: 24px;
-  font-weight: 700;
-  /* Độ đậm vừa phải, sắc nét */
-  color: #ffffff !important;
-  /* Màu trắng thuần túy */
-  letter-spacing: -0.5px;
-  background: none !important;
-  /* Xóa bỏ gradient */
-  -webkit-text-fill-color: initial !important;
-  /* Reset lại màu chữ */
-  text-transform: none;
-  /* Giữ nguyên kiểu chữ thường/hoa như cũ */
-}
-
-.logo-icon {
-  font-size: 22px;
-  color: #f5a623;
-  /* Giữ màu cam cho tia chớp để làm điểm nhấn */
-}
-
-/* --- Suggestions Dropdown --- */
-.search-form {
-  position: relative;
-  /* Để menu gợi ý bám theo form */
-}
-
-.suggestions-list {
-  position: absolute;
-  top: 105%;
-  left: 20px;
-  right: 140px;
-  /* Canh chỉnh để không đè lên nút tìm kiếm */
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  z-index: 1000;
-  list-style: none;
-  padding: 5px 0;
-  box-shadow: var(--shadow);
-  display: none;
-  /* Ẩn khi không có dữ liệu */
-}
-
-.suggestion-item {
-  padding: 10px 20px;
-  cursor: pointer;
-  color: var(--text2);
-  text-align: left;
-  transition: all 0.2s;
-}
-
-.suggestion-item:hover {
-  background: var(--surface3);
-  color: var(--accent);
-}
-
-.suggestion-item strong {
-  color: var(--text);
-}
-.navbar {
-  flex-direction: row-reverse;
-}
-.navbar .nav-links {
-  flex-direction: row;
-  margin-right: auto;
-}
-/* ================================================================
-   NAVBAR PATCH — thêm vào cuối style.css
-   Mục tiêu:
-     • Logo / tên trang → BÊN PHẢI
-     • Nav links + Danh mục → BÊN TRÁI
-     • Fix dropdown submenu bị trùm bởi navbar sticky
-   ================================================================ */
-
-/* ── Đảo chiều navbar ────────────────────────────────────────── */
-.navbar {
-  flex-direction: row-reverse;
-}
-
-/* Nav-links giữ nguyên hướng hàng ngang trên desktop */
-.navbar .nav-links {
-  flex-direction: row;
-  /* Đẩy về phía bên trái (vì navbar đã row-reverse) */
-  margin-right: auto;
-}
-
-/* Hamburger vẫn ở cạnh logo (bên phải màn hình mobile) */
-.nav-toggle {
-  order: -1; /* đặt trước logo trong row-reverse → thực ra hiện bên trái logo */
-}
-
-/* ── Mobile ──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: row-reverse; /* giữ: logo phải, hamburger trái */
-  }
-  .navbar .nav-links {
-    flex-direction: column;
-    margin-right: 0;
-  }
-}
-
-/* ── Fix dropdown bị cắt bởi navbar sticky ───────────────────── */
-/*
-   Khi navbar position:sticky + z-index:100, dropdown cần z-index cao hơn.
-   dropdown.css đã có z-index:200 — đảm bảo không bị override.
-*/
-.cat-dropdown {
-  z-index: 9999 !important;
-}
-.cat-submenu {
-  z-index: 10000 !important;
-}
-
-/* ── Fix: script load trước DOM (category/category_new templates) ──
-   Lỗi gốc: <script src="dropdown.js"> đặt TRƯỚC <body>.
-   Solution: luôn đặt script ở cuối <body> — xem hướng dẫn bên dưới.
-   CSS này không fix được JS order, chỉ fix visual.
-   ─────────────────────────────────────────────────────────────── */
-
-/* ── Dropdown open state đảm bảo hiển thị ───────────────────── */
-.cat-dropdown.open {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) scale(1) !important;
-  pointer-events: auto !important;
-}
-/* ================================================================
-   NAVBAR PATCH v2 — thêm vào CUỐI file static/css/style.css
-   - Logo trái, search giữa, auth phải
-   - Bỏ row-reverse cũ
-   - Fix badge site tiếng Việt
-================================================================ */
-
-/* Reset các override cũ */
-.navbar {
-  flex-direction: row !important;
-}
-.navbar .nav-links {
-  flex-direction: row !important;
-  margin-right: 0 !important;
-}
-
-/* ── Site badges với tên tiếng Việt ── */
-/* Thêm fallback cho tên có dấu */
-[class*="site-Di"][class*="ng3A"],
-[class*="site-DiDong3A"] {
-  background: #2563eb !important;
-  color: #fff !important;
-}
-[class*="site-Smart"][class*="Vi"],
-[class*="site-SmartViet"] {
-  background: #16a34a !important;
-  color: #fff !important;
-}
-[class*="site-Bach"][class*="Long"],
-[class*="site-BachLong"] {
-  background: #9333ea !important;
-  color: #fff !important;
-}
-[class*="site-Tien"][class*="Tr"],
-[class*="site-TienTran"] {
-  background: #0891b2 !important;
-  color: #fff !important;
-}
-
-/* Generic fallback cho badge không khớp class */
-.card-site-badge:not([class*="site-Clickbuy"]):not(
-    [class*="site-CellphoneS"]
-  ):not([class*="site-DiD"]):not([class*="site-Smart"]):not(
-    [class*="site-Bach"]
-  ):not([class*="site-Tien"]) {
-  background: #6366f1;
-  color: #fff;
-}
-
-/* Fix card image loading placeholder */
-.card-img-wrap img[src=""],
-.card-img-wrap img:not([src]) {
-  content: url("https://via.placeholder.com/200x200/1a1a24/555?text=No+Image");
-}
-/* ================================================================
-   PATCH — Thêm vào CUỐI file CDIO/static/css/style.css
-   Fix: navbar row-reverse cũ, hover submenu, sort-btn as button
-================================================================ */
-
-/* Reset navbar row-reverse cũ */
-.navbar {
-  flex-direction: row !important;
-}
-.navbar .nav-links {
-  flex-direction: row !important;
-  margin-right: 0 !important;
-}
-
-/* sort-btn hoạt động đúng khi dùng <button> thay <a> */
-.sort-btn {
-  cursor: pointer;
-  font-family: "DM Sans", sans-serif;
-}
-
-/* Hover submenu — đảm bảo luôn hiện */
-.cat-item.has-sub:hover > .cat-submenu {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  transform: translateX(0) scale(1) !important;
-}
-.cat-dropdown {
-  z-index: 9999 !important;
-}
-.cat-submenu {
-  z-index: 10000 !important;
-}
-
-/* Site badges cho tên tiếng Việt có dấu — dùng inline style trong template
-   nhưng giữ class cũ làm fallback */
-.site-DiĐộng3A,
-[class*="site-Di"][class*="ng3A"] {
-  background: #2563eb !important;
-  color: #fff !important;
-}
-.site-SmartViệt,
-[class*="site-Smart"] {
-  background: #16a34a !important;
-  color: #fff !important;
-}
-.site-BạchLongStore,
-[class*="site-Bach"] {
-  background: #9333ea !important;
-  color: #fff !important;
-}
-.site-TiếnTrầnMobile,
-[class*="site-Tien"] {
-  background: #0891b2 !important;
-  color: #fff !important;
 }

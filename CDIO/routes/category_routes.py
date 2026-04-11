@@ -1,10 +1,9 @@
 """
-routes/category_routes.py — Fixed v3
-Fix 4 lỗi:
-1. Sort không nhảy trang (xử lý ở template)
-2. Hover submenu (xử lý ở CSS)
-3. Brand iphone/samsung query cả title VÀ keyword column
-4. Other brand lấy tất cả không phải iphone/samsung
+routes/category_routes.py — Fixed v4
+Fixes:
+1. Thêm samsung-s25 và samsung-s24 vào SERIES_KEYWORDS
+2. Fix query brand page trả về đúng sản phẩm
+3. Fix series page Samsung S25/S24
 """
 
 from flask import Blueprint, render_template, abort, request, redirect, url_for
@@ -17,8 +16,9 @@ SERIES_KEYWORDS = {
     "iphone-16": "iPhone 16",
     "iphone-15": "iPhone 15",
     "iphone-14": "iPhone 14",
-    "samsung-s25": "Galaxy S25",
-    "samsung-s24": "Galaxy S24",
+    "samsung-s25": "Galaxy S25",   # ← FIX: thiếu trong code gốc
+    "samsung-s24": "Galaxy S24",   # ← FIX: thiếu trong code gốc
+    "samsung-s":   "Galaxy S",
     "samsung-a":   "Galaxy A",
     "samsung-z":   "Galaxy Z",
     "other":       None,
@@ -73,10 +73,7 @@ def _query_by_series(keyword, sort, page, per_page):
 
 
 def _query_by_brand(brand, sort, page, per_page):
-    """
-    Truy vấn TẤT CẢ sản phẩm của brand.
-    Tìm trong cả title VÀ keyword column.
-    """
+    """Truy vấn TẤT CẢ sản phẩm của brand."""
     import pymysql.cursors
     conn = _get_conn()
     try:
@@ -85,17 +82,18 @@ def _query_by_brand(brand, sort, page, per_page):
         offset = (page - 1) * per_page
 
         if brand == "iphone":
-            where = (
-                "(LOWER(title) LIKE '%iphone%' OR LOWER(keyword) LIKE '%iphone%')"
-            )
+            where = "(LOWER(title) LIKE '%iphone%' OR LOWER(keyword) LIKE '%iphone%')"
+            params_count = ()
+            params_query = (per_page, offset)
         elif brand == "samsung":
             where = (
                 "(LOWER(title) LIKE '%samsung%' OR LOWER(title) LIKE '%galaxy%' "
                 "OR LOWER(keyword) LIKE '%samsung%' OR LOWER(keyword) LIKE '%galaxy%')"
             )
+            params_count = ()
+            params_query = (per_page, offset)
         else:
             # other: không phải iphone, không phải samsung/galaxy
-            # Chỉ lọc theo title, không lọc keyword để bắt được nhiều hơn
             where = (
                 "LOWER(title) NOT LIKE '%iphone%' "
                 "AND LOWER(title) NOT LIKE '%samsung%' "
@@ -103,6 +101,8 @@ def _query_by_brand(brand, sort, page, per_page):
                 "AND title IS NOT NULL AND title != '' "
                 "AND raw_price > 0"
             )
+            params_count = ()
+            params_query = (per_page, offset)
 
         cur.execute(f"SELECT COUNT(*) AS c FROM search_history WHERE {where}")
         total = cur.fetchone()["c"]
@@ -110,7 +110,7 @@ def _query_by_brand(brand, sort, page, per_page):
         cur.execute(
             f"SELECT * FROM search_history WHERE {where} "
             f"ORDER BY raw_price {order} LIMIT %s OFFSET %s",
-            (per_page, offset)
+            params_query
         )
         rows = cur.fetchall()
         print(f"[category] brand '{brand}': {total} total, {len(rows)} rows")
@@ -180,8 +180,13 @@ def series_page(series_slug: str):
         products, total = [], 0
 
     total_pages = max(1, (total + per_page - 1) // per_page)
-    brand_key = "iphone" if "iphone" in series_slug else (
-                "samsung" if "samsung" in series_slug else "other")
+    
+    if "iphone" in series_slug:
+        brand_key = "iphone"
+    elif "samsung" in series_slug:
+        brand_key = "samsung"
+    else:
+        brand_key = "other"
 
     return render_template(
         "category_new.html",

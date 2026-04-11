@@ -1,6 +1,6 @@
 /* ================================================================
    NAVBAR CATEGORY DROPDOWN — dropdown.css
-   Fix: hover submenu mượt, bridge zone chống flicker
+   Fix v2: hover submenu mượt, bridge zone chống flicker
    ================================================================ */
 
 .nav-category-wrap {
@@ -115,14 +115,14 @@
 }
 
 /* ── L2 submenu ──
-   ::after tạo "cầu vô hình" từ item sang submenu,
-   giữ hover state khi chuột di chuyển qua khoảng trống.
+   FIX: Dùng group hover thay vì chỉ :hover để tránh flicker
+   Bridge ::after lấp khoảng hở 2px
 ── */
 .cat-submenu {
   position: absolute;
-  top: 0;
-  left: calc(100% + 2px);
-  min-width: 210px;
+  top: -0.4rem; /* align với padding của L1 panel */
+  left: calc(100% + 1px);
+  min-width: 220px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -131,34 +131,37 @@
     0 0 0 1px rgba(255, 255, 255, 0.04);
   padding: 0.4rem 0;
   z-index: 10000;
+
+  /* Trạng thái ẩn */
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateX(-6px) scale(0.97);
+  transform: translateX(-4px) scale(0.97);
   transform-origin: top left;
   transition:
-    opacity 0.18s ease,
-    visibility 0.18s,
-    transform 0.18s ease;
+    opacity 0.15s ease,
+    visibility 0.15s,
+    transform 0.15s ease;
 }
 
-/* Bridge: lấp khoảng hở 2px giữa item và submenu */
+/* Bridge: lấp khoảng hở giữa item và submenu */
 .cat-item.has-sub::after {
   content: "";
   position: absolute;
   top: 0;
-  right: -12px;
-  width: 12px;
+  right: -14px;
+  width: 14px;
   height: 100%;
   background: transparent;
 }
 
+/* FIX CHÍNH: Khi hover vào .cat-item.has-sub → hiện submenu con */
 .cat-item.has-sub:hover > .cat-submenu,
 .cat-item.has-sub > .cat-submenu:hover {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateX(0) scale(1);
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateX(0) scale(1) !important;
 }
 
 /* ── L2 items ── */
@@ -213,6 +216,8 @@
   font-size: 0.8rem;
   transition: all 0.15s;
   white-space: nowrap;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
 }
 .sort-btn:hover {
   border-color: var(--border-hover);
@@ -288,6 +293,8 @@
   text-decoration: none;
   font-size: 0.83rem;
   transition: all 0.15s;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
 }
 .page-btn:hover {
   border-color: var(--border-hover);
@@ -463,17 +470,18 @@
       max-height 0.25s ease,
       visibility 0.2s;
   }
+  /* Tắt desktop hover trên mobile */
   .cat-item.has-sub:hover > .cat-submenu {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    max-height: 0;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    max-height: 0 !important;
   }
   .cat-item.has-sub.mob-open > .cat-submenu {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    max-height: 500px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    max-height: 500px !important;
   }
   .cat-item.has-sub .sub-arrow {
     transition: transform 0.2s;
