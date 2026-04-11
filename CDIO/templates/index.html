@@ -255,6 +255,7 @@
           {% if session.get('user_id') %}
             <button class="btn-cart" onclick="addToCart(this)" title="Thêm vào giỏ">🛒</button>
             <button class="btn-fav"  onclick="saveFav(this)"   title="Yêu thích">♡</button>
+            <button class="btn-alert" onclick="openAlertModal(this)" title="Theo dõi giá">🔔</button>
           {% else %}
             <a href="/login" class="btn-cart" title="Đăng nhập để mua">🛒</a>
           {% endif %}
@@ -512,6 +513,472 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
+
+/* ════════════════════════════════════════════════════
+   PRICE ALERT MODAL
+════════════════════════════════════════════════════ */
+var _alertData = {
+  title:        '',
+  keyword:      '',
+  currentPrice: 0,
+  btn:          null,
+};
+
+/**
+ * Mở modal theo dõi giá.
+ * Gọi từ onclick="openAlertModal(this)" trên .btn-alert
+ */
+function openAlertModal(btn) {
+  var card   = btn.closest('.product-card');
+  var pData  = card ? card.querySelector('.product-data') : null;
+
+  var title  = pData ? pData.dataset.title  : (card ? card.querySelector('.card-title')?.textContent?.trim() : '');
+  var price  = pData ? pData.dataset.price  : (card ? card.querySelector('.card-price')?.textContent?.trim() : '');
+  var rawPx  = pData ? parseInt((pData.dataset.price || '').replace(/\D/g,'')) : 0;
+  /* Lấy keyword từ URL (trang search) hoặc data attribute */
+  var kw     = (typeof _searchKeyword !== 'undefined' && _searchKeyword)
+               ? _searchKeyword
+               : (new URLSearchParams(window.location.search).get('keyword') || title);
+
+  _alertData.title        = title || 'Sản phẩm';
+  _alertData.keyword      = kw    || title;
+  _alertData.currentPrice = rawPx;
+  _alertData.btn          = btn;
+
+  /* Populate modal */
+  setText('alert-product-name',  title || 'Sản phẩm');
+  setText('alert-current-price', price || '—');
+
+  /* Pre-fill: đề xuất 90% giá hiện tại */
+  var suggested = rawPx > 0 ? Math.floor(rawPx * 0.9) : '';
+  var inp = document.getElementById('alert-price-input');
+  if (inp) {
+    inp.value = suggested ? suggested.toLocaleString('vi-VN') : '';
+    inp.oninput = formatAlertInput;
+  }
+
+  /* Reset state */
+  hideResult();
+  var btnEl = document.getElementById('alert-submit-btn');
+  if (btnEl) { btnEl.disabled = false; setText('alert-btn-text', '🔔 Đặt theo dõi giá'); }
+
+  document.getElementById('alert-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() { if (inp) inp.focus(); }, 300);
+}
+
+function closeAlertModal(e) {
+  if (e && e.target !== document.getElementById('alert-overlay')) return;
+  document.getElementById('alert-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* Format input VND khi gõ */
+function formatAlertInput() {
+  var v   = this.value.replace(/\D/g, '');
+  this.value = v ? parseInt(v).toLocaleString('vi-VN') : '';
+}
+
+function submitAlert() {
+  var inp = document.getElementById('alert-price-input');
+  if (!inp) return;
+
+  var raw = inp.value.replace(/\D/g, '');
+  var targetPrice = parseInt(raw);
+
+  if (!raw || isNaN(targetPrice) || targetPrice <= 0) {
+    showResult('error', '⚠️ Vui lòng nhập mức giá hợp lệ.');
+    inp.focus();
+    return;
+  }
+  if (_alertData.currentPrice > 0 && targetPrice >= _alertData.currentPrice) {
+    showResult('error', '⚠️ Mức giá theo dõi phải thấp hơn giá hiện tại (' + _alertData.currentPrice.toLocaleString('vi-VN') + 'đ).');
+    inp.focus();
+    return;
+  }
+
+  var btn = document.getElementById('alert-submit-btn');
+  if (btn) { btn.disabled = true; setText('alert-btn-text', '⏳ Đang lưu...'); }
+
+  fetch('/api/alert/add', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      title:        _alertData.title,
+      keyword:      _alertData.keyword,
+      target_price: targetPrice,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      showResult('success', '✅ ' + (data.message || 'Đã đặt theo dõi giá thành công!'));
+      /* Đánh dấu nút đã theo dõi */
+      if (_alertData.btn) _alertData.btn.classList.add('watching');
+      setTimeout(function() {
+        document.getElementById('alert-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }, 2000);
+    } else {
+      showResult('error', '❌ ' + (data.error || 'Có lỗi xảy ra.'));
+      if (btn) { btn.disabled = false; setText('alert-btn-text', '🔔 Đặt theo dõi giá'); }
+    }
+  })
+  .catch(function() {
+    showResult('error', '❌ Lỗi kết nối. Vui lòng thử lại.');
+    if (btn) { btn.disabled = false; setText('alert-btn-text', '🔔 Đặt theo dõi giá'); }
+  });
+}
+
+function showResult(type, msg) {
+  var el = document.getElementById('alert-result');
+  if (!el) return;
+  el.className = 'alert-result ' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideResult() {
+  var el = document.getElementById('alert-result');
+  if (el) { el.style.display = 'none'; el.className = 'alert-result'; }
+}
+
+/* Đóng bằng Escape */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('alert-overlay')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+/* Helper setText (dùng chung) */
+function setText(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
 </script>
+
+<style>
+
+/* ── Nút bell trong card ── */
+.btn-alert {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  position: relative;
+  font-family: inherit;
+}
+.btn-alert:hover {
+  background: rgba(245, 166, 35, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+.btn-alert.watching {
+  background: rgba(245, 166, 35, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+  animation: bell-ring 0.6s ease;
+}
+@keyframes bell-ring {
+  0%,100% { transform: rotate(0); }
+  20%     { transform: rotate(-15deg); }
+  40%     { transform: rotate(15deg); }
+  60%     { transform: rotate(-8deg); }
+  80%     { transform: rotate(8deg); }
+}
+
+/* ── Overlay ── */
+.alert-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.alert-overlay.open {
+  opacity: 1; visibility: visible;
+}
+.alert-overlay.open .alert-modal {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* ── Modal card ── */
+.alert-modal {
+  background: #111118;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(245,166,35,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              opacity 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+/* Top accent line */
+.alert-modal::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #f5a623, #ff6b35);
+}
+
+/* ── Header ── */
+.alert-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.alert-modal-icon {
+  width: 44px; height: 44px;
+  background: rgba(245,166,35,0.12);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  animation: bell-pulse 2.5s ease infinite;
+}
+@keyframes bell-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(245,166,35,0); }
+}
+.alert-modal-title {
+  font-family: "Syne", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #eeeef5;
+  margin: 0 0 3px;
+}
+.alert-modal-subtitle {
+  font-size: 0.8rem;
+  color: #8888a0;
+  margin: 0;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alert-modal-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #555568;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.alert-modal-close:hover { color: #eeeef5; }
+
+/* ── Current price box ── */
+.alert-current-price-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}
+.alert-current-label {
+  font-size: 0.75rem;
+  color: #555568;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.alert-current-price {
+  font-family: "Syne", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f5a623;
+}
+
+/* ── Form group ── */
+.alert-form-group { margin-bottom: 18px; }
+.alert-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8888a0;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+.alert-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #1a1a24;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.alert-input-wrap:focus-within {
+  border-color: rgba(245,166,35,0.5);
+  box-shadow: 0 0 0 3px rgba(245,166,35,0.1);
+}
+.alert-input-prefix {
+  padding: 0 12px;
+  font-family: "Syne", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f5a623;
+  background: rgba(245,166,35,0.08);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  height: 46px;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+.alert-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0 14px;
+  height: 46px;
+  font-size: 1rem;
+  font-family: "Syne", sans-serif;
+  font-weight: 600;
+  color: #eeeef5;
+  letter-spacing: 0.02em;
+}
+.alert-input::placeholder { color: #44445a; font-weight: 400; font-family: "DM Sans", sans-serif; font-size: 0.9rem; }
+.alert-hint {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: #44445a;
+  line-height: 1.5;
+}
+
+/* ── Submit button ── */
+.alert-submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #f5a623, #ff6b35);
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: "Syne", sans-serif;
+  letter-spacing: 0.01em;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.alert-submit-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.2s;
+}
+.alert-submit-btn:hover::after { background: rgba(255,255,255,0.1); }
+.alert-submit-btn:active { transform: scale(0.98); }
+.alert-submit-btn:disabled {
+  opacity: 0.6; cursor: not-allowed; transform: none;
+}
+
+/* ── Result message ── */
+.alert-result {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  animation: fadeInUp 0.3s ease;
+}
+.alert-result.success {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: #86efac;
+}
+.alert-result.error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #fca5a5;
+}
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+</style>
+
+<div id="alert-overlay" class="alert-overlay" onclick="closeAlertModal(event)">
+  <div class="alert-modal" id="alert-modal" role="dialog" aria-modal="true"
+       aria-labelledby="alert-modal-title">
+
+    <!-- Header -->
+    <div class="alert-modal-header">
+      <div class="alert-modal-icon">🔔</div>
+      <div>
+        <h3 class="alert-modal-title" id="alert-modal-title">Theo dõi giá</h3>
+        <p class="alert-modal-subtitle" id="alert-product-name">Đang tải...</p>
+      </div>
+      <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Đóng">✕</button>
+    </div>
+
+    <!-- Current price display -->
+    <div class="alert-current-price-box">
+      <span class="alert-current-label">Giá hiện tại</span>
+      <span class="alert-current-price" id="alert-current-price">—</span>
+    </div>
+
+    <!-- Input -->
+    <div class="alert-form-group">
+      <label class="alert-label" for="alert-price-input">
+        Mức giá mong muốn (VND)
+      </label>
+      <div class="alert-input-wrap">
+        <span class="alert-input-prefix">đ</span>
+        <input
+          type="text"
+          id="alert-price-input"
+          class="alert-input"
+          placeholder="Ví dụ: 25.000.000"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+      </div>
+      <p class="alert-hint" id="alert-hint">
+        Nhập mức giá bạn muốn mua. Chúng tôi sẽ gửi email khi giá xuống đến mức này.
+      </p>
+    </div>
+
+    <!-- Submit -->
+    <button class="alert-submit-btn" id="alert-submit-btn" onclick="submitAlert()">
+      <span id="alert-btn-text">🔔 Đặt theo dõi giá</span>
+    </button>
+
+    <!-- Result message -->
+    <div class="alert-result" id="alert-result" style="display:none"></div>
+
+  </div>
+</div>
+
 </body>
 </html>

@@ -304,3 +304,99 @@ def get_suggestions(query):
     finally:
         if 'conn' in locals() and conn:
             conn.close()
+
+"""
+database/db.py — PATCH: thêm hàm init_price_alerts_table() và 2 hàm helper.
+Chèn đoạn này vào cuối file database/db.py hiện tại của bạn.
+Không xóa hoặc sửa bất kỳ hàm nào đang có.
+"""
+
+# ════════════════════════════════════════════════════════════════════
+# PRICE ALERTS — tạo bảng + helpers
+# Nguyên lý Open-Closed: chỉ MỞ RỘNG, không sửa code cũ
+# ════════════════════════════════════════════════════════════════════
+
+CREATE_PRICE_ALERTS_SQL = """
+CREATE TABLE IF NOT EXISTS `price_alerts` (
+    `id`            INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id`       INT          NOT NULL,
+    `product_title` VARCHAR(500) NOT NULL,
+    `keyword`       VARCHAR(255) NOT NULL,
+    `target_price`  BIGINT       NOT NULL,
+    `is_active`     TINYINT(1)   NOT NULL DEFAULT 1,
+    `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_keyword  (`keyword`),
+    INDEX idx_user_id  (`user_id`),
+    INDEX idx_active   (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+"""
+
+
+def init_price_alerts_table():
+    """Tạo bảng price_alerts nếu chưa có. Gọi 1 lần khi khởi động app."""
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(CREATE_PRICE_ALERTS_SQL)
+        conn.commit()
+        print("✅ [DB] Bảng price_alerts đã sẵn sàng.")
+    except Exception as e:
+        print(f"❌ [DB] Lỗi tạo bảng price_alerts: {e}")
+    finally:
+        conn.close()
+
+
+def get_active_alerts_for_keyword(keyword: str):
+    """
+    Trả về list[dict] các alert đang is_active=1 khớp với keyword.
+    Dùng trong background job để so sánh giá.
+    """
+    conn = get_db_connection()
+    try:
+        import pymysql.cursors
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+        cur.execute(
+            """
+            SELECT pa.*, u.email AS user_email
+            FROM price_alerts pa
+            JOIN users u ON pa.user_id = u.id
+            WHERE pa.is_active = 1
+              AND LOWER(pa.keyword) = LOWER(%s)
+            """,
+            (keyword,)
+        )
+        return cur.fetchall() or []
+    except Exception as e:
+        print(f"[DB] get_active_alerts_for_keyword error: {e}")
+        return []
+    finally:
+        conn.close()
+
+
+def deactivate_alert(alert_id: int):
+    """Đánh dấu is_active=0 sau khi đã gửi email để tránh spam."""
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE price_alerts SET is_active = 0 WHERE id = %s",
+            (alert_id,)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"[DB] deactivate_alert error: {e}")
+    finally:
+        conn.close()
+
+
+# ════════════════════════════════════════════════════════════════════
+# HƯỚNG DẪN TÍCH HỢP VÀO app.py (cuối hàm main):
+#
+#   from database.db import init_extra_tables, init_price_alerts_table
+#   ...
+#   if __name__ == "__main__":
+#       app = create_app()
+#       init_extra_tables()
+#       init_price_alerts_table()   # <-- thêm dòng này
+#       app.run(debug=True, use_reloader=False)
+# ════════════════════════════════════════════════════════════════════
