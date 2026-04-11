@@ -9,32 +9,23 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/dropdown.css">
   <style>
-    /* FIX: Tắt scroll-behavior smooth để sort không nhảy đầu trang */
     html { scroll-behavior: auto !important; }
-
-    /* NAVBAR */
     .navbar {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      padding: 0 1.5rem !important;
-      gap: 0 !important;
+      display: flex !important; flex-direction: row !important;
+      align-items: center !important; padding: 0 1.5rem !important; gap: 0 !important;
     }
     .nav-logo { flex-shrink: 0; margin-right: 0.75rem; }
     .nav-left  { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
     .nav-center{ flex: 1; display: flex; justify-content: center; padding: 0 1.5rem; }
     .nav-right { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; margin-left: 0.5rem; }
-
     .nav-sf-wrap { position: relative; width: 100%; max-width: 500px; }
     .nav-sbar {
-      display: flex; align-items: center;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 99px; padding: 0.32rem 0.32rem 0.32rem 1.1rem;
-      gap: 0.5rem; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+      display: flex; align-items: center; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 99px;
+      padding: 0.32rem 0.32rem 0.32rem 1.1rem; gap: 0.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
     }
-    .nav-sbar:focus-within {
-      border-color: rgba(245,166,35,.45); box-shadow: 0 0 0 3px rgba(245,166,35,.08);
-    }
+    .nav-sbar:focus-within { border-color: rgba(245,166,35,.45); box-shadow: 0 0 0 3px rgba(245,166,35,.08); }
     .nav-sbar input {
       flex: 1; background: none; border: none; outline: none;
       color: var(--text); font-size: 0.88rem; font-family: "DM Sans", sans-serif; min-width: 0;
@@ -42,36 +33,28 @@
     .nav-sbar input::placeholder { color: var(--text3); }
     .nav-sbar button {
       background: var(--accent); border: none; border-radius: 99px;
-      color: #000; font-size: 0.82rem; cursor: pointer;
-      padding: 0.4rem 1.1rem; font-weight: 600;
-      font-family: "DM Sans", sans-serif; white-space: nowrap; flex-shrink: 0;
+      color: #000; font-size: 0.82rem; cursor: pointer; padding: 0.4rem 1.1rem;
+      font-weight: 600; font-family: "DM Sans", sans-serif; white-space: nowrap; flex-shrink: 0;
       transition: background 0.18s;
     }
     .nav-sbar button:hover { background: #ffc04a; }
-
     .nav-sug-drop {
       position: absolute; top: calc(100% + 6px); left: 0; right: 0;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-sm); z-index: 9000;
       list-style: none; padding: 4px 0; margin: 0;
-      box-shadow: 0 8px 32px rgba(0,0,0,.45);
-      display: none; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45); display: none; overflow: hidden;
     }
     .nav-sug-drop.show { display: block; }
-    .nsug-li {
-      padding: 0.55rem 1rem; cursor: pointer; color: var(--text2); font-size: 0.85rem; transition: all 0.15s;
-    }
+    .nsug-li { padding: 0.55rem 1rem; cursor: pointer; color: var(--text2); font-size: 0.85rem; transition: all 0.15s; }
     .nsug-li:hover { background: var(--surface2); color: var(--accent); }
     .nsug-li mark { background: none; color: var(--accent); font-weight: 700; }
-
-    /* FIX 2: Hover submenu */
     .cat-dropdown { z-index: 9999 !important; }
     .cat-submenu  { z-index: 10000 !important; }
     .cat-item.has-sub:hover > .cat-submenu {
       opacity: 1 !important; visibility: visible !important;
       pointer-events: auto !important; transform: translateX(0) scale(1) !important;
     }
-
     @media(max-width:768px){
       .navbar{flex-wrap:wrap;height:auto;padding:.5rem 1rem;}
       .nav-center{order:3;flex:0 0 100%;padding:.5rem 0 0;}
@@ -89,8 +72,8 @@
   </a>
 
   <div class="nav-left">
-    <a href="/"        class="nav-link active">Tìm Kiếm</a>
-    <a href="/history" class="nav-link">Lịch Sử</a>
+    <a href="/" class="nav-link active">Tìm Kiếm</a>
+    {# ĐÃ XÓA: <a href="/history" class="nav-link">Lịch Sử</a> #}
 
     <div class="nav-category-wrap" id="cat-wrap">
       <button class="nav-category-btn" id="cat-btn"
@@ -132,7 +115,6 @@
     </div>
   </div>
 
-  <!-- Search giữa -->
   <div class="nav-center">
     <div class="nav-sf-wrap">
       <form id="nav-sf" action="/" method="GET" autocomplete="off">
@@ -147,12 +129,14 @@
     </div>
   </div>
 
-  <!-- Auth phải -->
   <div class="nav-right">
     {% if session.get('user_id') %}
       <a href="/cart"    class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
       <a href="/orders"  class="nav-link">Đơn hàng</a>
       <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
+      {% if session.get('is_admin') %}
+      <a href="/admin" class="nav-link" style="color:var(--accent)">⚙️ Admin</a>
+      {% endif %}
       <a href="/logout"  class="nav-btn btn-ghost">Đăng xuất</a>
     {% else %}
       <a href="/login"    class="nav-btn btn-ghost">Đăng nhập</a>
@@ -220,7 +204,6 @@
 <!-- ══ RESULTS ══ -->
 {% if keyword %}
 <section class="results-section">
-
   {% if db_miss %}
   <div class="db-miss-banner">
     <div class="db-miss-text">
@@ -238,13 +221,10 @@
       </h2>
       <p class="results-count">Tìm thấy <strong>{{ total }}</strong> sản phẩm</p>
     </div>
-    <!-- FIX: Sort dùng JS để không scroll lên đầu -->
     <div class="sort-bar">
       <span class="sort-label">Sắp xếp:</span>
-      <button onclick="sortChange('asc')"
-              class="sort-btn {% if sort == 'asc' %}active{% endif %}">↑ Giá thấp → cao</button>
-      <button onclick="sortChange('desc')"
-              class="sort-btn {% if sort == 'desc' %}active{% endif %}">↓ Giá cao → thấp</button>
+      <button onclick="sortChange('asc')"  class="sort-btn {% if sort == 'asc'  %}active{% endif %}">↑ Giá thấp → cao</button>
+      <button onclick="sortChange('desc')" class="sort-btn {% if sort == 'desc' %}active{% endif %}">↓ Giá cao → thấp</button>
     </div>
   </div>
 
@@ -307,226 +287,230 @@
             class="page-btn {% if page==total_pages %}disabled{% endif %}">›</button>
   </nav>
   {% endif %}
+
+  {% else %}
+  <div class="empty-state" style="padding:5rem 0">
+    <div class="empty-icon">🔍</div>
+    <h3>Không tìm thấy sản phẩm</h3>
+    <p>Thử từ khóa khác hoặc cào dữ liệu mới.</p>
+  </div>
   {% endif %}
+{% endif %}
 
-</section>
-
-{% else %}
+{% if not keyword %}
 <section class="features-section">
   <div class="features-grid">
-    <div class="feature-card"><span class="feature-icon">🔍</span><h3>Tìm kiếm thông minh</h3><p>Tìm kiếm toàn bộ sản phẩm đã có trong hệ thống, so sánh giá từ nhiều cửa hàng.</p></div>
-    <div class="feature-card"><span class="feature-icon">💰</span><h3>So sánh giá</h3><p>Xem ngay sản phẩm nào có giá tốt nhất, sắp xếp từ thấp đến cao hoặc ngược lại.</p></div>
-    <div class="feature-card"><span class="feature-icon">🤖</span><h3>Nhận diện ảnh AI</h3><p>Chụp hoặc tải ảnh điện thoại lên, AI sẽ nhận diện và tìm giá tự động.</p></div>
-    <div class="feature-card"><span class="feature-icon">🛒</span><h3>Giỏ hàng & Đặt mua</h3><p>Lưu sản phẩm yêu thích, thêm vào giỏ và đặt hàng chỉ trong vài bước.</p></div>
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <h3>So sánh nhanh</h3>
+      <p>Tổng hợp giá từ {{ store_count }}+ cửa hàng trong vài giây.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🤖</span>
+      <h3>AI nhận diện ảnh</h3>
+      <p>Chụp ảnh sản phẩm, AI tự nhận diện và tìm giá cho bạn.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔔</span>
+      <h3>Giá realtime</h3>
+      <p>Dữ liệu được cập nhật liên tục, luôn chính xác nhất.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛒</span>
+      <h3>Giỏ hàng thông minh</h3>
+      <p>Lưu sản phẩm yêu thích, đặt hàng trực tiếp.</p>
+    </div>
   </div>
 </section>
 {% endif %}
+</section>
 
-<!-- Cart Modal -->
-<div id="cart-modal-overlay">
-  <div class="cart-modal">
-    <div class="modal-icon-container">
-      <div class="modal-spinner" id="modal-spinner"></div>
-      <svg class="modal-check" id="modal-check" viewBox="0 0 52 52">
-        <circle class="modal-check-circle" cx="26" cy="26" r="25" fill="none"/>
-        <path   class="modal-check-path"   fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-      </svg>
-      <svg class="modal-error" id="modal-error" viewBox="0 0 52 52">
-        <circle class="modal-error-circle" cx="26" cy="26" r="25" fill="none"/>
-        <path   class="modal-error-path"   fill="none" d="M16 16 36 36 M36 16 16 36"/>
-      </svg>
-    </div>
-    <h3 class="modal-title" id="modal-title">Đang xử lý...</h3>
-    <p  class="modal-desc"  id="modal-desc">Vui lòng đợi trong giây lát</p>
-  </div>
-</div>
 <div id="toast" class="toast"></div>
 <footer class="footer"><p>© 2025 PriceHunt — So sánh giá thông minh</p></footer>
 
 <script src="/static/js/main.js"></script>
 <script src="/static/js/dropdown.js"></script>
 <script>
-/* Sort & Pagination — giữ scroll */
-function sortChange(s) {
-  var url = new URL(window.location.href);
-  url.searchParams.set('sort', s);
-  url.searchParams.set('page', 1);
-  var sy = window.scrollY;
-  sessionStorage.setItem('restoreScroll', sy);
-  window.location.href = url.toString();
-}
-function pageChange(p) {
-  var url = new URL(window.location.href);
-  url.searchParams.set('page', p);
-  var sy = window.scrollY;
-  sessionStorage.setItem('restoreScroll', sy);
-  window.location.href = url.toString();
-}
-window.addEventListener('load', function(){
-  var sy = sessionStorage.getItem('restoreScroll');
-  if(sy){ sessionStorage.removeItem('restoreScroll'); window.scrollTo(0, parseInt(sy)); }
-});
-
-function showLoading(){
-  var kw = document.getElementById('search-input').value.trim();
-  if(!kw) return;
+function showLoading() {
   document.getElementById('loading-overlay').classList.add('active');
 }
 
-/* Hero suggestions */
+function sortChange(newSort) {
+  var url = new URL(window.location.href);
+  url.searchParams.set('sort', newSort);
+  url.searchParams.set('page', 1);
+  window.location.replace(url.toString());
+}
+
+function pageChange(newPage) {
+  var url = new URL(window.location.href);
+  url.searchParams.set('page', newPage);
+  window.location.replace(url.toString());
+}
+
+function filterSite(site, btn) {
+  document.querySelectorAll('#products-grid .product-card').forEach(function(c) {
+    c.style.display = (site==='all' || c.dataset.site===site) ? '' : 'none';
+  });
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+/* Suggestions */
 function fetchSuggestions(q) {
   var list = document.getElementById('suggestions-list');
-  if(!q||q.length<2){list.style.display='none';return;}
-  fetch('/api/suggestions?q='+encodeURIComponent(q))
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.length){list.style.display='none';return;}
-      list.innerHTML=data.map(function(s){
-        var hi=s.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<strong>$1</strong>');
-        return '<li class="suggestion-item" onclick="selectSug(\''+s.replace(/'/g,"\\'")+'\')">' +hi+'</li>';
+  if (!list) return;
+  if (q.length < 2) { list.style.display='none'; return; }
+  fetch('/api/suggestions?q=' + encodeURIComponent(q))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data.length) { list.style.display='none'; return; }
+      list.innerHTML = data.slice(0,8).map(function(s){
+        return '<li class="suggestion-item" onclick="document.getElementById(\'search-input\').value=\'' + s.replace(/'/g,"\\'") + '\';document.getElementById(\'search-form\').submit()">' + s + '</li>';
       }).join('');
-      list.style.display='block';
-    }).catch(function(){list.style.display='none';});
+      list.style.display = 'block';
+    }).catch(function(){ list.style.display='none'; });
 }
-function selectSug(val){
-  document.getElementById('search-input').value=val;
-  document.getElementById('suggestions-list').style.display='none';
-  document.getElementById('search-form').submit();
-}
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.search-form'))
-    document.getElementById('suggestions-list').style.display='none';
-});
 
-/* Navbar suggestions */
+/* Nav search suggestions */
 (function(){
-  var inp=document.getElementById('nav-si');
-  var list=document.getElementById('nav-sl');
-  if(!inp||!list)return;
+  var inp  = document.getElementById('nav-si');
+  var list = document.getElementById('nav-sl');
+  if(!inp || !list) return;
   var timer;
-  inp.addEventListener('input',function(){
+  inp.addEventListener('input', function(){
     clearTimeout(timer);
-    var q=inp.value.trim();
-    if(q.length<2){list.classList.remove('show');return;}
-    timer=setTimeout(function(){
-      fetch('/api/suggestions?q='+encodeURIComponent(q))
-        .then(function(r){return r.json();})
+    var q = inp.value.trim();
+    if(q.length < 2){ list.classList.remove('show'); return; }
+    timer = setTimeout(function(){
+      fetch('/api/suggestions?q=' + encodeURIComponent(q))
+        .then(function(r){ return r.json(); })
         .then(function(data){
-          if(!data.length){list.classList.remove('show');return;}
-          list.innerHTML=data.slice(0,8).map(function(s){
-            var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-            return '<li class="nsug-li" data-val="'+s.replace(/"/g,'&quot;')+'">'+s.replace(re,'<mark>$1</mark>')+'</li>';
+          if(!data.length){ list.classList.remove('show'); return; }
+          list.innerHTML = data.slice(0,8).map(function(s){
+            var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')','gi');
+            return '<li class="nsug-li" data-val="' + s.replace(/"/g,'&quot;') + '">'
+              + s.replace(re,'<mark>$1</mark>') + '</li>';
           }).join('');
           list.classList.add('show');
           list.querySelectorAll('.nsug-li').forEach(function(li){
-            li.addEventListener('mousedown',function(e){
+            li.addEventListener('mousedown', function(e){
               e.preventDefault();
-              inp.value=li.dataset.val;
+              inp.value = li.dataset.val;
               list.classList.remove('show');
-              window.location.href='/?keyword='+encodeURIComponent(li.dataset.val);
+              window.location.href = '/?keyword=' + encodeURIComponent(li.dataset.val);
             });
           });
-        }).catch(function(){list.classList.remove('show');});
-    },220);
+        }).catch(function(){ list.classList.remove('show'); });
+    }, 220);
   });
-  document.addEventListener('click',function(e){
-    if(!inp.contains(e.target)&&!list.contains(e.target))list.classList.remove('show');
+  document.addEventListener('click', function(e){
+    if(!inp.contains(e.target) && !list.contains(e.target)) list.classList.remove('show');
   });
-  inp.addEventListener('keydown',function(e){
+  inp.addEventListener('keydown', function(e){
     if(e.key==='Enter'){
       list.classList.remove('show');
-      var kw=inp.value.trim();
-      if(kw)window.location.href='/?keyword='+encodeURIComponent(kw);
+      var kw = inp.value.trim();
+      if(kw) window.location.href = '/?keyword=' + encodeURIComponent(kw);
     }
   });
 })();
 
-function filterSite(site,btn){
-  document.querySelectorAll('#products-grid .product-card').forEach(function(c){
-    c.style.display=(site==='all'||c.dataset.site===site)?'':'none';
-  });
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-}
+/* Cart */
+{% if session.get('user_id') %}
+fetch('/cart/count').then(function(r){return r.json();}).then(function(d){
+  var el = document.getElementById('cart-count');
+  if(el) el.textContent = d.count || 0;
+});
+{% endif %}
 
-function openModal(state,title,desc){
-  document.getElementById('modal-spinner').style.display=state==='loading'?'block':'none';
-  document.getElementById('modal-check').style.display=state==='success'?'block':'none';
-  document.getElementById('modal-error').style.display=state==='error'?'block':'none';
-  if(title)document.getElementById('modal-title').textContent=title;
-  if(desc)document.getElementById('modal-desc').textContent=desc;
-  document.getElementById('modal-title').style.color=state==='success'?'#22c55e':state==='error'?'#ef4444':'#fff';
-  document.getElementById('cart-modal-overlay').classList.add('active');
+/* Image upload */
+function handleImageSelect(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  showImagePreview(file);
 }
-function closeModal(){document.getElementById('cart-modal-overlay').classList.remove('active');}
-
-function addToCart(btn){
-  var s=btn.closest('.card-body').querySelector('.product-data');
-  openModal('loading');var start=Date.now();
-  fetch('/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
-  .then(function(r){return r.json();})
-  .then(function(res){
-    setTimeout(function(){
-      if(res.ok||res.count!==undefined){
-        openModal('success','Thành công!','Sản phẩm đã nằm trong giỏ hàng.');
-        var el=document.getElementById('cart-count');
-        if(el&&res.count!==undefined){el.textContent=res.count;el.style.transform='scale(1.5)';setTimeout(function(){el.style.transform='scale(1)';},200);}
-      }else openModal('error','Thất bại','Vui lòng đăng nhập để thêm vào giỏ hàng.');
-      setTimeout(closeModal,1500);
-    },Math.max(0,700-(Date.now()-start)));
-  }).catch(function(){openModal('error','Lỗi mạng','Không thể kết nối.');setTimeout(closeModal,2000);});
+function handleDrop(e) {
+  e.preventDefault();
+  var file = e.dataTransfer.files[0];
+  if (file) showImagePreview(file);
 }
-function saveFav(btn){
-  var s=btn.closest('.card-body').querySelector('.product-data');
-  fetch('/favorites/add',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({title:s.dataset.title,price_str:s.dataset.price,img:s.dataset.img,link:s.dataset.link,site:s.dataset.site})})
-  .then(function(){openModal('success','Đã thích!','Đã lưu vào mục yêu thích.');setTimeout(closeModal,1500);});
-}
-
-function handleImageSelect(e){var f=e.target.files[0];if(f)showPreview(f);}
-function handleDrop(e){e.preventDefault();var f=e.dataTransfer.files[0];if(f)showPreview(f);}
-function showPreview(file){
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    document.getElementById('drop-zone').style.display='none';
-    document.getElementById('upload-preview').style.display='block';
-    document.getElementById('upload-preview').innerHTML=
-      '<div class="upload-preview"><img src="'+ev.target.result+'" alt="preview">'+
-      '<div class="preview-info"><p class="preview-name">'+file.name+'</p>'+
-      '<div class="preview-actions">'+
-      '<button class="btn-ai-search" id="ai-btn" onclick="runAISearch()">🤖 Nhận diện ngay</button>'+
-      '<button class="btn-cancel-upload" onclick="cancelUpload()">Hủy</button>'+
-      '</div></div></div>';
+function showImagePreview(file) {
+  var reader = new FileReader();
+  reader.onload = function(e2) {
+    var prev = document.getElementById('upload-preview');
+    prev.innerHTML = '<div class="upload-preview">'
+      + '<img src="' + e2.target.result + '" alt="Preview">'
+      + '<div class="preview-info"><p class="preview-name">' + file.name + '</p>'
+      + '<div class="preview-actions">'
+      + '<button class="btn-ai-search" onclick="uploadAndSearch()">🤖 Tìm bằng AI</button>'
+      + '<button class="btn-cancel-upload" onclick="cancelUpload()">✕ Hủy</button>'
+      + '</div></div></div>';
+    prev.style.display = 'block';
+    document.getElementById('drop-zone').style.display = 'none';
+    window._uploadFile = file;
   };
   reader.readAsDataURL(file);
-  window._uploadFile=file;
 }
-function cancelUpload(){
-  document.getElementById('drop-zone').style.display='';
-  document.getElementById('upload-preview').style.display='none';
-  document.getElementById('ai-result-msg').innerHTML='';
-  window._uploadFile=null;
+function cancelUpload() {
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('drop-zone').style.display = 'flex';
+  document.getElementById('ai-result-msg').innerHTML = '';
+  window._uploadFile = null;
 }
-function runAISearch(){
-  if(!window._uploadFile)return;
-  var btn=document.getElementById('ai-btn');
-  if(btn){btn.disabled=true;btn.textContent='⏳ Đang nhận diện...';}
-  var fd=new FormData();fd.append('image',window._uploadFile);
-  fetch('/upload-image',{method:'POST',body:fd})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var msg=document.getElementById('ai-result-msg');
-      if(d.success){
-        msg.innerHTML='<div class="ai-result-msg ai-success">✅ Nhận diện: <strong>'+d.keyword+'</strong> — Đang chuyển...</div>';
-        setTimeout(function(){window.location.href=d.redirect;},800);
-      }else{
-        msg.innerHTML='<div class="ai-result-msg ai-error">❌ '+d.error+'</div>';
-        if(btn){btn.disabled=false;btn.textContent='🤖 Thử lại';}
+function uploadAndSearch() {
+  if (!window._uploadFile) return;
+  var btn = document.querySelector('.btn-ai-search');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Đang nhận diện...'; }
+  var fd = new FormData();
+  fd.append('image', window._uploadFile);
+  fetch('/upload-image', { method:'POST', body: fd })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var msg = document.getElementById('ai-result-msg');
+      if (data.success) {
+        msg.innerHTML = '<div class="ai-result-msg ai-success">✅ Nhận diện: <strong>' + data.keyword + '</strong> — Đang tìm kiếm...</div>';
+        setTimeout(function(){ window.location.href = data.redirect; }, 800);
+      } else {
+        msg.innerHTML = '<div class="ai-result-msg ai-error">❌ ' + (data.error || 'Không nhận diện được') + '</div>';
+        if(btn){ btn.disabled=false; btn.textContent='🤖 Thử lại'; }
       }
-    }).catch(function(){
-      document.getElementById('ai-result-msg').innerHTML='<div class="ai-result-msg ai-error">❌ Lỗi kết nối máy chủ.</div>';
+    })
+    .catch(function(){
+      document.getElementById('ai-result-msg').innerHTML = '<div class="ai-result-msg ai-error">❌ Lỗi kết nối</div>';
+      if(btn){ btn.disabled=false; btn.textContent='🤖 Thử lại'; }
     });
+}
+
+/* Cart modal helpers */
+function addToCart(btn) {
+  var s = btn.closest('.card-body').querySelector('.product-data');
+  fetch('/cart/add', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ title:s.dataset.title, price_str:s.dataset.price, img:s.dataset.img, link:s.dataset.link, site:s.dataset.site })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res) {
+    if(res.ok || res.count !== undefined) {
+      var el = document.getElementById('cart-count');
+      if(el && res.count !== undefined){ el.textContent = res.count; }
+      showToast('🛒 Đã thêm vào giỏ hàng!');
+    } else {
+      showToast('❌ Vui lòng đăng nhập để thêm vào giỏ');
+    }
+  });
+}
+function saveFav(btn) {
+  var s = btn.closest('.card-body').querySelector('.product-data');
+  fetch('/favorites/add', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ title:s.dataset.title, price_str:s.dataset.price, img:s.dataset.img, link:s.dataset.link, site:s.dataset.site })
+  }).then(function(){ showToast('❤️ Đã lưu vào yêu thích!'); });
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 </script>
 </body>

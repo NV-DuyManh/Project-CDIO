@@ -1,3 +1,10 @@
+"""
+routes/auth_routes.py
+=====================
+FIX: Đảm bảo session['is_admin'] luôn là Python bool thực sự,
+     không phải None hoặc bytearray từ MySQL.
+"""
+
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
@@ -57,7 +64,12 @@ def login():
             if user and check_password_hash(user['password_hash'], password):
                 session['user_id']  = user['id']
                 session['username'] = user['username']
-                session['is_admin'] = bool(user['is_admin'])
+
+                # FIX: Ép kiểu rõ ràng — MySQL trả TINYINT(1) có thể là int 0/1
+                # bool(1) = True, bool(0) = False, bool(None) = False
+                raw_admin = user.get('is_admin', 0)
+                session['is_admin'] = bool(int(raw_admin)) if raw_admin is not None else False
+
                 flash(f'Chào mừng trở lại, {username}!', 'success')
                 return redirect(url_for('search.home'))
             flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'error')

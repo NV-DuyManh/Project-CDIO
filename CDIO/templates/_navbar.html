@@ -1,6 +1,6 @@
-{# ============================================================ _navbar.html —
-dùng chung cho mọi trang Cách dùng trong template: {% include '_navbar.html' %}
-Nếu trang cần search bar ở giữa, đặt trước include: {% set show_search = true %}
+{# ============================================================
+_navbar.html — dùng chung cho mọi trang
+Đã XÓA: link "Lịch Sử" (/history)
 ============================================================ #}
 <style>
   .navbar {
@@ -36,9 +36,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     gap: 0.25rem;
     flex-shrink: 0;
   }
-  .nav-spacer {
-    flex: 1;
-  }
+  .nav-spacer { flex: 1; }
   .nav-auth {
     display: flex;
     align-items: center;
@@ -54,8 +52,6 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     cursor: pointer;
     margin-left: 0.5rem;
   }
-
-  /* Search bar (chỉ hiện khi show_search=true) */
   .nav-search-zone {
     flex: 1;
     display: flex;
@@ -64,10 +60,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     max-width: 560px;
     margin: 0 auto;
   }
-  .nav-sf-wrap {
-    position: relative;
-    width: 100%;
-  }
+  .nav-sf-wrap { position: relative; width: 100%; }
   .nav-sbar {
     display: flex;
     align-items: center;
@@ -77,9 +70,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     padding: 0.32rem 0.32rem 0.32rem 1.1rem;
     gap: 0.5rem;
     width: 100%;
-    transition:
-      border-color 0.2s,
-      box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
   .nav-sbar:focus-within {
     border-color: rgba(245, 166, 35, 0.45);
@@ -95,9 +86,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     font-family: "DM Sans", sans-serif;
     min-width: 0;
   }
-  .nav-sbar input::placeholder {
-    color: var(--text3);
-  }
+  .nav-sbar input::placeholder { color: var(--text3); }
   .nav-sbar button {
     background: var(--accent);
     border: none;
@@ -111,28 +100,21 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     white-space: nowrap;
     transition: background 0.18s;
   }
-  .nav-sbar button:hover {
-    background: #ffc04a;
-  }
+  .nav-sbar button:hover { background: #ffc04a; }
   .nav-sug-drop {
     position: absolute;
     top: calc(100% + 6px);
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     z-index: 9000;
     list-style: none;
-    padding: 4px 0;
-    margin: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-    display: none;
-    overflow: hidden;
+    padding: 4px 0; margin: 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    display: none; overflow: hidden;
   }
-  .nav-sug-drop.show {
-    display: block;
-  }
+  .nav-sug-drop.show { display: block; }
   .nsug-li {
     padding: 0.55rem 1rem;
     cursor: pointer;
@@ -140,23 +122,11 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
     font-size: 0.85rem;
     transition: all 0.15s;
   }
-  .nsug-li:hover {
-    background: var(--surface2);
-    color: var(--accent);
-  }
-  .nsug-li mark {
-    background: none;
-    color: var(--accent);
-    font-weight: 700;
-  }
+  .nsug-li:hover { background: var(--surface2); color: var(--accent); }
+  .nsug-li mark { background: none; color: var(--accent); font-weight: 700; }
 
-  /* Submenu fix */
-  .cat-dropdown {
-    z-index: 9999 !important;
-  }
-  .cat-submenu {
-    z-index: 10000 !important;
-  }
+  .cat-dropdown { z-index: 9999 !important; }
+  .cat-submenu  { z-index: 10000 !important; }
   .cat-item.has-sub:hover > .cat-submenu {
     opacity: 1 !important;
     visibility: visible !important;
@@ -165,35 +135,17 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
   }
 
   @media (max-width: 768px) {
-    .navbar {
-      flex-wrap: wrap;
-      height: auto;
-      padding: 0.5rem 1rem !important;
-    }
-    .nav-body {
-      order: 2;
-    }
-    .nav-auth {
-      order: 3;
-      margin-left: auto;
-    }
-    .nav-toggle {
-      display: block;
-      order: 4;
-    }
+    .navbar { flex-wrap: wrap; height: auto; padding: 0.5rem 1rem !important; }
+    .nav-body { order: 2; }
+    .nav-auth { order: 3; margin-left: auto; }
+    .nav-toggle { display: block; order: 4; }
     .nav-search-zone {
-      order: 5;
-      flex: 0 0 100%;
-      padding: 0.5rem 0 0;
-      max-width: 100%;
-      margin: 0;
+      order: 5; flex: 0 0 100%;
+      padding: 0.5rem 0 0; max-width: 100%; margin: 0;
     }
     .nav-body.mob-open {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      order: 6;
-      padding: 0.5rem 0;
+      display: flex; flex-direction: column;
+      width: 100%; order: 6; padding: 0.5rem 0;
     }
   }
 </style>
@@ -205,6 +157,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
   </a>
 
   <div class="nav-body" id="nb-body">
+    {# ĐÃ XÓA: <a href="/history" class="nav-link">Lịch Sử</a> #}
     <a href="/" class="nav-link">Tìm Kiếm</a>
 
     <div class="nav-category-wrap" id="cat-wrap">
@@ -222,22 +175,12 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
           <span>📱 iPhone</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
             <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/iphone" class="cat-sub-item"
-              >Tất cả iPhone</a
-            >
+            <a href="/category/brand/iphone" class="cat-sub-item">Tất cả iPhone</a>
             <div class="cat-divider"></div>
-            <a href="/category/series/iphone-17" class="cat-sub-item"
-              >iPhone 17 Series</a
-            >
-            <a href="/category/series/iphone-16" class="cat-sub-item"
-              >iPhone 16 Series</a
-            >
-            <a href="/category/series/iphone-15" class="cat-sub-item"
-              >iPhone 15 Series</a
-            >
-            <a href="/category/series/iphone-14" class="cat-sub-item"
-              >iPhone 14 Series</a
-            >
+            <a href="/category/series/iphone-17" class="cat-sub-item">iPhone 17 Series</a>
+            <a href="/category/series/iphone-16" class="cat-sub-item">iPhone 16 Series</a>
+            <a href="/category/series/iphone-15" class="cat-sub-item">iPhone 15 Series</a>
+            <a href="/category/series/iphone-14" class="cat-sub-item">iPhone 14 Series</a>
           </div>
         </a>
 
@@ -245,32 +188,22 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
           <span>🌐 Samsung</span><span class="sub-arrow">▶</span>
           <div class="cat-submenu">
             <span class="cat-sub-label">Dòng sản phẩm</span>
-            <a href="/category/brand/samsung" class="cat-sub-item"
-              >Tất cả Samsung</a
-            >
+            <a href="/category/brand/samsung" class="cat-sub-item">Tất cả Samsung</a>
             <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy S</span>
-            <a href="/category/series/samsung-s25" class="cat-sub-item"
-              >Galaxy S25 Series</a
-            >
-            <a href="/category/series/samsung-s24" class="cat-sub-item"
-              >Galaxy S24 Series</a
-            >
+            <a href="/category/series/samsung-s25" class="cat-sub-item">Galaxy S25 Series</a>
+            <a href="/category/series/samsung-s24" class="cat-sub-item">Galaxy S24 Series</a>
             <div class="cat-divider"></div>
             <span class="cat-sub-label">Galaxy A / Z</span>
-            <a href="/category/series/samsung-a" class="cat-sub-item"
-              >Galaxy A Series</a
-            >
-            <a href="/category/series/samsung-z" class="cat-sub-item"
-              >Galaxy Z Series</a
-            >
+            <a href="/category/series/samsung-a" class="cat-sub-item">Galaxy A Series</a>
+            <a href="/category/series/samsung-z" class="cat-sub-item">Galaxy Z Series</a>
           </div>
         </a>
 
         <div class="cat-divider"></div>
-        <a href="/category/brand/other" class="cat-item"
-          ><span>📦 Thương hiệu khác</span></a
-        >
+        <a href="/category/brand/other" class="cat-item">
+          <span>📦 Thương hiệu khác</span>
+        </a>
       </div>
     </div>
   </div>
@@ -281,9 +214,7 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
       <form id="nav-sf" action="/" method="GET" autocomplete="off">
         <div class="nav-sbar">
           <input
-            type="text"
-            id="nav-si"
-            name="keyword"
+            type="text" id="nav-si" name="keyword"
             value="{{ keyword or '' }}"
             placeholder="Tìm sản phẩm, ví dụ: iPhone 16 Pro..."
             autocomplete="off"
@@ -300,13 +231,12 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
 
   <div class="nav-auth">
     {% if session.get('user_id') %}
-    <a href="/cart" class="nav-link cart-link"
-      >🛒 <span class="cart-count" id="cart-count">0</span></a
-    >
+    <a href="/cart" class="nav-link cart-link">🛒 <span class="cart-count" id="cart-count">0</span></a>
     <a href="/orders" class="nav-link">Đơn hàng</a>
-    <a href="/profile" class="nav-link nav-profile"
-      >{{ session.get('username') }}</a
-    >
+    <a href="/profile" class="nav-link nav-profile">{{ session.get('username') }}</a>
+    {% if session.get('is_admin') %}
+    <a href="/admin" class="nav-link" style="color:var(--accent)">⚙️ Admin</a>
+    {% endif %}
     <a href="/logout" class="nav-btn btn-ghost">Đăng xuất</a>
     {% else %}
     <a href="/login" class="nav-btn btn-ghost">Đăng nhập</a>
@@ -317,64 +247,40 @@ Nếu trang cần search bar ở giữa, đặt trước include: {% set show_se
   <button
     class="nav-toggle"
     onclick="document.getElementById('nb-body').classList.toggle('mob-open')"
-  >
-    ☰
-  </button>
+  >☰</button>
 </nav>
 
 <script>
   (function () {
-    var inp = document.getElementById("nav-si");
+    var inp  = document.getElementById("nav-si");
     var list = document.getElementById("nav-sl");
     if (!inp || !list) return;
     var timer;
     inp.addEventListener("input", function () {
       clearTimeout(timer);
       var q = inp.value.trim();
-      if (q.length < 2) {
-        list.classList.remove("show");
-        return;
-      }
+      if (q.length < 2) { list.classList.remove("show"); return; }
       timer = setTimeout(function () {
         fetch("/api/suggestions?q=" + encodeURIComponent(q))
-          .then(function (r) {
-            return r.json();
-          })
+          .then(function (r) { return r.json(); })
           .then(function (data) {
-            if (!data.length) {
-              list.classList.remove("show");
-              return;
-            }
-            list.innerHTML = data
-              .slice(0, 8)
-              .map(function (s) {
-                var re = new RegExp(
-                  "(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
-                  "gi",
-                );
-                return (
-                  '<li class="nsug-li" data-val="' +
-                  s.replace(/"/g, "&quot;") +
-                  '">' +
-                  s.replace(re, "<mark>$1</mark>") +
-                  "</li>"
-                );
-              })
-              .join("");
+            if (!data.length) { list.classList.remove("show"); return; }
+            list.innerHTML = data.slice(0, 8).map(function (s) {
+              var re = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi");
+              return '<li class="nsug-li" data-val="' + s.replace(/"/g, "&quot;") + '">'
+                + s.replace(re, "<mark>$1</mark>") + "</li>";
+            }).join("");
             list.classList.add("show");
             list.querySelectorAll(".nsug-li").forEach(function (li) {
               li.addEventListener("mousedown", function (e) {
                 e.preventDefault();
                 inp.value = li.dataset.val;
                 list.classList.remove("show");
-                window.location.href =
-                  "/?keyword=" + encodeURIComponent(li.dataset.val);
+                window.location.href = "/?keyword=" + encodeURIComponent(li.dataset.val);
               });
             });
           })
-          .catch(function () {
-            list.classList.remove("show");
-          });
+          .catch(function () { list.classList.remove("show"); });
       }, 220);
     });
     document.addEventListener("click", function (e) {
